@@ -1,4 +1,4 @@
-<!-- Generated from schema.yaml — do not edit directly. -->
+> **This file is generated from [schema.yaml](../schema.yaml). Do not edit directly.**
 
 # OpenSportsSchema Reference
 

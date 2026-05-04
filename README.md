@@ -1,97 +1,57 @@
 # OpenSportsSchema
 
-A canonical, open taxonomy for sports and physical activities.
+An open standard for classifying sports and physical activities.
 
-## The problem
+Every platform has invented its own list of sports. Apple HealthKit calls it `Cycling`, Strava calls it `Ride`, Garmin calls it `ROAD_CYCLING`. None of them are hierarchical, none map to each other, and none are open standards.
 
-Every platform that tracks physical activity has invented its own list of sports.
-
-| Activity | Apple HealthKit | Strava | Garmin Connect |
-|---|---|---|---|
-| Road cycling | `Cycling` | `Ride` | `ROAD_CYCLING` |
-| Gravel cycling | `Cycling` | `GravelRide` | `GRAVEL_UNPAVED_CYCLING` |
-| Trail running | `Running` | `TrailRun` | `TRAIL_RUNNING` |
-
-Apple HealthKit, Garmin, Strava, Polar, Suunto all use different names, different granularity, and different structure. None of them are hierarchical, none map to each other, and none are open standards.
-
-If you build software that works with sports data from multiple sources, you end up writing the same normalization code over and over.
+OpenSportsSchema provides a single canonical set of sport codes that any application can reference.
 
 ## How it works
 
-OpenSportsSchema classifies activities using two layers.
-
-### Sport codes (what you're doing)
-
-A sport code identifies the discipline. Sport codes form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The hierarchy is encoded in the code itself: the parent of `cycling.road` is `cycling`. Querying for `cycling` should naturally include all its children.
-
-### Modifiers (how or why you're doing it)
-
-A modifier describes the circumstances of a specific activity, not the discipline itself. Road cycling on a stationary trainer is still road cycling, performed on a stationary machine.
-
-Modifiers exist because some concepts cut across the sport tree. "Stationary" applies to cycling, running, skiing, rowing. Encoding these as branches in the tree would duplicate them under every parent. Instead, they live alongside the sport code as a flat set of flags.
-
-### Example
+An activity has a **sport code** (what you're doing) and zero or more **modifiers** (how or why).
 
 ```json
 { "sport": "cycling.road", "modifiers": [] }
-{ "sport": "cycling.road", "modifiers": ["stationary"] }
-{ "sport": "cycling.road", "modifiers": ["stationary", "virtual"] }
 { "sport": "cycling.road", "modifiers": ["stationary", "virtual", "race"] }
 { "sport": "cycling.gravel", "modifiers": ["assisted", "commute"] }
 { "sport": "running.trail", "modifiers": ["race"] }
 ```
 
+**Sport codes** form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The hierarchy is encoded in the code itself: the parent of `cycling.road` is `cycling`. Querying for `cycling` should naturally include all its children.
+
+**Modifiers** describe circumstances, not disciplines. Road cycling on a trainer is still road cycling, performed on a stationary machine. Modifiers are independent: a Zwift ride is both `stationary` and `virtual`, set separately.
+
+See the [full reference](dist/reference.md) for all sport codes and modifiers.
+
 ## Design principles
 
-### Sport code or modifier?
+**Sport code or modifier?** If you removed it, would an athlete still recognize the activity as the same sport? If yes, it's a modifier. If no, it's a sport code.
 
-If you removed it, would an athlete still recognize the activity as the same sport? If yes, it's a modifier. If no, it's a sport code.
+**One activity, one sport.** Multi-sport events like triathlons are composed of separate single-sport activities.
 
-Remove "virtual" from a Zwift ride and you still have road cycling. Modifier. Remove "track" from track cycling and you have a different bike, different technique, a specialized venue. Sport code.
+**Venues are not modifiers.** Track cycling happens in a velodrome. That's its natural setting, not a "modified" version of outdoor cycling.
 
-### One activity, one sport
-
-An activity always has exactly one sport code. Multi-sport events like triathlons are composed of separate single-sport activities. Event grouping is a concern for the application, not the taxonomy.
-
-### Venues are not modifiers
-
-Track cycling happens in a velodrome. That's its natural venue, not a "modified" version of outdoor cycling. A velodrome cyclist and a Zwift cyclist are both physically indoors, but they have nothing in common. The distinction that matters is between performing a sport in its intended setting and performing it on a stationary substitute.
-
-### Modifiers are independent and explicit
-
-No modifier implies another. A Zwift ride is both `stationary` and `virtual`. These are two separate facts, set independently. Absence is meaningful: no modifier means the default.
+**Modifiers are independent.** No modifier implies another. Absence is meaningful.
 
 ## Schema format
 
-The canonical schema lives in [`schema.yaml`](schema.yaml). A human-readable overview of all sports and modifiers is available in [`dist/reference.md`](dist/reference.md). The YAML file has two sections:
-
-- **`sports`** — a flat list of sport codes, sorted alphabetically. Hierarchy is encoded in the dot notation, not in file structure. Every parent entry must exist (if `cycling.mountain.xco` exists, `cycling.mountain` and `cycling` must too).
-
-- **`modifiers`** — a flat list of modifier codes. Each has a `code` and `label`. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags that combine freely.
+The canonical schema is [`schema.yaml`](schema.yaml), a single YAML file with two flat lists: `sports` (sorted alphabetically, hierarchy in the dot notation) and `modifiers` (with optional `group` for mutual exclusivity).
 
 ## What the schema does not cover
 
-- **Venue properties** — pool length (25m vs 50m), track size (200m, 400m), velodrome size (250m, 333m). These matter for performance and records but are not distinct disciplines. Standardized vocabularies for these may be added in a future version.
+- **Venue properties** like pool length (25m vs 50m) or track size. These matter for records and performance but are not distinct disciplines. Planned for a future version.
 
 ## Versioning
 
-The schema follows [Semantic Versioning](https://semver.org). The `version` field in `schema.yaml` is the source of truth. Each release is a git tag (`v0.1.0`) and a GitHub Release with generated artifacts (JSON, CSV).
-
-To fetch a specific version:
+The schema follows [Semantic Versioning](https://semver.org). Each release is a git tag and a GitHub Release. Sport codes are stable: once published, never removed, only deprecated.
 
 ```
 # Latest
 https://raw.githubusercontent.com/sweatstack/open-sports-schema/main/schema.yaml
 
-# Pinned
+# Pinned to a version
 https://raw.githubusercontent.com/sweatstack/open-sports-schema/v0.1.0/schema.yaml
 ```
-
-Sport codes are stable. Once published, a code is never removed, only deprecated.
-
-## Status
-
-Early development. The taxonomy currently covers cycling, running, and cross-country skiing. See the [roadmap](plans/) for what's planned.
 
 ## Contributing
 
@@ -99,6 +59,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
-
-Maintained by [SweatStack](https://sweatstack.io).
+MIT. Maintained by [SweatStack](https://sweatstack.io).
