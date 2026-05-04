@@ -1,0 +1,45 @@
+# Contributing
+
+OpenSportsSchema is maintained by SweatStack. Contributions are welcome.
+
+## Schema format
+
+The canonical schema is [`schema.yaml`](schema.yaml). It contains two flat lists:
+
+**Sports** are sorted alphabetically by code. Each entry has a `code` and a `label`. Hierarchy is encoded in the dot notation: `cycling.mountain.xco` is a child of `cycling.mountain`, which is a child of `cycling`. Every parent must have its own entry.
+
+**Modifiers** are sorted alphabetically by code. Each entry has a `code`, `label`, `description`, and `applies_to` (a list of glob patterns for compatible sport codes). Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags.
+
+## Adding a sport code
+
+Open an issue or pull request with:
+
+- **Code** — lowercase, dot-separated. Must nest under an existing parent or introduce a new top-level sport.
+- **Label** — English display name.
+- **Rationale** — why this is a distinct discipline, not a variant of an existing code.
+
+Apply the test: if you removed this level from the code, would an athlete still recognize the activity as the same sport? If yes, it probably belongs as a modifier, not a sport code. If no, it's a distinct discipline and belongs in the tree.
+
+Examples of sport codes: `cycling.track` (different bike, different technique, specialized venue). `skiing.roller` (different equipment, different surface, own racing circuit).
+
+Examples of things that are NOT sport codes: indoor cycling (it's `cycling.road` + `stationary`), e-bike gravel (it's `cycling.gravel` + `assisted`), a cycling race (it's any cycling code + `race`).
+
+## Adding a modifier
+
+Modifiers should be rare. A new modifier must apply to multiple sport codes and represent a concept that cuts across the sport tree. Open an issue with:
+
+- **Code** — lowercase, single word.
+- **Group** — if mutually exclusive with existing modifiers, which group? If independent, leave blank.
+- **applies_to** — which sport codes does it apply to?
+- **Rationale** — why this can't be a sport code.
+
+## Conventions
+
+- Codes are lowercase, using underscores for multi-word segments: `hand_cycling`, not `handCycling`.
+- Labels use title case: "Road Cycling", not "road cycling".
+- The sport list is sorted alphabetically by code. Comments group entries by top-level sport for readability; these are for humans only.
+- Keep entries minimal. Descriptions, emoji, mappings, and translations live in separate files, not in the core schema.
+
+## Reporting errors
+
+If a sport is miscategorized or a modifier applies incorrectly, open an issue describing the problem and the expected correction.

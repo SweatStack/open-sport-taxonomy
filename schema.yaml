@@ -1,0 +1,129 @@
+# OpenSportsSchema
+#
+# Canonical source of truth for sport codes and modifiers.
+# Format: flat lists, sorted alphabetically by code.
+# Hierarchy is encoded in dot notation, not in file structure.
+#
+# See README.md for how the schema works.
+# See CONTRIBUTING.md for how to propose changes.
+
+version: "0.1.0"
+
+sports:
+
+  # Cycling
+
+  - code: cycling
+    label: Cycling
+
+  - code: cycling.bmx
+    label: BMX
+
+  - code: cycling.cyclocross
+    label: Cyclocross
+
+  - code: cycling.gravel
+    label: Gravel Cycling
+
+  - code: cycling.hand_cycling
+    label: Hand Cycling
+
+  - code: cycling.mountain
+    label: Mountain Biking
+
+  - code: cycling.mountain.downhill
+    label: Downhill Mountain Biking
+
+  - code: cycling.mountain.enduro
+    label: Enduro Mountain Biking
+
+  - code: cycling.mountain.xco
+    label: Cross-Country Mountain Biking (XCO)
+
+  - code: cycling.recumbent
+    label: Recumbent Cycling
+
+  - code: cycling.road
+    label: Road Cycling
+
+  - code: cycling.track
+    label: Track Cycling
+
+  # Running
+
+  - code: running
+    label: Running
+
+  - code: running.road
+    label: Road Running
+
+  - code: running.track
+    label: Track Running
+
+  - code: running.trail
+    label: Trail Running
+
+  - code: running.ultra
+    label: Ultra Running
+
+  # Skiing
+
+  - code: skiing.roller
+    label: Roller Skiing
+
+  - code: skiing.roller.classic
+    label: Classic Roller Skiing
+
+  - code: skiing.roller.skate
+    label: Skate Roller Skiing
+
+  - code: skiing.xc
+    label: Cross-Country Skiing
+
+  - code: skiing.xc.backcountry
+    label: Backcountry Cross-Country Skiing
+
+  - code: skiing.xc.classic
+    label: Classic Cross-Country Skiing
+
+  - code: skiing.xc.skate
+    label: Skate Cross-Country Skiing
+
+  # Other
+
+  - code: transition
+    label: Transition
+
+modifiers:
+
+  # Grouped: at most one per group.
+
+  - code: race
+    group: purpose
+    label: Race
+    description: Competitive event.
+    applies_to: ["*"]
+
+  - code: commute
+    group: purpose
+    label: Commute
+    description: Transportation, not exercise.
+    applies_to: ["cycling.*", "running.*"]
+
+  - code: stationary
+    group: locomotion
+    label: Stationary
+    description: Performed on a fixed machine (trainer, treadmill, erg). No movement through physical space.
+    applies_to: ["cycling.*", "running.*", "skiing.*"]
+
+  # Independent flags: combine freely.
+
+  - code: assisted
+    label: Assisted
+    description: Motor-assisted variant (e-bike, e-MTB).
+    applies_to: ["cycling.*"]
+
+  - code: virtual
+    label: Virtual
+    description: Performed in a digital environment (Zwift, Rouvy).
+    applies_to: ["cycling.*", "running.*"]
