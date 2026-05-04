@@ -67,7 +67,7 @@ The canonical schema lives in [`schema.yaml`](schema.yaml). It is a single YAML 
 
 - **`sports`** — a flat list of sport codes, sorted alphabetically. Hierarchy is encoded in the dot notation, not in file structure. Every parent entry must exist (if `cycling.mountain.xco` exists, `cycling.mountain` and `cycling` must too).
 
-- **`modifiers`** — a flat list of modifier codes. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags that combine freely.
+- **`modifiers`** — a flat list of modifier codes. Each has a `code` and `label`. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags that combine freely.
 
 Generated distribution formats (JSON, CSV) are published under [`dist/`](dist/).
 

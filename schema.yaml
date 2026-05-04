@@ -1,17 +1,8 @@
-# OpenSportsSchema
-#
-# Canonical source of truth for sport codes and modifiers.
-# Format: flat lists, sorted alphabetically by code.
-# Hierarchy is encoded in dot notation, not in file structure.
-#
-# See README.md for how the schema works.
-# See CONTRIBUTING.md for how to propose changes.
+# OpenSportsSchema — https://github.com/sweatstack/open-sports-schema
 
 version: "0.1.0"
 
 sports:
-
-  # Cycling
 
   - code: cycling
     label: Cycling
@@ -49,8 +40,6 @@ sports:
   - code: cycling.track
     label: Track Cycling
 
-  # Running
-
   - code: running
     label: Running
 
@@ -65,8 +54,6 @@ sports:
 
   - code: running.ultra
     label: Ultra Running
-
-  # Skiing
 
   - code: skiing.roller
     label: Roller Skiing
@@ -89,41 +76,25 @@ sports:
   - code: skiing.xc.skate
     label: Skate Cross-Country Skiing
 
-  # Other
-
   - code: transition
     label: Transition
 
 modifiers:
 
-  # Grouped: at most one per group.
-
-  - code: race
-    group: purpose
-    label: Race
-    description: Competitive event.
-    applies_to: ["*"]
+  - code: assisted
+    label: Assisted
 
   - code: commute
     group: purpose
     label: Commute
-    description: Transportation, not exercise.
-    applies_to: ["cycling.*", "running.*"]
+
+  - code: race
+    group: purpose
+    label: Race
 
   - code: stationary
     group: locomotion
     label: Stationary
-    description: Performed on a fixed machine (trainer, treadmill, erg). No movement through physical space.
-    applies_to: ["cycling.*", "running.*", "skiing.*"]
-
-  # Independent flags: combine freely.
-
-  - code: assisted
-    label: Assisted
-    description: Motor-assisted variant (e-bike, e-MTB).
-    applies_to: ["cycling.*"]
 
   - code: virtual
     label: Virtual
-    description: Performed in a digital environment (Zwift, Rouvy).
-    applies_to: ["cycling.*", "running.*"]

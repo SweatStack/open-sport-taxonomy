@@ -8,7 +8,7 @@ The canonical schema is [`schema.yaml`](schema.yaml). It contains two flat lists
 
 **Sports** are sorted alphabetically by code. Each entry has a `code` and a `label`. Hierarchy is encoded in the dot notation: `cycling.mountain.xco` is a child of `cycling.mountain`, which is a child of `cycling`. Every parent must have its own entry.
 
-**Modifiers** are sorted alphabetically by code. Each entry has a `code`, `label`, `description`, and `applies_to` (a list of glob patterns for compatible sport codes). Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags.
+**Modifiers** are sorted alphabetically by code. Each entry has a `code` and `label`. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags.
 
 ## Adding a sport code
 
@@ -30,7 +30,6 @@ Modifiers should be rare. A new modifier must apply to multiple sport codes and 
 
 - **Code** — lowercase, single word.
 - **Group** — if mutually exclusive with existing modifiers, which group? If independent, leave blank.
-- **applies_to** — which sport codes does it apply to?
 - **Rationale** — why this can't be a sport code.
 
 ## Conventions
