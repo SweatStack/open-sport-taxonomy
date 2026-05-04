@@ -22,7 +22,7 @@ OpenSportsSchema classifies activities using two layers.
 
 ### Sport codes (what you're doing)
 
-A sport code identifies the discipline. Sport codes form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The tree expresses relationships between disciplines and enables grouping by prefix.
+A sport code identifies the discipline. Sport codes form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The hierarchy is encoded in the code itself: the parent of `cycling.road` is `cycling`. Querying for `cycling` should naturally include all its children.
 
 ### Modifiers (how or why you're doing it)
 

@@ -8,8 +8,7 @@
 
 Sport codes identify the discipline. They form a hierarchy using
 dot notation. A parent groups related disciplines; children
-specialize further. Prefix matching works naturally: `cycling.*`
-returns all cycling disciplines.
+specialize further.
 
 - **cycling** — cycling
   - **cycling.cyclocross** — cyclocross
