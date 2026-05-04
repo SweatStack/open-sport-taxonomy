@@ -2,7 +2,7 @@
 
 # OpenSportsSchema Reference
 
-4 sport families, 16 sports, 6 modifiers — version 0.1.0
+7 sport families, 25 sports, 6 modifiers — version 0.1.0
 
 ## Sports
 
@@ -12,13 +12,22 @@ specialize further.
 
 - **cycling** — cycling
   - **cycling.cyclocross** — cyclocross
+  - **cycling.gravel** — gravel cycling
+  - **cycling.mountain** — mountain biking
   - **cycling.road** — road cycling
+  - **cycling.time_trial** — time trial cycling
   - **cycling.track** — track cycling
 - **generic** — generic
+- **rowing** — rowing
 - **running** — running
   - **running.road** — road running
   - **running.track** — track running
   - **running.trail** — trail running
+- **swimming** — swimming
+  - **swimming.open_water** — open water swimming
+  - **swimming.pool** — pool swimming
+- **walking** — walking
+  - **walking.hiking** — hiking
 - **xc_skiing** — XC skiing
   - **xc_skiing.backcountry** — backcountry XC skiing
   - **xc_skiing.classic** — classic XC skiing

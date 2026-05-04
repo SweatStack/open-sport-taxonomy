@@ -10,14 +10,26 @@ sports:
   - code: cycling.cyclocross
     label: cyclocross
 
+  - code: cycling.gravel
+    label: gravel cycling
+
+  - code: cycling.mountain
+    label: mountain biking
+
   - code: cycling.road
     label: road cycling
+
+  - code: cycling.time_trial
+    label: time trial cycling
 
   - code: cycling.track
     label: track cycling
 
   - code: generic
     label: generic
+
+  - code: rowing
+    label: rowing
 
   - code: running
     label: running
@@ -30,6 +42,21 @@ sports:
 
   - code: running.trail
     label: trail running
+
+  - code: swimming
+    label: swimming
+
+  - code: swimming.open_water
+    label: open water swimming
+
+  - code: swimming.pool
+    label: pool swimming
+
+  - code: walking
+    label: walking
+
+  - code: walking.hiking
+    label: hiking
 
   - code: xc_skiing
     label: XC skiing

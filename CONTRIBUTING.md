@@ -35,6 +35,7 @@ Modifiers should be rare. A new modifier must apply to multiple sport codes and 
 ## Conventions
 
 - Codes are lowercase, using underscores for multi-word segments: `hand_cycling`, not `handCycling`.
+- Codes use full words, not abbreviations: `cycling.time_trial`, not `cycling.tt`. Abbreviations are acceptable only when the full form is rarely used (e.g. `xc_skiing`).
 - Labels are lowercase, with capitals only for acronyms: "road cycling", "classic XC skiing", "BMX".
 - Both sports and modifiers are sorted alphabetically by code.
 - Keep entries minimal. Descriptions, emoji, mappings, and translations live in separate files, not in the core schema.
