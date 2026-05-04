@@ -69,6 +69,10 @@ The canonical schema lives in [`schema.yaml`](schema.yaml). A human-readable ove
 
 - **`modifiers`** — a flat list of modifier codes. Each has a `code` and `label`. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags that combine freely.
 
+## What the schema does not cover
+
+- **Venue properties** — pool length (25m vs 50m), track size (200m, 400m), velodrome size (250m, 333m). These matter for performance and records but are not distinct disciplines. Standardized vocabularies for these may be added in a future version.
+
 ## Versioning
 
 The schema follows [Semantic Versioning](https://semver.org). The `version` field in `schema.yaml` is the source of truth. Each release is a git tag (`v0.1.0`) and a GitHub Release with generated artifacts (JSON, CSV).
