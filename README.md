@@ -8,20 +8,31 @@ OpenSportsSchema provides a single canonical set of sport codes that any applica
 
 ## How it works
 
-An activity has a **sport code** (what you're doing) and zero or more **modifiers** (how or why).
+An activity is identified by a **sport string**: a sport code optionally followed by modifiers.
 
-```json
-{ "sport": "cycling.road", "modifiers": [] }
-{ "sport": "cycling.road", "modifiers": ["stationary", "virtual", "race"] }
-{ "sport": "cycling.gravel", "modifiers": ["assisted", "commute"] }
-{ "sport": "running.trail", "modifiers": ["race"] }
+```
+cycling.road                        — road cycling
+cycling.road+race                   — road cycling race
+cycling.road+stationary+virtual     — road cycling on Zwift
+cycling.gravel+assisted+commute     — e-bike gravel commute
+running.trail+race                  — trail running race
 ```
 
 **Sport codes** form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The hierarchy is encoded in the code itself: the parent of `cycling.road` is `cycling`. Querying for `cycling` should naturally include all its children.
 
-**Modifiers** describe circumstances, not disciplines. Road cycling on a trainer is still road cycling, performed on a stationary machine. Modifiers are independent: a Zwift ride is both `stationary` and `virtual`, set separately.
+**Modifiers** describe circumstances, not disciplines. Road cycling on a trainer is still road cycling, performed on a stationary machine. Modifiers are appended with `+` and sorted alphabetically. They are independent: a Zwift ride is both `stationary` and `virtual`, set separately.
 
 See the [full reference](dist/reference.md) for all sport codes and modifiers.
+
+### Structured format
+
+When your context needs separate fields (API payloads, database columns), the same information can be represented as:
+
+```json
+{ "sport": "cycling.road", "modifiers": ["stationary", "virtual"] }
+```
+
+The sport string is the canonical form. The structured format is derived from it.
 
 ## Design principles
 
@@ -55,6 +66,40 @@ Translations are lossy by design. Some platforms are less granular than the sche
   target: { sport: 2, sub_sport: 7 }   # Garmin FIT
 - oss: cycling.road
   target: Ride                          # Strava
+```
+
+## Python library
+
+Install the reference implementation:
+
+```bash
+pip install open-sports-schema
+```
+
+```python
+from open_sports_schema import Sport, Modifier
+
+# Parse a sport string
+sport = Sport("cycling.road+race+virtual")
+sport.code          # "cycling.road"
+sport.modifiers     # frozenset({Modifier.RACE, Modifier.VIRTUAL})
+sport.label         # "road cycling"
+str(sport)          # "cycling.road+race+virtual"
+
+# Class constants with IDE autocomplete
+Sport.CYCLING_ROAD
+Sport.RUNNING_TRAIL
+
+# Taxonomy navigation
+Sport.CYCLING.disciplines   # (Sport('cycling.cyclocross'), Sport('cycling.gravel'), ...)
+Sport.CYCLING_ROAD.parent   # Sport('cycling')
+
+# Platform translation
+from open_sports_schema.platforms import strava, apple_healthkit, garmin_fit
+
+strava.translate(Sport("cycling.road+virtual"))     # "VirtualRide"
+apple_healthkit.translate(Sport.CYCLING_ROAD)        # 13
+garmin_fit.translate(Sport.CYCLING_ROAD)             # GarminFitCode(sport=2, sub_sport=7)
 ```
 
 ## What the schema does not cover
