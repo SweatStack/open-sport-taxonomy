@@ -35,9 +35,21 @@ Modifiers should be rare. A new modifier must apply to multiple sport codes and 
 ## Conventions
 
 - Codes are lowercase, using underscores for multi-word segments: `hand_cycling`, not `handCycling`.
-- Labels use title case: "Road Cycling", not "road cycling".
+- Labels are lowercase, with capitals only for acronyms: "road cycling", "classic XC skiing", "BMX".
 - The sport list is sorted alphabetically by code. Comments group entries by top-level sport for readability; these are for humans only.
 - Keep entries minimal. Descriptions, emoji, mappings, and translations live in separate files, not in the core schema.
+
+## Versioning
+
+The `version` field in `schema.yaml` follows [Semantic Versioning](https://semver.org):
+
+- **Patch** (0.1.x) — new sport codes or modifiers added
+- **Minor** (0.x.0) — new fields, new metadata, structural additions
+- **Major** (x.0.0) — breaking changes to the schema format
+
+Sport codes are never removed. A deprecated code gets a `deprecated: true` field and a `replaced_by` pointer.
+
+Each release is tagged in git (`v0.1.0`) and published as a GitHub Release.
 
 ## Reporting errors
 

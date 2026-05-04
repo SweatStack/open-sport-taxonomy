@@ -69,7 +69,21 @@ The canonical schema lives in [`schema.yaml`](schema.yaml). It is a single YAML 
 
 - **`modifiers`** — a flat list of modifier codes. Each has a `code` and `label`. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags that combine freely.
 
-Generated distribution formats (JSON, CSV) are published under [`dist/`](dist/).
+## Versioning
+
+The schema follows [Semantic Versioning](https://semver.org). The `version` field in `schema.yaml` is the source of truth. Each release is a git tag (`v0.1.0`) and a GitHub Release with generated artifacts (JSON, CSV).
+
+To fetch a specific version:
+
+```
+# Latest
+https://raw.githubusercontent.com/sweatstack/open-sports-schema/main/schema.yaml
+
+# Pinned
+https://raw.githubusercontent.com/sweatstack/open-sports-schema/v0.1.0/schema.yaml
+```
+
+Sport codes are stable. Once published, a code is never removed, only deprecated.
 
 ## Status
 

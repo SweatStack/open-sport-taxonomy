@@ -5,96 +5,73 @@ version: "0.1.0"
 sports:
 
   - code: cycling
-    label: Cycling
-
-  - code: cycling.bmx
-    label: BMX
+    label: cycling
 
   - code: cycling.cyclocross
-    label: Cyclocross
-
-  - code: cycling.gravel
-    label: Gravel Cycling
-
-  - code: cycling.hand_cycling
-    label: Hand Cycling
-
-  - code: cycling.mountain
-    label: Mountain Biking
-
-  - code: cycling.mountain.downhill
-    label: Downhill Mountain Biking
-
-  - code: cycling.mountain.enduro
-    label: Enduro Mountain Biking
-
-  - code: cycling.mountain.xco
-    label: Cross-Country Mountain Biking (XCO)
-
-  - code: cycling.recumbent
-    label: Recumbent Cycling
+    label: cyclocross
 
   - code: cycling.road
-    label: Road Cycling
+    label: road cycling
 
   - code: cycling.track
-    label: Track Cycling
+    label: track cycling
+
+  - code: generic
+    label: generic
 
   - code: running
-    label: Running
+    label: running
 
   - code: running.road
-    label: Road Running
+    label: road running
 
   - code: running.track
-    label: Track Running
+    label: track running
 
   - code: running.trail
-    label: Trail Running
+    label: trail running
 
-  - code: running.ultra
-    label: Ultra Running
+  - code: xc_skiing
+    label: XC skiing
 
-  - code: skiing.roller
-    label: Roller Skiing
+  - code: xc_skiing.roller
+    label: roller skiing
 
-  - code: skiing.roller.classic
-    label: Classic Roller Skiing
+  - code: xc_skiing.roller.classic
+    label: classic roller skiing
 
-  - code: skiing.roller.skate
-    label: Skate Roller Skiing
+  - code: xc_skiing.roller.skate
+    label: skate roller skiing
 
-  - code: skiing.xc
-    label: Cross-Country Skiing
+  - code: xc_skiing.backcountry
+    label: backcountry XC skiing
 
-  - code: skiing.xc.backcountry
-    label: Backcountry Cross-Country Skiing
+  - code: xc_skiing.classic
+    label: classic XC skiing
 
-  - code: skiing.xc.classic
-    label: Classic Cross-Country Skiing
-
-  - code: skiing.xc.skate
-    label: Skate Cross-Country Skiing
-
-  - code: transition
-    label: Transition
+  - code: xc_skiing.skate
+    label: skate XC skiing
 
 modifiers:
 
-  - code: assisted
-    label: Assisted
-
   - code: commute
     group: purpose
-    label: Commute
+    label: commute
 
   - code: race
     group: purpose
-    label: Race
+    label: race
+
+  - code: training
+    group: purpose
+    label: training
 
   - code: stationary
-    group: locomotion
-    label: Stationary
+    label: stationary
 
   - code: virtual
-    label: Virtual
+    label: virtual
+
+  - code: assisted
+    label: assisted
+
