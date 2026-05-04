@@ -36,8 +36,15 @@ Modifiers should be rare. A new modifier must apply to multiple sport codes and 
 
 - Codes are lowercase, using underscores for multi-word segments: `hand_cycling`, not `handCycling`.
 - Labels are lowercase, with capitals only for acronyms: "road cycling", "classic XC skiing", "BMX".
-- The sport list is sorted alphabetically by code. Comments group entries by top-level sport for readability; these are for humans only.
+- Both sports and modifiers are sorted alphabetically by code.
 - Keep entries minimal. Descriptions, emoji, mappings, and translations live in separate files, not in the core schema.
+
+Before submitting a pull request, run the linter:
+
+```bash
+uv run scripts/lint.py          # check for ordering and orphan issues
+uv run scripts/lint.py --fix    # auto-fix ordering
+```
 
 ## Versioning
 
