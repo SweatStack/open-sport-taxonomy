@@ -1,0 +1,103 @@
+# OpenSportsSchema — Strava mapping
+# See README.md for how mappings work.
+
+platform: strava
+platform_version: "v3 API, 2024"
+fallback: Workout
+
+mappings:
+
+  - oss: cycling
+    target: Ride
+
+  - oss: cycling.cyclocross
+    target: Ride
+
+  - oss: cycling.gravel
+    target: GravelRide
+
+  - oss: cycling.mountain
+    target: MountainBikeRide
+
+  - oss: cycling.mountain
+    modifiers: [assisted]
+    target: EMountainBikeRide
+
+  - oss: cycling.road
+    target: Ride
+
+  - oss: cycling.road
+    modifiers: [assisted]
+    target: EBikeRide
+
+  - oss: cycling.road
+    modifiers: [virtual]
+    target: VirtualRide
+
+  - oss: cycling.time_trial
+    target: Ride
+
+  - oss: cycling.track
+    target: Ride
+
+  - oss: generic
+    target: Workout
+
+  - oss: rowing
+    target: Rowing
+
+  - oss: rowing
+    modifiers: [virtual]
+    target: VirtualRow
+
+  - oss: running
+    target: Run
+
+  - oss: running.road
+    target: Run
+
+  - oss: running.road
+    modifiers: [virtual]
+    target: VirtualRun
+
+  - oss: running.track
+    target: Run
+
+  - oss: running.trail
+    target: TrailRun
+
+  - oss: swimming
+    target: Swim
+
+  - oss: swimming.open_water
+    target: Swim
+
+  - oss: swimming.pool
+    target: Swim
+
+  - oss: walking
+    target: Walk
+
+  - oss: walking.hiking
+    target: Hike
+
+  - oss: xc_skiing
+    target: NordicSki
+
+  - oss: xc_skiing.backcountry
+    target: BackcountrySki
+
+  - oss: xc_skiing.classic
+    target: NordicSki
+
+  - oss: xc_skiing.roller
+    target: RollerSki
+
+  - oss: xc_skiing.roller.classic
+    target: RollerSki
+
+  - oss: xc_skiing.roller.skate
+    target: RollerSki
+
+  - oss: xc_skiing.skate
+    target: NordicSki

@@ -1,0 +1,83 @@
+# OpenSportsSchema — Garmin FIT mapping
+# See README.md for how mappings work.
+
+platform: garmin_fit
+platform_version: "FIT SDK 21.133"
+fallback: { sport: 0, sub_sport: 0 }  # generic
+
+mappings:
+
+  - oss: cycling
+    target: { sport: 2, sub_sport: 0 }   # cycling / generic
+
+  - oss: cycling.cyclocross
+    target: { sport: 2, sub_sport: 11 }   # cycling / cyclocross
+
+  - oss: cycling.gravel
+    target: { sport: 2, sub_sport: 46 }   # cycling / gravel_cycling
+
+  - oss: cycling.mountain
+    target: { sport: 2, sub_sport: 8 }    # cycling / mountain
+
+  - oss: cycling.road
+    target: { sport: 2, sub_sport: 7 }    # cycling / road
+
+  - oss: cycling.time_trial
+    target: { sport: 2, sub_sport: 7 }    # cycling / road
+
+  - oss: cycling.track
+    target: { sport: 2, sub_sport: 13 }   # cycling / track_cycling
+
+  - oss: generic
+    target: { sport: 0, sub_sport: 0 }    # generic / generic
+
+  - oss: rowing
+    target: { sport: 15, sub_sport: 0 }   # rowing / generic
+
+  - oss: running
+    target: { sport: 1, sub_sport: 0 }    # running / generic
+
+  - oss: running.road
+    target: { sport: 1, sub_sport: 2 }    # running / street
+
+  - oss: running.track
+    target: { sport: 1, sub_sport: 4 }    # running / track
+
+  - oss: running.trail
+    target: { sport: 1, sub_sport: 3 }    # running / trail
+
+  - oss: swimming
+    target: { sport: 5, sub_sport: 0 }    # swimming / generic
+
+  - oss: swimming.open_water
+    target: { sport: 5, sub_sport: 18 }   # swimming / open_water
+
+  - oss: swimming.pool
+    target: { sport: 5, sub_sport: 17 }   # swimming / lap_swimming
+
+  - oss: walking
+    target: { sport: 11, sub_sport: 0 }   # walking / generic
+
+  - oss: walking.hiking
+    target: { sport: 17, sub_sport: 0 }   # hiking / generic
+
+  - oss: xc_skiing
+    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
+
+  - oss: xc_skiing.backcountry
+    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
+
+  - oss: xc_skiing.classic
+    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
+
+  - oss: xc_skiing.roller
+    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
+
+  - oss: xc_skiing.roller.classic
+    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
+
+  - oss: xc_skiing.roller.skate
+    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
+
+  - oss: xc_skiing.skate
+    target: { sport: 12, sub_sport: 42 }  # cross_country_skiing / skate_skiing

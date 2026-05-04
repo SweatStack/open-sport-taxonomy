@@ -47,6 +47,33 @@ uv run scripts/lint.py          # check for ordering and orphan issues
 uv run scripts/lint.py --fix    # auto-fix ordering
 ```
 
+## Platform mappings
+
+Mapping files in `mappings/` translate OSS codes to platform-specific identifiers. Every file follows the same structure:
+
+```yaml
+platform: <platform_id>
+platform_version: <version of the platform spec>
+fallback: <platform's generic/catch-all value>
+
+mappings:
+  - oss: <sport_code>
+    modifiers: [<modifier>, ...]     # optional
+    target: <platform_specific_value>
+```
+
+When adding or updating mappings:
+
+- **Every OSS sport code should have an entry in every mapping file**, even when the mapping is lossy. If the platform doesn't distinguish the discipline, map to the closest equivalent.
+- **Entries are sorted by `oss`**, then by `modifiers`.
+- When a platform encodes an OSS modifier as a distinct sport type (e.g. Strava's `VirtualRide`), add an entry with `modifiers`. The entry without modifiers is the default.
+- For numeric targets, add a YAML comment with the human-readable name: `target: 13  # cycling`.
+- The `fallback` field documents the platform's catch-all value. It's a safety net for codes not yet in the file, not a replacement for explicit entries.
+
+### Adding a new platform
+
+Create a new file in `mappings/` following the format above. Add reference data for the platform in `reference/<platform>/` with a README explaining the source.
+
 ## Versioning
 
 The `version` field in `schema.yaml` follows [Semantic Versioning](https://semver.org):

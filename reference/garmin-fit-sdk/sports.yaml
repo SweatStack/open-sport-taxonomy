@@ -1,0 +1,231 @@
+# Garmin FIT SDK — sport enum
+#
+# Source: Profile.xlsx (Types sheet, "sport" type)
+# Base type: enum (uint8)
+# 69 values defined (including "all" = 254 for goals only)
+
+cases:
+  - name: generic
+    value: 0
+
+  - name: running
+    value: 1
+
+  - name: cycling
+    value: 2
+
+  - name: transition
+    value: 3
+    comment: Multisport transition
+
+  - name: fitness_equipment
+    value: 4
+
+  - name: swimming
+    value: 5
+
+  - name: basketball
+    value: 6
+
+  - name: soccer
+    value: 7
+
+  - name: tennis
+    value: 8
+
+  - name: american_football
+    value: 9
+
+  - name: training
+    value: 10
+
+  - name: walking
+    value: 11
+
+  - name: cross_country_skiing
+    value: 12
+
+  - name: alpine_skiing
+    value: 13
+
+  - name: snowboarding
+    value: 14
+
+  - name: rowing
+    value: 15
+
+  - name: mountaineering
+    value: 16
+
+  - name: hiking
+    value: 17
+
+  - name: multisport
+    value: 18
+
+  - name: paddling
+    value: 19
+
+  - name: flying
+    value: 20
+
+  - name: e_biking
+    value: 21
+
+  - name: motorcycling
+    value: 22
+
+  - name: boating
+    value: 23
+
+  - name: driving
+    value: 24
+
+  - name: golf
+    value: 25
+
+  - name: hang_gliding
+    value: 26
+
+  - name: horseback_riding
+    value: 27
+
+  - name: hunting
+    value: 28
+
+  - name: fishing
+    value: 29
+
+  - name: inline_skating
+    value: 30
+
+  - name: rock_climbing
+    value: 31
+
+  - name: sailing
+    value: 32
+
+  - name: ice_skating
+    value: 33
+
+  - name: sky_diving
+    value: 34
+
+  - name: snowshoeing
+    value: 35
+
+  - name: snowmobiling
+    value: 36
+
+  - name: stand_up_paddleboarding
+    value: 37
+
+  - name: surfing
+    value: 38
+
+  - name: wakeboarding
+    value: 39
+
+  - name: water_skiing
+    value: 40
+
+  - name: kayaking
+    value: 41
+
+  - name: rafting
+    value: 42
+
+  - name: windsurfing
+    value: 43
+
+  - name: kitesurfing
+    value: 44
+
+  - name: tactical
+    value: 45
+
+  - name: jumpmaster
+    value: 46
+
+  - name: boxing
+    value: 47
+
+  - name: floor_climbing
+    value: 48
+
+  - name: baseball
+    value: 49
+
+  # Values 50-52 not assigned
+
+  - name: diving
+    value: 53
+
+  # Values 54-61 not assigned
+
+  - name: hiit
+    value: 62
+
+  # Value 63 not assigned
+
+  - name: racket
+    value: 64
+
+  - name: wheelchair_push_walk
+    value: 65
+
+  - name: wheelchair_push_run
+    value: 66
+
+  - name: meditation
+    value: 67
+
+  # Value 68 not assigned
+
+  - name: disc_golf
+    value: 69
+
+  # Value 70 not assigned
+
+  - name: cricket
+    value: 71
+
+  - name: rugby
+    value: 72
+
+  - name: hockey
+    value: 73
+
+  - name: lacrosse
+    value: 74
+
+  - name: volleyball
+    value: 75
+
+  - name: water_tubing
+    value: 76
+
+  - name: wakesurfing
+    value: 77
+
+  # Values 78-79 not assigned
+
+  - name: mixed_martial_arts
+    value: 80
+
+  # Value 81 not assigned
+
+  - name: snorkeling
+    value: 82
+
+  - name: dance
+    value: 83
+
+  - name: jump_rope
+    value: 84
+
+  # Values 85-253 not assigned
+
+  - name: all
+    value: 254
+    comment: All is for goals only to include all sports.

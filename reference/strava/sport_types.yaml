@@ -1,0 +1,64 @@
+# Strava — SportType enum
+#
+# Source: https://developers.strava.com/docs/reference/#api-models-SportType
+# Retrieved: 2026-05-04
+# Type: string enum
+# 56 values
+
+cases:
+  - AlpineSki
+  - BackcountrySki
+  - Badminton
+  - Basketball
+  - Canoeing
+  - Cricket
+  - Crossfit
+  - Dance
+  - EBikeRide
+  - EMountainBikeRide
+  - Elliptical
+  - Golf
+  - GravelRide
+  - Handcycle
+  - HighIntensityIntervalTraining
+  - Hike
+  - IceSkate
+  - InlineSkate
+  - Kayaking
+  - Kitesurf
+  - MountainBikeRide
+  - NordicSki
+  - Padel
+  - PhysicalTherapy
+  - Pickleball
+  - Pilates
+  - Racquetball
+  - Ride
+  - RockClimbing
+  - RollerSki
+  - Rowing
+  - Run
+  - Sail
+  - Skateboard
+  - Snowboard
+  - Snowshoe
+  - Soccer
+  - Squash
+  - StairStepper
+  - StandUpPaddling
+  - Surfing
+  - Swim
+  - TableTennis
+  - Tennis
+  - TrailRun
+  - Velomobile
+  - VirtualRide
+  - VirtualRow
+  - VirtualRun
+  - Volleyball
+  - Walk
+  - WeightTraining
+  - Wheelchair
+  - Windsurf
+  - Workout
+  - Yoga

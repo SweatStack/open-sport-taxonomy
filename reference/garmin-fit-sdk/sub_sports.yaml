@@ -1,0 +1,367 @@
+# Garmin FIT SDK — sub_sport enum
+#
+# Source: Profile.xlsx (Types sheet, "sub_sport" type)
+# Base type: enum (uint8)
+# 89 values defined (including "all" = 254)
+#
+# The "associated_sports" field indicates which sport(s) a sub_sport
+# is typically used with, as documented in the SDK comments.
+# These associations are informational, not enforced by the protocol.
+
+cases:
+  - name: generic
+    value: 0
+
+  - name: treadmill
+    value: 1
+    associated_sports: [running, fitness_equipment]
+
+  - name: street
+    value: 2
+    associated_sports: [running]
+
+  - name: trail
+    value: 3
+    associated_sports: [running]
+
+  - name: track
+    value: 4
+    associated_sports: [running]
+
+  - name: spin
+    value: 5
+    associated_sports: [cycling]
+
+  - name: indoor_cycling
+    value: 6
+    associated_sports: [cycling, fitness_equipment]
+
+  - name: road
+    value: 7
+    associated_sports: [cycling]
+
+  - name: mountain
+    value: 8
+    associated_sports: [cycling]
+
+  - name: downhill
+    value: 9
+    associated_sports: [cycling]
+
+  - name: recumbent
+    value: 10
+    associated_sports: [cycling]
+
+  - name: cyclocross
+    value: 11
+    associated_sports: [cycling]
+
+  - name: hand_cycling
+    value: 12
+    associated_sports: [cycling]
+
+  - name: track_cycling
+    value: 13
+    associated_sports: [cycling]
+
+  - name: indoor_rowing
+    value: 14
+    associated_sports: [fitness_equipment]
+
+  - name: elliptical
+    value: 15
+    associated_sports: [fitness_equipment]
+
+  - name: stair_climbing
+    value: 16
+    associated_sports: [fitness_equipment]
+
+  - name: lap_swimming
+    value: 17
+    associated_sports: [swimming]
+
+  - name: open_water
+    value: 18
+    associated_sports: [swimming]
+
+  - name: flexibility_training
+    value: 19
+    associated_sports: [training]
+
+  - name: strength_training
+    value: 20
+    associated_sports: [training]
+
+  - name: warm_up
+    value: 21
+    associated_sports: [tennis]
+
+  - name: match
+    value: 22
+    associated_sports: [tennis]
+
+  - name: exercise
+    value: 23
+    associated_sports: [tennis]
+
+  - name: challenge
+    value: 24
+
+  - name: indoor_skiing
+    value: 25
+    associated_sports: [fitness_equipment]
+
+  - name: cardio_training
+    value: 26
+    associated_sports: [training]
+
+  - name: indoor_walking
+    value: 27
+    associated_sports: [walking, fitness_equipment]
+
+  - name: e_bike_fitness
+    value: 28
+    associated_sports: [e_biking]
+
+  - name: bmx
+    value: 29
+    associated_sports: [cycling]
+
+  - name: casual_walking
+    value: 30
+    associated_sports: [walking]
+
+  - name: speed_walking
+    value: 31
+    associated_sports: [walking]
+
+  - name: bike_to_run_transition
+    value: 32
+    associated_sports: [transition]
+
+  - name: run_to_bike_transition
+    value: 33
+    associated_sports: [transition]
+
+  - name: swim_to_bike_transition
+    value: 34
+    associated_sports: [transition]
+
+  - name: atv
+    value: 35
+    associated_sports: [motorcycling]
+
+  - name: motocross
+    value: 36
+    associated_sports: [motorcycling]
+
+  - name: backcountry
+    value: 37
+    associated_sports: [alpine_skiing, snowboarding]
+
+  - name: resort
+    value: 38
+    associated_sports: [alpine_skiing, snowboarding]
+
+  - name: rc_drone
+    value: 39
+    associated_sports: [flying]
+
+  - name: wingsuit
+    value: 40
+    associated_sports: [flying]
+
+  - name: whitewater
+    value: 41
+    associated_sports: [kayaking, rafting]
+
+  - name: skate_skiing
+    value: 42
+    associated_sports: [cross_country_skiing]
+
+  - name: yoga
+    value: 43
+    associated_sports: [training]
+
+  - name: pilates
+    value: 44
+    associated_sports: [fitness_equipment]
+
+  - name: indoor_running
+    value: 45
+    associated_sports: [running]
+
+  - name: gravel_cycling
+    value: 46
+    associated_sports: [cycling]
+
+  - name: e_bike_mountain
+    value: 47
+    associated_sports: [cycling]
+
+  - name: commuting
+    value: 48
+    associated_sports: [cycling]
+
+  - name: mixed_surface
+    value: 49
+    associated_sports: [cycling]
+
+  - name: navigate
+    value: 50
+
+  - name: track_me
+    value: 51
+
+  - name: map
+    value: 52
+
+  - name: single_gas_diving
+    value: 53
+    associated_sports: [diving]
+
+  - name: multi_gas_diving
+    value: 54
+    associated_sports: [diving]
+
+  - name: gauge_diving
+    value: 55
+    associated_sports: [diving]
+
+  - name: apnea_diving
+    value: 56
+    associated_sports: [diving]
+
+  - name: apnea_hunting
+    value: 57
+    associated_sports: [diving]
+
+  - name: virtual_activity
+    value: 58
+
+  - name: obstacle
+    value: 59
+    comment: Used for events where participants run, crawl through mud, climb over walls, etc.
+
+  # Values 60-61 not assigned
+
+  - name: breathing
+    value: 62
+
+  # Values 63-64 not assigned
+
+  - name: sail_race
+    value: 65
+    associated_sports: [sailing]
+
+  # Value 66 not assigned
+
+  - name: ultra
+    value: 67
+    comment: Ultramarathon
+
+  - name: indoor_climbing
+    value: 68
+    associated_sports: [climbing]
+
+  - name: bouldering
+    value: 69
+    associated_sports: [climbing]
+
+  - name: hiit
+    value: 70
+    comment: High Intensity Interval Training
+
+  # Values 71-72 not assigned
+
+  - name: amrap
+    value: 73
+    associated_sports: [hiit]
+
+  - name: emom
+    value: 74
+    associated_sports: [hiit]
+
+  - name: tabata
+    value: 75
+    associated_sports: [hiit]
+
+  # Values 76-83 not assigned
+
+  - name: pickleball
+    value: 84
+    associated_sports: [racket]
+
+  - name: padel
+    value: 85
+    associated_sports: [racket]
+
+  - name: indoor_wheelchair_walk
+    value: 86
+
+  - name: indoor_wheelchair_run
+    value: 87
+
+  - name: indoor_hand_cycling
+    value: 88
+
+  # Values 89-93 not assigned
+
+  - name: squash
+    value: 94
+
+  - name: badminton
+    value: 95
+
+  - name: racquetball
+    value: 96
+
+  - name: table_tennis
+    value: 97
+
+  # Values 98-109 not assigned
+
+  - name: fly_canopy
+    value: 110
+    associated_sports: [flying]
+
+  - name: fly_paraglide
+    value: 111
+    associated_sports: [flying]
+
+  - name: fly_paramotor
+    value: 112
+    associated_sports: [flying]
+
+  - name: fly_pressurized
+    value: 113
+    associated_sports: [flying]
+
+  - name: fly_navigate
+    value: 114
+    associated_sports: [flying]
+
+  - name: fly_timer
+    value: 115
+    associated_sports: [flying]
+
+  - name: fly_altimeter
+    value: 116
+    associated_sports: [flying]
+
+  - name: fly_wx
+    value: 117
+    associated_sports: [flying]
+
+  - name: fly_vfr
+    value: 118
+    associated_sports: [flying]
+
+  - name: fly_ifr
+    value: 119
+    associated_sports: [flying]
+
+  # Values 120-253 not assigned
+
+  - name: all
+    value: 254

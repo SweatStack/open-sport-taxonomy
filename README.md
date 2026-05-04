@@ -37,6 +37,26 @@ See the [full reference](dist/reference.md) for all sport codes and modifiers.
 
 The canonical schema is [`schema.yaml`](schema.yaml), a single YAML file with two flat lists: `sports` (sorted alphabetically, hierarchy in the dot notation) and `modifiers` (with optional `group` for mutual exclusivity).
 
+## Platform mappings
+
+Mapping files in [`mappings/`](mappings/) translate OSS codes to platform-specific identifiers. One file per platform:
+
+- [`apple_healthkit.yaml`](mappings/apple_healthkit.yaml) — HKWorkoutActivityType integer values
+- [`garmin_fit.yaml`](mappings/garmin_fit.yaml) — sport + sub_sport integer pairs
+- [`strava.yaml`](mappings/strava.yaml) — SportType string values
+
+Translations are lossy by design. Some platforms are less granular than the schema: all cycling disciplines map to a single HealthKit value (`13`). This is the platform's limitation, not an error.
+
+```yaml
+# The same OSS code on three platforms:
+- oss: cycling.road
+  target: 13                            # Apple HealthKit
+- oss: cycling.road
+  target: { sport: 2, sub_sport: 7 }   # Garmin FIT
+- oss: cycling.road
+  target: Ride                          # Strava
+```
+
 ## What the schema does not cover
 
 - **Venue properties** like pool length (25m vs 50m) or track size. These matter for records and performance but are not distinct disciplines. Planned for a future version.

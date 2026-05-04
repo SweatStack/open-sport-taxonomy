@@ -1,0 +1,83 @@
+# OpenSportsSchema — Apple HealthKit mapping
+# See README.md for how mappings work.
+
+platform: apple_healthkit
+platform_version: "iOS 18"
+fallback: 3000  # other
+
+mappings:
+
+  - oss: cycling
+    target: 13  # cycling
+
+  - oss: cycling.cyclocross
+    target: 13  # cycling
+
+  - oss: cycling.gravel
+    target: 13  # cycling
+
+  - oss: cycling.mountain
+    target: 13  # cycling
+
+  - oss: cycling.road
+    target: 13  # cycling
+
+  - oss: cycling.time_trial
+    target: 13  # cycling
+
+  - oss: cycling.track
+    target: 13  # cycling
+
+  - oss: generic
+    target: 3000  # other
+
+  - oss: rowing
+    target: 35  # rowing
+
+  - oss: running
+    target: 37  # running
+
+  - oss: running.road
+    target: 37  # running
+
+  - oss: running.track
+    target: 37  # running
+
+  - oss: running.trail
+    target: 37  # running
+
+  - oss: swimming
+    target: 46  # swimming
+
+  - oss: swimming.open_water
+    target: 46  # swimming
+
+  - oss: swimming.pool
+    target: 46  # swimming
+
+  - oss: walking
+    target: 52  # walking
+
+  - oss: walking.hiking
+    target: 24  # hiking
+
+  - oss: xc_skiing
+    target: 60  # crossCountrySkiing
+
+  - oss: xc_skiing.backcountry
+    target: 60  # crossCountrySkiing
+
+  - oss: xc_skiing.classic
+    target: 60  # crossCountrySkiing
+
+  - oss: xc_skiing.roller
+    target: 30  # inlineSkate
+
+  - oss: xc_skiing.roller.classic
+    target: 30  # inlineSkate
+
+  - oss: xc_skiing.roller.skate
+    target: 30  # inlineSkate
+
+  - oss: xc_skiing.skate
+    target: 60  # crossCountrySkiing

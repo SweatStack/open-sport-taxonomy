@@ -1,0 +1,363 @@
+# Apple HealthKit — HKWorkoutActivityType
+#
+# Source: https://developer.apple.com/documentation/healthkit/hkworkoutactivitytype
+# Type: UInt enum (Swift) / NSUInteger enum (Objective-C)
+# Platform: iOS, watchOS, macOS, visionOS
+#
+# Raw values run 1–80, skip 81, then 82–84, with "other" at 3000.
+# 84 total cases: 81 active, 3 deprecated.
+
+cases:
+  - name: americanFootball
+    raw_value: 1
+    description: Playing American football.
+
+  - name: archery
+    raw_value: 2
+    description: Shooting archery.
+
+  - name: australianFootball
+    raw_value: 3
+    description: Playing Australian football.
+
+  - name: badminton
+    raw_value: 4
+    description: Playing badminton.
+
+  - name: baseball
+    raw_value: 5
+    description: Playing baseball.
+
+  - name: basketball
+    raw_value: 6
+    description: Playing basketball.
+
+  - name: bowling
+    raw_value: 7
+    description: Bowling.
+
+  - name: boxing
+    raw_value: 8
+    description: Boxing.
+
+  - name: climbing
+    raw_value: 9
+    description: Climbing.
+
+  - name: cricket
+    raw_value: 10
+    description: Playing cricket.
+
+  - name: crossTraining
+    raw_value: 11
+    description: Exercise that includes any mixture of cardio, strength, and/or flexibility training.
+
+  - name: curling
+    raw_value: 12
+    description: Curling.
+
+  - name: cycling
+    raw_value: 13
+    description: Cycling.
+
+  - name: dance
+    raw_value: 14
+    deprecated: true
+    replaced_by:
+      - cardioDance
+      - socialDance
+    description: Dancing.
+
+  - name: danceInspiredTraining
+    raw_value: 15
+    deprecated: true
+    replaced_by:
+      - dance
+      - barre
+      - pilates
+    description: Workouts inspired by dance, including Pilates, Barre, and Feldenkrais.
+
+  - name: elliptical
+    raw_value: 16
+    description: Workouts on an elliptical machine.
+
+  - name: equestrianSports
+    raw_value: 17
+    description: Activities that involve riding a horse, including polo, horse racing, and horse riding.
+
+  - name: fencing
+    raw_value: 18
+    description: Fencing.
+
+  - name: fishing
+    raw_value: 19
+    description: Fishing.
+
+  - name: functionalStrengthTraining
+    raw_value: 20
+    description: Strength training, primarily with free weights and body weight.
+
+  - name: golf
+    raw_value: 21
+    description: Playing golf.
+
+  - name: gymnastics
+    raw_value: 22
+    description: Performing gymnastics.
+
+  - name: handball
+    raw_value: 23
+    description: Playing handball.
+
+  - name: hiking
+    raw_value: 24
+    description: Hiking.
+
+  - name: hockey
+    raw_value: 25
+    description: Playing hockey, including ice hockey, field hockey, and related sports.
+
+  - name: hunting
+    raw_value: 26
+    description: Hunting.
+
+  - name: lacrosse
+    raw_value: 27
+    description: Playing lacrosse.
+
+  - name: martialArts
+    raw_value: 28
+    description: Practicing martial arts.
+
+  - name: mindAndBody
+    raw_value: 29
+    description: Performing activities like walking meditation, Gyrotonic exercise, and Qigong.
+
+  - name: mixedMetabolicCardioTraining
+    raw_value: 30
+    deprecated: true
+    replaced_by:
+      - mixedCardio
+    description: Performing any mix of cardio-focused exercises.
+
+  - name: paddleSports
+    raw_value: 31
+    description: Canoeing, kayaking, paddling an outrigger, paddling a stand-up paddle board, and related sports.
+
+  - name: play
+    raw_value: 32
+    description: Play-based activities like tag, dodgeball, hopscotch, tetherball, and playing on a jungle gym.
+
+  - name: preparationAndRecovery
+    raw_value: 33
+    description: Warm-up and therapeutic activities like foam rolling and stretching.
+
+  - name: racquetball
+    raw_value: 34
+    description: Playing racquetball.
+
+  - name: rowing
+    raw_value: 35
+    description: Rowing.
+
+  - name: rugby
+    raw_value: 36
+    description: Playing rugby.
+
+  - name: running
+    raw_value: 37
+    description: Running and jogging.
+
+  - name: sailing
+    raw_value: 38
+    description: Sailing.
+
+  - name: skatingSports
+    raw_value: 39
+    description: Skating activities, including ice skating, speed skating, inline skating, and skateboarding.
+
+  - name: snowSports
+    raw_value: 40
+    description: A variety of snow sports, including sledding, snowmobiling, or building a snowman.
+
+  - name: soccer
+    raw_value: 41
+    description: Playing soccer.
+
+  - name: softball
+    raw_value: 42
+    description: Playing softball.
+
+  - name: squash
+    raw_value: 43
+    description: Playing squash.
+
+  - name: stairClimbing
+    raw_value: 44
+    description: Workouts using a stair climbing machine.
+
+  - name: surfingSports
+    raw_value: 45
+    description: A variety of surf sports, including surfing, kite surfing, and wind surfing.
+
+  - name: swimming
+    raw_value: 46
+    description: Swimming.
+
+  - name: tableTennis
+    raw_value: 47
+    description: Playing table tennis.
+
+  - name: tennis
+    raw_value: 48
+    description: Playing tennis.
+
+  - name: trackAndField
+    raw_value: 49
+    description: Participating in track and field events, including shot put, javelin, pole vaulting, and related sports.
+
+  - name: traditionalStrengthTraining
+    raw_value: 50
+    description: Strength training exercises primarily using machines or free weights.
+
+  - name: volleyball
+    raw_value: 51
+    description: Playing volleyball.
+
+  - name: walking
+    raw_value: 52
+    description: Walking.
+
+  - name: waterFitness
+    raw_value: 53
+    description: Aerobic exercise performed in shallow water.
+
+  - name: waterPolo
+    raw_value: 54
+    description: Playing water polo.
+
+  - name: waterSports
+    raw_value: 55
+    description: A variety of water sports, including water skiing, wake boarding, and related activities.
+
+  - name: wrestling
+    raw_value: 56
+    description: Wrestling.
+
+  - name: yoga
+    raw_value: 57
+    description: Practicing yoga.
+
+  # --- Added in later iOS releases ---
+
+  - name: barre
+    raw_value: 58
+    description: Barre workout.
+
+  - name: coreTraining
+    raw_value: 59
+    description: Core training.
+
+  - name: crossCountrySkiing
+    raw_value: 60
+    description: Cross country skiing.
+
+  - name: downhillSkiing
+    raw_value: 61
+    description: Downhill skiing.
+
+  - name: flexibility
+    raw_value: 62
+    description: A flexibility workout.
+
+  - name: highIntensityIntervalTraining
+    raw_value: 63
+    description: High intensity interval training.
+
+  - name: jumpRope
+    raw_value: 64
+    description: Jumping rope.
+
+  - name: kickboxing
+    raw_value: 65
+    description: Kickboxing.
+
+  - name: pilates
+    raw_value: 66
+    description: A Pilates workout.
+
+  - name: snowboarding
+    raw_value: 67
+    description: Snowboarding.
+
+  - name: stairs
+    raw_value: 68
+    description: Running, walking, or other drills using stairs (e.g., in a stadium or inside a multilevel building).
+
+  - name: stepTraining
+    raw_value: 69
+    description: Training using a step bench.
+
+  - name: wheelchairWalkPace
+    raw_value: 70
+    description: A wheelchair workout at walking pace.
+
+  - name: wheelchairRunPace
+    raw_value: 71
+    description: A wheelchair workout at running pace.
+
+  - name: taiChi
+    raw_value: 72
+    description: Tai chi.
+
+  - name: mixedCardio
+    raw_value: 73
+    description: Workouts that mix a variety of cardio exercise machines or modalities.
+
+  - name: handCycling
+    raw_value: 74
+    description: Hand cycling.
+
+  - name: discSports
+    raw_value: 75
+    description: Playing disc sports such as Ultimate and Disc Golf.
+
+  - name: fitnessGaming
+    raw_value: 76
+    description: Playing fitness-based video games.
+
+  - name: cardioDance
+    raw_value: 77
+    description: Cardiovascular dance workouts.
+
+  - name: socialDance
+    raw_value: 78
+    description: Dancing with a partner or partners, such as swing, salsa, or folk dances.
+
+  - name: pickleball
+    raw_value: 79
+    description: Playing pickleball.
+
+  - name: cooldown
+    raw_value: 80
+    description: Low intensity stretching and mobility exercises following a more vigorous workout.
+
+  # Raw value 81 is skipped (no case assigned)
+
+  - name: swimBikeRun
+    raw_value: 82
+    description: Multisport activities like triathlons.
+
+  - name: transition
+    raw_value: 83
+    description: Transition time between activities in a multisport workout.
+
+  - name: underwaterDiving
+    raw_value: 84
+    description: Underwater diving.
+
+  # --- Catch-all ---
+
+  - name: other
+    raw_value: 3000
+    description: A workout that does not match any of the other workout activity types.
