@@ -63,7 +63,7 @@ No modifier implies another. A Zwift ride is both `stationary` and `virtual`. Th
 
 ## Schema format
 
-The canonical schema lives in [`schema.yaml`](schema.yaml). It is a single YAML file with two sections:
+The canonical schema lives in [`schema.yaml`](schema.yaml). A human-readable overview of all sports and modifiers is available in [`dist/reference.md`](dist/reference.md). The YAML file has two sections:
 
 - **`sports`** — a flat list of sport codes, sorted alphabetically. Hierarchy is encoded in the dot notation, not in file structure. Every parent entry must exist (if `cycling.mountain.xco` exists, `cycling.mountain` and `cycling` must too).
 

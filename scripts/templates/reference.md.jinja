@@ -1,0 +1,48 @@
+<!-- Generated from schema.yaml — do not edit directly. -->
+
+# OpenSportsSchema Reference
+
+{{ families }} sport families, {{ total_sports }} sports, {{ total_modifiers }} modifiers — version {{ version }}
+
+## Sports
+
+Sport codes identify the discipline. They form a hierarchy using
+dot notation. A parent groups related disciplines; children
+specialize further. Prefix matching works naturally: `cycling.*`
+returns all cycling disciplines.
+
+{% for node in tree %}
+{{ render_sport(node, 0) }}
+{% endfor %}
+
+## Modifiers
+
+Modifiers describe the circumstances of an activity, not the
+discipline itself. They are attached alongside a sport code.
+For example, a Zwift race is `cycling.road` with modifiers
+`stationary`, `virtual`, and `race`.
+{% if groups %}
+
+### Grouped
+
+Pick at most one modifier from each group.
+{% for group_name, members in groups %}
+
+#### {{ group_name }}
+
+{% for m in members %}
+- **{{ m.code }}** — {{ m.label }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% if ungrouped %}
+
+### Ungrouped
+
+Independent flags. Combine freely with each other and
+with grouped modifiers.
+
+{% for m in ungrouped %}
+- **{{ m.code }}** — {{ m.label }}
+{% endfor %}
+{% endif %}
