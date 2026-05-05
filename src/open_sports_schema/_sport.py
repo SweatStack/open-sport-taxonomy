@@ -176,6 +176,47 @@ class Sport:
     def __repr__(self) -> str:
         return f"Sport({str(self)!r})"
 
+    @classmethod
+    def resolve(cls, raw: str) -> Sport:
+        """Resolve an encoded string to the nearest known Sport.
+
+        Walks up the sport code hierarchy for unknown codes and drops
+        unknown modifiers. Always returns a schema-valid Sport.
+
+        Structural errors (empty string, trailing +) still raise ValueError.
+        """
+        if not isinstance(raw, str):
+            raise TypeError(f"Expected str, got {type(raw).__name__}")
+
+        if not raw:
+            raise ValueError("Sport code cannot be empty")
+
+        parts = raw.split("+")
+        if "" in parts:
+            raise ValueError(f"Invalid encoded string: {raw!r}")
+
+        raw_code = parts[0]
+        raw_modifiers = parts[1:]
+
+        # Walk up the hierarchy until a known code is found.
+        code = raw_code
+        while code and code not in _LABELS:
+            dot = code.rfind(".")
+            code = code[:dot] if dot != -1 else ""
+
+        if not code:
+            code = "generic"
+
+        # Keep only known modifiers, drop the rest.
+        known_modifiers: set[Modifier] = set()
+        for m in raw_modifiers:
+            try:
+                known_modifiers.add(Modifier(m))
+            except ValueError:
+                continue
+
+        return cls(code, modifiers=known_modifiers)
+
 
 # Class constants.
 Sport.CYCLING = Sport("cycling")  # type: ignore[attr-defined]
