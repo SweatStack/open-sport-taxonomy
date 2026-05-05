@@ -88,12 +88,28 @@ modifiers:
     group: purpose
     label: commute
 
+  - code: group
+    group: company
+    label: group
+
+  - code: leisure
+    group: purpose
+    label: leisure
+
   - code: race
     group: purpose
     label: race
 
+  - code: solo
+    group: company
+    label: solo
+
   - code: stationary
     label: stationary
+
+  - code: test
+    group: purpose
+    label: test
 
   - code: training
     group: purpose

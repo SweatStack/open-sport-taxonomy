@@ -11,8 +11,12 @@ class Modifier(str, Enum):
 
     ASSISTED = "assisted"
     COMMUTE = "commute"
+    GROUP = "group"
+    LEISURE = "leisure"
     RACE = "race"
+    SOLO = "solo"
     STATIONARY = "stationary"
+    TEST = "test"
     TRAINING = "training"
     VIRTUAL = "virtual"
 
@@ -36,15 +40,23 @@ class Modifier(str, Enum):
 _LABELS: dict[str, str] = {
     "assisted": "assisted",
     "commute": "commute",
+    "group": "group",
+    "leisure": "leisure",
     "race": "race",
+    "solo": "solo",
     "stationary": "stationary",
+    "test": "test",
     "training": "training",
     "virtual": "virtual",
 }
 
 _GROUPS: dict[str, str] = {
     "commute": "purpose",
+    "group": "company",
+    "leisure": "purpose",
     "race": "purpose",
+    "solo": "company",
+    "test": "purpose",
     "training": "purpose",
 }
 

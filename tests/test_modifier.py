@@ -56,7 +56,9 @@ class TestInGroup:
         assert Modifier.RACE in purpose
         assert Modifier.COMMUTE in purpose
         assert Modifier.TRAINING in purpose
-        assert len(purpose) == 3
+        assert Modifier.TEST in purpose
+        assert Modifier.LEISURE in purpose
+        assert len(purpose) == 5
 
     def test_unknown_group(self):
         assert Modifier.in_group("nonexistent") == []
@@ -73,8 +75,12 @@ class TestCompleteness:
         expected = {
             ("assisted", "assisted", None),
             ("commute", "commute", "purpose"),
+            ("group", "group", "company"),
+            ("leisure", "leisure", "purpose"),
             ("race", "race", "purpose"),
+            ("solo", "solo", "company"),
             ("stationary", "stationary", None),
+            ("test", "test", "purpose"),
             ("training", "training", "purpose"),
             ("virtual", "virtual", None),
         }
