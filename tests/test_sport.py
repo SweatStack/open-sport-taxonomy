@@ -196,4 +196,4 @@ class TestClassConstants:
     def test_constant_equals_constructed(self):
         assert Sport.CYCLING_ROAD == Sport("cycling.road")
         assert Sport.RUNNING_TRAIL == Sport("running.trail")
-        assert Sport.XC_SKIING_ROLLER_CLASSIC == Sport("xc_skiing.roller.classic")
+        assert Sport.XC_SKIING_DOUBLE_POLING == Sport("xc_skiing.double_poling")

@@ -61,20 +61,11 @@ sports:
   - code: xc_skiing
     label: XC skiing
 
-  - code: xc_skiing.backcountry
-    label: backcountry XC skiing
-
   - code: xc_skiing.classic
     label: classic XC skiing
 
-  - code: xc_skiing.roller
-    label: roller skiing
-
-  - code: xc_skiing.roller.classic
-    label: classic roller skiing
-
-  - code: xc_skiing.roller.skate
-    label: skate roller skiing
+  - code: xc_skiing.double_poling
+    label: double poling XC skiing
 
   - code: xc_skiing.skate
     label: skate XC skiing
@@ -83,6 +74,9 @@ modifiers:
 
   - code: assisted
     label: assisted
+
+  - code: roller
+    label: roller
 
   - code: commute
     group: purpose

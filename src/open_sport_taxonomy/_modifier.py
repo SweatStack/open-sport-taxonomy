@@ -10,6 +10,7 @@ class Modifier(str, Enum):
     """A modifier that qualifies a sport (e.g. race, virtual, assisted)."""
 
     ASSISTED = "assisted"
+    ROLLER = "roller"
     COMMUTE = "commute"
     GROUP = "group"
     LEISURE = "leisure"
@@ -39,6 +40,7 @@ class Modifier(str, Enum):
 
 _LABELS: dict[str, str] = {
     "assisted": "assisted",
+    "roller": "roller",
     "commute": "commute",
     "group": "group",
     "leisure": "leisure",

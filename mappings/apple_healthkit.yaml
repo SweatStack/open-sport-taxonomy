@@ -64,20 +64,27 @@ mappings:
   - ost: xc_skiing
     target: 60  # crossCountrySkiing
 
-  - ost: xc_skiing.backcountry
-    target: 60  # crossCountrySkiing
+  - ost: xc_skiing
+    modifiers: [roller]
+    target: 30  # inlineSkate
 
   - ost: xc_skiing.classic
     target: 60  # crossCountrySkiing
 
-  - ost: xc_skiing.roller
+  - ost: xc_skiing.classic
+    modifiers: [roller]
     target: 30  # inlineSkate
 
-  - ost: xc_skiing.roller.classic
-    target: 30  # inlineSkate
+  - ost: xc_skiing.double_poling
+    target: 60  # crossCountrySkiing
 
-  - ost: xc_skiing.roller.skate
+  - ost: xc_skiing.double_poling
+    modifiers: [roller]
     target: 30  # inlineSkate
 
   - ost: xc_skiing.skate
     target: 60  # crossCountrySkiing
+
+  - ost: xc_skiing.skate
+    modifiers: [roller]
+    target: 30  # inlineSkate

@@ -18,8 +18,8 @@ class TestExactMatches:
     def test_walking_hiking(self):
         assert strava.translate(Sport.WALKING_HIKING) == "Hike"
 
-    def test_xc_skiing_backcountry(self):
-        assert strava.translate(Sport.XC_SKIING_BACKCOUNTRY) == "BackcountrySki"
+    def test_xc_skiing_roller(self):
+        assert strava.translate(Sport("xc_skiing.classic+roller")) == "RollerSki"
 
 
 class TestModifierMatches:

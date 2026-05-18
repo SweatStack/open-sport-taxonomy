@@ -32,7 +32,7 @@ class TestMappings:
         assert apple_healthkit.translate(Sport.XC_SKIING) == 60
 
     def test_roller_skiing_maps_to_skating(self):
-        assert apple_healthkit.translate(Sport.XC_SKIING_ROLLER) == 30
+        assert apple_healthkit.translate(Sport("xc_skiing.classic+roller")) == 30
 
 
 class TestFallback:

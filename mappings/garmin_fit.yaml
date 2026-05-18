@@ -64,20 +64,27 @@ mappings:
   - ost: xc_skiing
     target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
 
-  - ost: xc_skiing.backcountry
-    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
+  - ost: xc_skiing
+    modifiers: [roller]
+    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
 
   - ost: xc_skiing.classic
     target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
 
-  - ost: xc_skiing.roller
+  - ost: xc_skiing.classic
+    modifiers: [roller]
     target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
 
-  - ost: xc_skiing.roller.classic
-    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
+  - ost: xc_skiing.double_poling
+    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
 
-  - ost: xc_skiing.roller.skate
+  - ost: xc_skiing.double_poling
+    modifiers: [roller]
     target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
 
   - ost: xc_skiing.skate
     target: { sport: 12, sub_sport: 42 }  # cross_country_skiing / skate_skiing
+
+  - ost: xc_skiing.skate
+    modifiers: [roller]
+    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic

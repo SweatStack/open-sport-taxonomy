@@ -84,20 +84,27 @@ mappings:
   - ost: xc_skiing
     target: NordicSki
 
-  - ost: xc_skiing.backcountry
-    target: BackcountrySki
+  - ost: xc_skiing
+    modifiers: [roller]
+    target: RollerSki
 
   - ost: xc_skiing.classic
     target: NordicSki
 
-  - ost: xc_skiing.roller
+  - ost: xc_skiing.classic
+    modifiers: [roller]
     target: RollerSki
 
-  - ost: xc_skiing.roller.classic
-    target: RollerSki
+  - ost: xc_skiing.double_poling
+    target: NordicSki
 
-  - ost: xc_skiing.roller.skate
+  - ost: xc_skiing.double_poling
+    modifiers: [roller]
     target: RollerSki
 
   - ost: xc_skiing.skate
     target: NordicSki
+
+  - ost: xc_skiing.skate
+    modifiers: [roller]
+    target: RollerSki

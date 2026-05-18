@@ -30,11 +30,8 @@ _LABELS: dict[str, str] = {
     "walking": "walking",
     "walking.hiking": "hiking",
     "xc_skiing": "XC skiing",
-    "xc_skiing.backcountry": "backcountry XC skiing",
     "xc_skiing.classic": "classic XC skiing",
-    "xc_skiing.roller": "roller skiing",
-    "xc_skiing.roller.classic": "classic roller skiing",
-    "xc_skiing.roller.skate": "skate roller skiing",
+    "xc_skiing.double_poling": "double poling XC skiing",
     "xc_skiing.skate": "skate XC skiing",
 }
 
@@ -58,11 +55,8 @@ _PARENTS: dict[str, str | None] = {
     "walking": None,
     "walking.hiking": "walking",
     "xc_skiing": None,
-    "xc_skiing.backcountry": "xc_skiing",
     "xc_skiing.classic": "xc_skiing",
-    "xc_skiing.roller": "xc_skiing",
-    "xc_skiing.roller.classic": "xc_skiing.roller",
-    "xc_skiing.roller.skate": "xc_skiing.roller",
+    "xc_skiing.double_poling": "xc_skiing",
     "xc_skiing.skate": "xc_skiing",
 }
 
@@ -85,12 +79,9 @@ _CHILDREN: dict[str, tuple[str, ...]] = {
     "swimming.pool": (),
     "walking": ("walking.hiking",),
     "walking.hiking": (),
-    "xc_skiing": ("xc_skiing.backcountry", "xc_skiing.classic", "xc_skiing.roller", "xc_skiing.skate",),
-    "xc_skiing.backcountry": (),
+    "xc_skiing": ("xc_skiing.classic", "xc_skiing.double_poling", "xc_skiing.skate",),
     "xc_skiing.classic": (),
-    "xc_skiing.roller": ("xc_skiing.roller.classic", "xc_skiing.roller.skate",),
-    "xc_skiing.roller.classic": (),
-    "xc_skiing.roller.skate": (),
+    "xc_skiing.double_poling": (),
     "xc_skiing.skate": (),
 }
 
@@ -332,9 +323,6 @@ Sport.SWIMMING_POOL = Sport("swimming.pool")  # type: ignore[attr-defined]
 Sport.WALKING = Sport("walking")  # type: ignore[attr-defined]
 Sport.WALKING_HIKING = Sport("walking.hiking")  # type: ignore[attr-defined]
 Sport.XC_SKIING = Sport("xc_skiing")  # type: ignore[attr-defined]
-Sport.XC_SKIING_BACKCOUNTRY = Sport("xc_skiing.backcountry")  # type: ignore[attr-defined]
 Sport.XC_SKIING_CLASSIC = Sport("xc_skiing.classic")  # type: ignore[attr-defined]
-Sport.XC_SKIING_ROLLER = Sport("xc_skiing.roller")  # type: ignore[attr-defined]
-Sport.XC_SKIING_ROLLER_CLASSIC = Sport("xc_skiing.roller.classic")  # type: ignore[attr-defined]
-Sport.XC_SKIING_ROLLER_SKATE = Sport("xc_skiing.roller.skate")  # type: ignore[attr-defined]
+Sport.XC_SKIING_DOUBLE_POLING = Sport("xc_skiing.double_poling")  # type: ignore[attr-defined]
 Sport.XC_SKIING_SKATE = Sport("xc_skiing.skate")  # type: ignore[attr-defined]

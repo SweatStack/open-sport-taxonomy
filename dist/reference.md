@@ -2,7 +2,7 @@
 
 # OpenSportTaxonomy Reference
 
-7 sport families, 25 sports, 10 modifiers — version 0.1.0
+7 sport families, 22 sports, 11 modifiers — version 0.1.0
 
 ## Sports
 
@@ -29,11 +29,8 @@ specialize further.
 - **walking** — walking
   - **walking.hiking** — hiking
 - **xc_skiing** — XC skiing
-  - **xc_skiing.backcountry** — backcountry XC skiing
   - **xc_skiing.classic** — classic XC skiing
-  - **xc_skiing.roller** — roller skiing
-    - **xc_skiing.roller.classic** — classic roller skiing
-    - **xc_skiing.roller.skate** — skate roller skiing
+  - **xc_skiing.double_poling** — double poling XC skiing
   - **xc_skiing.skate** — skate XC skiing
 
 ## Modifiers
@@ -66,5 +63,6 @@ Independent flags. Combine freely with each other and
 with grouped modifiers.
 
 - **assisted** — assisted
+- **roller** — roller
 - **stationary** — stationary
 - **virtual** — virtual

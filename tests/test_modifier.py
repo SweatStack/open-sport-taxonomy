@@ -78,6 +78,7 @@ class TestCompleteness:
             ("group", "group", "company"),
             ("leisure", "leisure", "purpose"),
             ("race", "race", "purpose"),
+            ("roller", "roller", None),
             ("solo", "solo", "company"),
             ("stationary", "stationary", None),
             ("test", "test", "purpose"),

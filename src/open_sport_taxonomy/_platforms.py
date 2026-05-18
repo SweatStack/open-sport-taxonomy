@@ -35,12 +35,13 @@ STRAVA_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {
     ("walking", frozenset()): "Walk",
     ("walking.hiking", frozenset()): "Hike",
     ("xc_skiing", frozenset()): "NordicSki",
-    ("xc_skiing.backcountry", frozenset()): "BackcountrySki",
+    ("xc_skiing", frozenset({"roller"})): "RollerSki",
     ("xc_skiing.classic", frozenset()): "NordicSki",
-    ("xc_skiing.roller", frozenset()): "RollerSki",
-    ("xc_skiing.roller.classic", frozenset()): "RollerSki",
-    ("xc_skiing.roller.skate", frozenset()): "RollerSki",
+    ("xc_skiing.classic", frozenset({"roller"})): "RollerSki",
+    ("xc_skiing.double_poling", frozenset()): "NordicSki",
+    ("xc_skiing.double_poling", frozenset({"roller"})): "RollerSki",
     ("xc_skiing.skate", frozenset()): "NordicSki",
+    ("xc_skiing.skate", frozenset({"roller"})): "RollerSki",
 }
 
 APPLE_HEALTHKIT_FALLBACK: int = 3000
@@ -65,12 +66,13 @@ APPLE_HEALTHKIT_MAPPINGS: dict[tuple[str, frozenset[str]], int] = {
     ("walking", frozenset()): 52,
     ("walking.hiking", frozenset()): 24,
     ("xc_skiing", frozenset()): 60,
-    ("xc_skiing.backcountry", frozenset()): 60,
+    ("xc_skiing", frozenset({"roller"})): 30,
     ("xc_skiing.classic", frozenset()): 60,
-    ("xc_skiing.roller", frozenset()): 30,
-    ("xc_skiing.roller.classic", frozenset()): 30,
-    ("xc_skiing.roller.skate", frozenset()): 30,
+    ("xc_skiing.classic", frozenset({"roller"})): 30,
+    ("xc_skiing.double_poling", frozenset()): 60,
+    ("xc_skiing.double_poling", frozenset({"roller"})): 30,
     ("xc_skiing.skate", frozenset()): 60,
+    ("xc_skiing.skate", frozenset({"roller"})): 30,
 }
 
 GARMIN_FIT_FALLBACK: GarminFitCode = GarminFitCode(sport=0, sub_sport=0)
@@ -95,10 +97,11 @@ GARMIN_FIT_MAPPINGS: dict[tuple[str, frozenset[str]], GarminFitCode] = {
     ("walking", frozenset()): GarminFitCode(sport=11, sub_sport=0),
     ("walking.hiking", frozenset()): GarminFitCode(sport=17, sub_sport=0),
     ("xc_skiing", frozenset()): GarminFitCode(sport=12, sub_sport=0),
-    ("xc_skiing.backcountry", frozenset()): GarminFitCode(sport=12, sub_sport=0),
+    ("xc_skiing", frozenset({"roller"})): GarminFitCode(sport=30, sub_sport=0),
     ("xc_skiing.classic", frozenset()): GarminFitCode(sport=12, sub_sport=0),
-    ("xc_skiing.roller", frozenset()): GarminFitCode(sport=30, sub_sport=0),
-    ("xc_skiing.roller.classic", frozenset()): GarminFitCode(sport=30, sub_sport=0),
-    ("xc_skiing.roller.skate", frozenset()): GarminFitCode(sport=30, sub_sport=0),
+    ("xc_skiing.classic", frozenset({"roller"})): GarminFitCode(sport=30, sub_sport=0),
+    ("xc_skiing.double_poling", frozenset()): GarminFitCode(sport=12, sub_sport=0),
+    ("xc_skiing.double_poling", frozenset({"roller"})): GarminFitCode(sport=30, sub_sport=0),
     ("xc_skiing.skate", frozenset()): GarminFitCode(sport=12, sub_sport=42),
+    ("xc_skiing.skate", frozenset({"roller"})): GarminFitCode(sport=30, sub_sport=0),
 }
