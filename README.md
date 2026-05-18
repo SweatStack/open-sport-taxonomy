@@ -33,7 +33,7 @@ More examples:
 
 **Modifiers** describe circumstances, not disciplines. Road cycling on a trainer is still road cycling, performed on a stationary machine. Modifiers are appended with `+` and sorted alphabetically. They are independent: a Zwift ride is both `stationary` and `virtual`, set separately.
 
-See the [full reference](dist/reference.md) for all sport codes and modifiers.
+See the [full reference](docs/reference.md) for all sport codes and modifiers.
 
 ### Structured format
 

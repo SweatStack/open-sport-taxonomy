@@ -3,7 +3,7 @@
 # dependencies = ["pyyaml", "jinja2"]
 # ///
 
-"""Generate dist/reference.md from schema.yaml.
+"""Generate docs/reference.md from schema.yaml.
 
 Usage:
     uv run scripts/generate_reference.py
@@ -19,7 +19,7 @@ from jinja2 import Environment, FileSystemLoader
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "schema.yaml"
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
-OUTPUT_PATH = ROOT / "dist" / "reference.md"
+OUTPUT_PATH = ROOT / "docs" / "reference.md"
 
 
 def load_schema():
