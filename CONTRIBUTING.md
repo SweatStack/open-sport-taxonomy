@@ -20,9 +20,9 @@ Open an issue or pull request with:
 
 Apply the test: if you removed this level from the code, would an athlete still recognize the activity as the same sport? If yes, it probably belongs as a modifier, not a sport code. If no, it's a distinct discipline and belongs in the tree.
 
-Examples of sport codes: `cycling.track` (different bike, different technique, specialized venue). `skiing.roller` (different equipment, different surface, own racing circuit).
+Examples of sport codes: `cycling.track` (different bike, different technique, specialized venue). `xc_skiing.double_poling` (distinct technique, own racing category).
 
-Examples of things that are NOT sport codes: indoor cycling (it's `cycling.road` + `stationary`), e-bike gravel (it's `cycling.gravel` + `assisted`), a cycling race (it's any cycling code + `race`).
+Examples of things that are NOT sport codes: indoor cycling (it's `cycling.road` + `stationary`), e-bike gravel (it's `cycling.gravel` + `assisted`), roller skiing (it's `xc_skiing.classic` + `roller` — same technique, different surface), a cycling race (it's any cycling code + `race`).
 
 ## Adding a modifier
 

@@ -8,7 +8,17 @@ OpenSportTaxonomy provides a single canonical set of sport codes that any applic
 
 ## How it works
 
-An activity is identified by a **sport string**: a sport code optionally followed by modifiers.
+An activity is identified by a **sport string**: dots (`.`) separate the sport from its disciplines in the sport hierarchy, plusses (`+`) attach modifiers.
+
+Example: `cycling.road+stationary+virtual`
+
+```
+cycling . road + stationary + virtual
+\-----/   \--/   \--------/   \-----/
+ sport discipline modifier    modifier
+```
+
+More examples:
 
 | Sport string | Meaning |
 |---|---|
@@ -17,6 +27,7 @@ An activity is identified by a **sport string**: a sport code optionally followe
 | `cycling.road+stationary+virtual` | road cycling, for example on Zwift |
 | `cycling.gravel+assisted+commute` | e-bike gravel commute |
 | `running.trail+race` | trail running race |
+| `xc_skiing.classic+roller` | classic roller skiing |
 
 **Sport codes** form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The hierarchy is encoded in the code itself: the parent of `cycling.road` is `cycling`. Querying for `cycling` should naturally include all its children.
 
@@ -42,7 +53,7 @@ The sport string is the canonical form. The structured format is derived from it
 
 **Venues are not modifiers.** Track cycling happens in a velodrome. That's its natural setting, not a "modified" version of outdoor cycling.
 
-**Modifiers are explicit.** No modifier implies another. A Zwift ride is `stationary+virtual` — both set separately, because a trainer without a screen is stationary but not virtual. Within a group (e.g. purpose), pick at most one. Across groups and ungrouped modifiers, combine freely. Absence means unspecified, not "the opposite."
+**Modifiers are explicit.** No modifier implies another. A Zwift ride is `stationary+virtual` — both set separately, because a trainer without a screen is stationary but not virtual. Absence means unspecified, not "the opposite."
 
 ## Schema format
 
