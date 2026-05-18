@@ -10,7 +10,7 @@ Strava uses a string enum called `SportType` to classify activities. It replaced
 
 - **56 values** (string enum, no numeric IDs)
 - Flat list, no hierarchy
-- Some types encode what OpenSportsSchema treats as modifiers: `VirtualRide`, `VirtualRun`, `VirtualRow`, `EBikeRide`, `EMountainBikeRide`
+- Some types encode what OpenSportTaxonomy treats as modifiers: `VirtualRide`, `VirtualRun`, `VirtualRow`, `EBikeRide`, `EMountainBikeRide`
 
 ## Files
 

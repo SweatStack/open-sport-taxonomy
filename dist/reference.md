@@ -1,8 +1,8 @@
 > **This file is generated from [schema.yaml](../schema.yaml). Do not edit directly.**
 
-# OpenSportsSchema Reference
+# OpenSportTaxonomy Reference
 
-7 sport families, 25 sports, 6 modifiers — version 0.1.0
+7 sport families, 25 sports, 10 modifiers — version 0.1.0
 
 ## Sports
 
@@ -47,10 +47,17 @@ For example, a Zwift race is `cycling.road` with modifiers
 
 Pick at most one modifier from each group.
 
+#### company
+
+- **group** — group
+- **solo** — solo
+
 #### purpose
 
 - **commute** — commute
+- **leisure** — leisure
 - **race** — race
+- **test** — test
 - **training** — training
 
 ### Ungrouped

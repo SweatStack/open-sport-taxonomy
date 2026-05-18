@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from open_sports_schema._modifier import Modifier, validate_modifiers
+from open_sport_taxonomy._modifier import Modifier, validate_modifiers
 
 
 # Taxonomy data — generated from schema.yaml.

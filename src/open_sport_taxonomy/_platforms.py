@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from open_sports_schema._platform import GarminFitCode
+from open_sport_taxonomy._platform import GarminFitCode
 
 
 STRAVA_FALLBACK: str = "Workout"

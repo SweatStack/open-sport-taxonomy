@@ -1,6 +1,6 @@
 import pytest
 
-from open_sports_schema import Modifier, Sport
+from open_sport_taxonomy import Modifier, Sport
 
 
 class TestKnownCodes:

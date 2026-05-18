@@ -1,7 +1,7 @@
 [project]
-name = "open-sports-schema"
+name = "open-sport-taxonomy"
 version = "0.1.0"
-description = "An open standard for classifying sports and physical activities."
+description = "An open taxonomy for classifying sports and physical activities."
 readme = "README.md"
 authors = [
     { name = "Aart Goossens", email = "aart@goossens.me" }

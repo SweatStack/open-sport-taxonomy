@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, NamedTuple
 
-from open_sports_schema._sport import Sport
+from open_sport_taxonomy._sport import Sport
 
 
 class GarminFitCode(NamedTuple):

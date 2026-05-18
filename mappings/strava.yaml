@@ -1,4 +1,4 @@
-# OpenSportsSchema — Strava mapping
+# OpenSportTaxonomy — Strava mapping
 # See README.md for how mappings work.
 
 platform: strava
@@ -7,97 +7,97 @@ fallback: Workout
 
 mappings:
 
-  - oss: cycling
+  - ost: cycling
     target: Ride
 
-  - oss: cycling.cyclocross
+  - ost: cycling.cyclocross
     target: Ride
 
-  - oss: cycling.gravel
+  - ost: cycling.gravel
     target: GravelRide
 
-  - oss: cycling.mountain
+  - ost: cycling.mountain
     target: MountainBikeRide
 
-  - oss: cycling.mountain
+  - ost: cycling.mountain
     modifiers: [assisted]
     target: EMountainBikeRide
 
-  - oss: cycling.road
+  - ost: cycling.road
     target: Ride
 
-  - oss: cycling.road
+  - ost: cycling.road
     modifiers: [assisted]
     target: EBikeRide
 
-  - oss: cycling.road
+  - ost: cycling.road
     modifiers: [virtual]
     target: VirtualRide
 
-  - oss: cycling.time_trial
+  - ost: cycling.time_trial
     target: Ride
 
-  - oss: cycling.track
+  - ost: cycling.track
     target: Ride
 
-  - oss: generic
+  - ost: generic
     target: Workout
 
-  - oss: rowing
+  - ost: rowing
     target: Rowing
 
-  - oss: rowing
+  - ost: rowing
     modifiers: [virtual]
     target: VirtualRow
 
-  - oss: running
+  - ost: running
     target: Run
 
-  - oss: running.road
+  - ost: running.road
     target: Run
 
-  - oss: running.road
+  - ost: running.road
     modifiers: [virtual]
     target: VirtualRun
 
-  - oss: running.track
+  - ost: running.track
     target: Run
 
-  - oss: running.trail
+  - ost: running.trail
     target: TrailRun
 
-  - oss: swimming
+  - ost: swimming
     target: Swim
 
-  - oss: swimming.open_water
+  - ost: swimming.open_water
     target: Swim
 
-  - oss: swimming.pool
+  - ost: swimming.pool
     target: Swim
 
-  - oss: walking
+  - ost: walking
     target: Walk
 
-  - oss: walking.hiking
+  - ost: walking.hiking
     target: Hike
 
-  - oss: xc_skiing
+  - ost: xc_skiing
     target: NordicSki
 
-  - oss: xc_skiing.backcountry
+  - ost: xc_skiing.backcountry
     target: BackcountrySki
 
-  - oss: xc_skiing.classic
+  - ost: xc_skiing.classic
     target: NordicSki
 
-  - oss: xc_skiing.roller
+  - ost: xc_skiing.roller
     target: RollerSki
 
-  - oss: xc_skiing.roller.classic
+  - ost: xc_skiing.roller.classic
     target: RollerSki
 
-  - oss: xc_skiing.roller.skate
+  - ost: xc_skiing.roller.skate
     target: RollerSki
 
-  - oss: xc_skiing.skate
+  - ost: xc_skiing.skate
     target: NordicSki

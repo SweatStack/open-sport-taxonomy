@@ -57,7 +57,7 @@ def sort_entries(entries):
 def write_schema(schema):
     """Write schema.yaml preserving the structure."""
     lines = [
-        "# OpenSportsSchema — https://github.com/sweatstack/open-sports-schema",
+        "# OpenSportTaxonomy — https://github.com/sweatstack/open-sport-taxonomy",
         "",
         f'version: "{schema["version"]}"',
         "",

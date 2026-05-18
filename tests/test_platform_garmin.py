@@ -1,6 +1,6 @@
-from open_sports_schema import GarminFitCode, Sport
-from open_sports_schema._sport import _LABELS as TAXONOMY
-from open_sports_schema.platforms import garmin_fit
+from open_sport_taxonomy import GarminFitCode, Sport
+from open_sport_taxonomy._sport import _LABELS as TAXONOMY
+from open_sport_taxonomy.platforms import garmin_fit
 
 
 class TestMappings:

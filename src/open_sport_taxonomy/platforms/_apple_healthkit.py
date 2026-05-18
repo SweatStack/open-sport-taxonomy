@@ -1,5 +1,5 @@
-from open_sports_schema._platform import Platform
-from open_sports_schema._platforms import (
+from open_sport_taxonomy._platform import Platform
+from open_sport_taxonomy._platforms import (
     APPLE_HEALTHKIT_FALLBACK,
     APPLE_HEALTHKIT_MAPPINGS,
 )

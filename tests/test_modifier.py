@@ -1,6 +1,6 @@
 import pytest
 
-from open_sports_schema import Modifier
+from open_sport_taxonomy import Modifier
 
 
 class TestEnumBehavior:

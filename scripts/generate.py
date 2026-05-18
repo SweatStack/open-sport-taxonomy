@@ -15,7 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "schema.yaml"
 MAPPINGS_DIR = ROOT / "mappings"
-OUT_DIR = ROOT / "src" / "open_sports_schema"
+OUT_DIR = ROOT / "src" / "open_sport_taxonomy"
 
 HEADER = '# Auto-generated from schema.yaml — do not edit.\n# Run: uv run scripts/generate.py\n'
 
@@ -139,7 +139,7 @@ def generate_sport(schema: dict) -> str:
         "from collections.abc import Iterable",
         "from dataclasses import dataclass",
         "",
-        "from open_sports_schema._modifier import Modifier, validate_modifiers",
+        "from open_sport_taxonomy._modifier import Modifier, validate_modifiers",
         "",
         "",
         "# Taxonomy data — generated from schema.yaml.",
@@ -415,7 +415,7 @@ def generate_platforms(schema: dict) -> str:
         "",
         "from typing import Any",
         "",
-        "from open_sports_schema._platform import GarminFitCode",
+        "from open_sport_taxonomy._platform import GarminFitCode",
         "",
         "",
     ]
@@ -426,7 +426,7 @@ def generate_platforms(schema: dict) -> str:
     lines.append("")
     lines.append("STRAVA_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {")
     for entry in strava["mappings"]:
-        key_code = entry["oss"]
+        key_code = entry["ost"]
         key_mods = frozenset(entry.get("modifiers", []))
         mods_repr = _frozenset_repr(key_mods)
         lines.append(f'    ("{key_code}", {mods_repr}): "{entry["target"]}",')
@@ -439,7 +439,7 @@ def generate_platforms(schema: dict) -> str:
     lines.append("")
     lines.append("APPLE_HEALTHKIT_MAPPINGS: dict[tuple[str, frozenset[str]], int] = {")
     for entry in hk["mappings"]:
-        key_code = entry["oss"]
+        key_code = entry["ost"]
         key_mods = frozenset(entry.get("modifiers", []))
         mods_repr = _frozenset_repr(key_mods)
         lines.append(f'    ("{key_code}", {mods_repr}): {entry["target"]},')
@@ -458,7 +458,7 @@ def generate_platforms(schema: dict) -> str:
         "GARMIN_FIT_MAPPINGS: dict[tuple[str, frozenset[str]], GarminFitCode] = {"
     )
     for entry in gf["mappings"]:
-        key_code = entry["oss"]
+        key_code = entry["ost"]
         key_mods = frozenset(entry.get("modifiers", []))
         mods_repr = _frozenset_repr(key_mods)
         t = entry["target"]

@@ -1,6 +1,6 @@
 import pytest
 
-from open_sports_schema import Modifier, Sport
+from open_sport_taxonomy import Modifier, Sport
 
 
 class TestStandardInput:
@@ -167,13 +167,13 @@ class TestStructuralErrors:
 
 class TestPlatformTranslation:
     def test_non_standard_code_walks_up(self):
-        from open_sports_schema.platforms import strava
+        from open_sport_taxonomy.platforms import strava
 
         sport = Sport.parse("cycling.road.criterium+race")
         assert strava.translate(sport) == "Ride"
 
     def test_totally_unknown_falls_to_platform_fallback(self):
-        from open_sports_schema.platforms import strava
+        from open_sport_taxonomy.platforms import strava
 
         sport = Sport.parse("parkour.freerunning")
         assert strava.translate(sport) == "Workout"

@@ -1,8 +1,8 @@
 import pytest
 
-from open_sports_schema import Modifier, Sport
-from open_sports_schema._sport import _LABELS as TAXONOMY
-from open_sports_schema.platforms import strava
+from open_sport_taxonomy import Modifier, Sport
+from open_sport_taxonomy._sport import _LABELS as TAXONOMY
+from open_sport_taxonomy.platforms import strava
 
 
 class TestExactMatches:

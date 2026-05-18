@@ -1,4 +1,4 @@
-# OpenSportsSchema — Apple HealthKit mapping
+# OpenSportTaxonomy — Apple HealthKit mapping
 # See README.md for how mappings work.
 
 platform: apple_healthkit
@@ -7,77 +7,77 @@ fallback: 3000  # other
 
 mappings:
 
-  - oss: cycling
+  - ost: cycling
     target: 13  # cycling
 
-  - oss: cycling.cyclocross
+  - ost: cycling.cyclocross
     target: 13  # cycling
 
-  - oss: cycling.gravel
+  - ost: cycling.gravel
     target: 13  # cycling
 
-  - oss: cycling.mountain
+  - ost: cycling.mountain
     target: 13  # cycling
 
-  - oss: cycling.road
+  - ost: cycling.road
     target: 13  # cycling
 
-  - oss: cycling.time_trial
+  - ost: cycling.time_trial
     target: 13  # cycling
 
-  - oss: cycling.track
+  - ost: cycling.track
     target: 13  # cycling
 
-  - oss: generic
+  - ost: generic
     target: 3000  # other
 
-  - oss: rowing
+  - ost: rowing
     target: 35  # rowing
 
-  - oss: running
+  - ost: running
     target: 37  # running
 
-  - oss: running.road
+  - ost: running.road
     target: 37  # running
 
-  - oss: running.track
+  - ost: running.track
     target: 37  # running
 
-  - oss: running.trail
+  - ost: running.trail
     target: 37  # running
 
-  - oss: swimming
+  - ost: swimming
     target: 46  # swimming
 
-  - oss: swimming.open_water
+  - ost: swimming.open_water
     target: 46  # swimming
 
-  - oss: swimming.pool
+  - ost: swimming.pool
     target: 46  # swimming
 
-  - oss: walking
+  - ost: walking
     target: 52  # walking
 
-  - oss: walking.hiking
+  - ost: walking.hiking
     target: 24  # hiking
 
-  - oss: xc_skiing
+  - ost: xc_skiing
     target: 60  # crossCountrySkiing
 
-  - oss: xc_skiing.backcountry
+  - ost: xc_skiing.backcountry
     target: 60  # crossCountrySkiing
 
-  - oss: xc_skiing.classic
+  - ost: xc_skiing.classic
     target: 60  # crossCountrySkiing
 
-  - oss: xc_skiing.roller
+  - ost: xc_skiing.roller
     target: 30  # inlineSkate
 
-  - oss: xc_skiing.roller.classic
+  - ost: xc_skiing.roller.classic
     target: 30  # inlineSkate
 
-  - oss: xc_skiing.roller.skate
+  - ost: xc_skiing.roller.skate
     target: 30  # inlineSkate
 
-  - oss: xc_skiing.skate
+  - ost: xc_skiing.skate
     target: 60  # crossCountrySkiing

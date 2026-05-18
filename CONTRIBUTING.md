@@ -1,6 +1,6 @@
 # Contributing
 
-OpenSportsSchema is maintained by SweatStack. Contributions are welcome.
+OpenSportTaxonomy is maintained by SweatStack. Contributions are welcome.
 
 ## Schema format
 

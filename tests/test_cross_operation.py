@@ -1,6 +1,6 @@
 import pytest
 
-from open_sports_schema import Modifier, Sport
+from open_sport_taxonomy import Modifier, Sport
 
 
 class TestResolveEqualsValidate:
@@ -93,14 +93,14 @@ class TestRawDoesNotAffectEquality:
 
 class TestPlatformTranslationConsistency:
     def test_resolve_and_parse_same_translation(self):
-        from open_sports_schema.platforms import strava
+        from open_sport_taxonomy.platforms import strava
 
         raw = "cycling.road.criterium+race+rainy"
         assert strava.translate(Sport.resolve(raw)) == strava.translate(Sport.parse(raw))
 
     def test_non_standard_falls_through(self):
-        from open_sports_schema.platforms import strava, apple_healthkit, garmin_fit
-        from open_sports_schema import GarminFitCode
+        from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
+        from open_sport_taxonomy import GarminFitCode
 
         sport = Sport.parse("cycling.road.criterium")
         assert strava.translate(sport) == "Ride"

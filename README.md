@@ -1,10 +1,10 @@
-# OpenSportsSchema
+# OpenSportTaxonomy
 
-An open standard for classifying sports and physical activities.
+An open taxonomy for classifying sports and physical activities.
 
 Every platform has invented its own list of sports. Apple HealthKit calls it `Cycling`, Strava calls it `Ride`, Garmin calls it `ROAD_CYCLING`. None of them are hierarchical, none map to each other, and none are open standards.
 
-OpenSportsSchema provides a single canonical set of sport codes that any application can reference.
+OpenSportTaxonomy provides a single canonical set of sport codes that any application can reference.
 
 ## How it works
 
@@ -50,21 +50,21 @@ The canonical schema is [`schema.yaml`](schema.yaml), a single YAML file with tw
 
 ## Platform mappings
 
-Mapping files in [`mappings/`](mappings/) translate OSS codes to platform-specific identifiers. One file per platform:
+Mapping files in [`mappings/`](mappings/) translate OST codes to platform-specific identifiers. One file per platform:
 
 - [`apple_healthkit.yaml`](mappings/apple_healthkit.yaml) — HKWorkoutActivityType integer values
 - [`garmin_fit.yaml`](mappings/garmin_fit.yaml) — sport + sub_sport integer pairs
 - [`strava.yaml`](mappings/strava.yaml) — SportType string values
 
-Translations are lossy by design. Some platforms are less granular than the schema: all cycling disciplines map to a single HealthKit value (`13`). This is the platform's limitation, not an error.
+Translations are lossy by design. Some platforms are less granular than the taxonomy: all cycling disciplines map to a single HealthKit value (`13`). This is the platform's limitation, not an error.
 
 ```yaml
-# The same OSS code on three platforms:
-- oss: cycling.road
+# The same OST code on three platforms:
+- ost: cycling.road
   target: 13                            # Apple HealthKit
-- oss: cycling.road
+- ost: cycling.road
   target: { sport: 2, sub_sport: 7 }   # Garmin FIT
-- oss: cycling.road
+- ost: cycling.road
   target: Ride                          # Strava
 ```
 
@@ -73,14 +73,14 @@ Translations are lossy by design. Some platforms are less granular than the sche
 Install the reference implementation:
 
 ```bash
-pip install open-sports-schema
+pip install open-sport-taxonomy
 ```
 
 ```python
-from open_sports_schema import Sport, Modifier
+from open_sport_taxonomy import Sport, Modifier
 
-# Parse a sport string
-sport = Sport("cycling.road+race+virtual")
+# Resolve a sport string (recommended)
+sport = Sport.resolve("cycling.road+race+virtual")
 sport.code          # "cycling.road"
 sport.modifiers     # frozenset({Modifier.RACE, Modifier.VIRTUAL})
 sport.label         # "road cycling"
@@ -95,27 +95,27 @@ Sport.CYCLING.disciplines   # (Sport('cycling.cyclocross'), Sport('cycling.grave
 Sport.CYCLING_ROAD.parent   # Sport('cycling')
 
 # Platform translation
-from open_sports_schema.platforms import strava, apple_healthkit, garmin_fit
+from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
 
-strava.translate(Sport("cycling.road+virtual"))     # "VirtualRide"
-apple_healthkit.translate(Sport.CYCLING_ROAD)        # 13
-garmin_fit.translate(Sport.CYCLING_ROAD)             # GarminFitCode(sport=2, sub_sport=7)
+strava.translate(Sport.resolve("cycling.road+virtual"))  # "VirtualRide"
+apple_healthkit.translate(Sport.CYCLING_ROAD)              # 13
+garmin_fit.translate(Sport.CYCLING_ROAD)                   # GarminFitCode(sport=2, sub_sport=7)
 ```
 
-## What the schema does not cover
+## What the taxonomy does not cover
 
 - **Venue properties** like pool length (25m vs 50m) or track size. These matter for records and performance but are not distinct disciplines. Planned for a future version.
 
 ## Versioning
 
-The schema follows [Semantic Versioning](https://semver.org). Each release is a git tag and a GitHub Release. Sport codes are stable: once published, never removed, only deprecated.
+The taxonomy follows [Semantic Versioning](https://semver.org). Each release is a git tag and a GitHub Release. Sport codes are stable: once published, never removed, only deprecated.
 
 ```
 # Latest
-https://raw.githubusercontent.com/sweatstack/open-sports-schema/main/schema.yaml
+https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/main/schema.yaml
 
 # Pinned to a version
-https://raw.githubusercontent.com/sweatstack/open-sports-schema/v0.1.0/schema.yaml
+https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/v0.1.0/schema.yaml
 ```
 
 ## Contributing

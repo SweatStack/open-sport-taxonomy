@@ -1,6 +1,6 @@
-from open_sports_schema import Sport
-from open_sports_schema._sport import _LABELS as TAXONOMY
-from open_sports_schema.platforms import apple_healthkit
+from open_sport_taxonomy import Sport
+from open_sport_taxonomy._sport import _LABELS as TAXONOMY
+from open_sport_taxonomy.platforms import apple_healthkit
 
 
 class TestMappings:
@@ -38,7 +38,7 @@ class TestMappings:
 class TestFallback:
     def test_modifiers_ignored(self):
         # HealthKit has no modifier-specific entries
-        from open_sports_schema import Modifier
+        from open_sport_taxonomy import Modifier
 
         assert apple_healthkit.translate(Sport("cycling.road+virtual")) == 13
 
