@@ -10,13 +10,13 @@ OpenSportTaxonomy provides a single canonical set of sport codes that any applic
 
 An activity is identified by a **sport string**: a sport code optionally followed by modifiers.
 
-```
-cycling.road                        — road cycling
-cycling.road+race                   — road cycling race
-cycling.road+stationary+virtual     — road cycling on Zwift
-cycling.gravel+assisted+commute     — e-bike gravel commute
-running.trail+race                  — trail running race
-```
+| Sport string | Meaning |
+|---|---|
+| `cycling.road` | road cycling |
+| `cycling.road+race` | road cycling race |
+| `cycling.road+stationary+virtual` | road cycling, for example on Zwift |
+| `cycling.gravel+assisted+commute` | e-bike gravel commute |
+| `running.trail+race` | trail running race |
 
 **Sport codes** form a tree using dot notation. `cycling` contains `cycling.road`, `cycling.gravel`, `cycling.track`, and so on. The hierarchy is encoded in the code itself: the parent of `cycling.road` is `cycling`. Querying for `cycling` should naturally include all its children.
 
@@ -42,7 +42,7 @@ The sport string is the canonical form. The structured format is derived from it
 
 **Venues are not modifiers.** Track cycling happens in a velodrome. That's its natural setting, not a "modified" version of outdoor cycling.
 
-**Modifiers are independent.** No modifier implies another. Absence is meaningful.
+**Modifiers are explicit.** No modifier implies another. A Zwift ride is `stationary+virtual` — both set separately, because a trainer without a screen is stationary but not virtual. Within a group (e.g. purpose), pick at most one. Across groups and ungrouped modifiers, combine freely. Absence means unspecified, not "the opposite."
 
 ## Schema format
 
@@ -76,25 +76,83 @@ Install the reference implementation:
 pip install open-sport-taxonomy
 ```
 
+### Working with sport strings
+
+The library provides three ways to interpret a sport string:
+
+| Method | Use when |
+|---|---|
+| `Sport.resolve(raw)` | You received a sport string and need to work with it **(recommended)** |
+| `Sport.parse(raw)` | You need to store or forward a sport string without losing data |
+| `Sport.validate(raw)` | You want to reject non-standard sports explicitly |
+
+A **standard sport** is one where the code and all modifiers are defined in the current taxonomy version. A **non-standard sport** is structurally valid but contains codes or modifiers not yet in the taxonomy — typically from a newer version. Non-standard is not invalid, it's unrecognized.
+
+`Sport.resolve()` is the recommended default. It maps any structurally valid sport string to the nearest standard sport, so your code never breaks when the taxonomy grows.
+
 ```python
 from open_sport_taxonomy import Sport, Modifier
 
 # Resolve a sport string (recommended)
 sport = Sport.resolve("cycling.road+race+virtual")
 sport.code          # "cycling.road"
-sport.modifiers     # frozenset({Modifier.RACE, Modifier.VIRTUAL})
 sport.label         # "road cycling"
+sport.modifiers     # frozenset({Modifier.RACE, Modifier.VIRTUAL})
+sport.is_standard   # True
 str(sport)          # "cycling.road+race+virtual"
 
-# Class constants with IDE autocomplete
+# Forward-compatible: unknown codes resolve to the nearest known parent
+sport = Sport.resolve("cycling.road.criterium+race")
+sport.code          # "cycling.road" (resolved)
+sport.label         # "road cycling"
+sport.raw           # "cycling.road.criterium+race" (original preserved)
+
+# Parse: preserve unknown codes and modifiers without interpretation
+sport = Sport.parse("cycling.road.criterium+race+rainy")
+sport.code          # "cycling.road.criterium" (preserved)
+sport.is_standard   # False
+sport.label         # None (unknown code)
+str(sport)          # "cycling.road.criterium+race+rainy" (round-trips)
+
+# Validate: strict, rejects unknowns
+sport = Sport.validate("cycling.road+race")  # ok
+sport = Sport.validate("cycling.road.criterium")  # ValueError
+```
+
+### Storage pattern
+
+Always store `.raw` in your database — it's the original sport string with full fidelity. Use `Sport.resolve()` when loading for application logic. When you upgrade the library, previously non-standard sports become standard automatically. No data migration needed.
+
+```python
+# On ingest
+sport = Sport.resolve(api_response["sport"])
+db.activity.sport = sport.raw    # store original
+
+# On load
+sport = Sport.resolve(db.activity.sport)
+```
+
+### Class constants
+
+For known sports in application code, use class constants:
+
+```python
 Sport.CYCLING_ROAD
 Sport.RUNNING_TRAIL
+Sport.SWIMMING_OPEN_WATER
+```
 
-# Taxonomy navigation
+### Taxonomy navigation
+
+```python
 Sport.CYCLING.disciplines   # (Sport('cycling.cyclocross'), Sport('cycling.gravel'), ...)
 Sport.CYCLING_ROAD.parent   # Sport('cycling')
+Sport.all()                 # all standard sports
+```
 
-# Platform translation
+### Platform translation
+
+```python
 from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
 
 strava.translate(Sport.resolve("cycling.road+virtual"))  # "VirtualRide"

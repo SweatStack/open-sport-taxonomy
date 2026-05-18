@@ -483,6 +483,42 @@ def _frozenset_repr(s: frozenset) -> str:
 # Main
 # ---------------------------------------------------------------------------
 
+def generate_init(schema: dict) -> str:
+    version = schema["version"]
+    return f'''{HEADER}
+from open_sport_taxonomy._modifier import Modifier
+from open_sport_taxonomy._platform import GarminFitCode
+from open_sport_taxonomy._sport import Sport
+
+version = "{version}"
+
+__all__ = ["GarminFitCode", "Modifier", "Sport", "version"]
+'''
+
+
+def _check_version_consistency(schema: dict) -> list[str]:
+    """Check that version is consistent across schema.yaml and pyproject.toml."""
+    import re
+
+    errors = []
+    schema_version = schema["version"]
+
+    pyproject_path = ROOT / "pyproject.toml"
+    pyproject_text = pyproject_path.read_text(encoding="utf-8")
+    match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject_text, re.MULTILINE)
+    if match:
+        pyproject_version = match.group(1)
+        if schema_version != pyproject_version:
+            errors.append(
+                f"Version mismatch: schema.yaml has {schema_version!r}, "
+                f"pyproject.toml has {pyproject_version!r}"
+            )
+    else:
+        errors.append("Could not find version in pyproject.toml")
+
+    return errors
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Python source from schema.")
     parser.add_argument(
@@ -498,6 +534,7 @@ def main() -> None:
         OUT_DIR / "_modifier.py": generate_modifier(schema),
         OUT_DIR / "_sport.py": generate_sport(schema),
         OUT_DIR / "_platforms.py": generate_platforms(schema),
+        OUT_DIR / "__init__.py": generate_init(schema),
     }
 
     if args.check:
@@ -505,17 +542,30 @@ def main() -> None:
         for path, expected in files.items():
             if not path.exists() or path.read_text(encoding="utf-8") != expected:
                 stale.append(path)
-        if stale:
+
+        version_errors = _check_version_consistency(schema)
+
+        if stale or version_errors:
             for p in stale:
                 print(f"STALE: {p.relative_to(ROOT)}")
+            for e in version_errors:
+                print(f"ERROR: {e}")
             print("\nRun 'uv run scripts/generate.py' to update.")
             sys.exit(1)
         else:
             print("All generated files are up to date.")
+            print("Version is consistent across schema.yaml and pyproject.toml.")
     else:
         for path, content in files.items():
             path.write_text(content, encoding="utf-8")
             print(f"Generated {path.relative_to(ROOT)}")
+
+        version_errors = _check_version_consistency(schema)
+        if version_errors:
+            for e in version_errors:
+                print(f"WARNING: {e}")
+        else:
+            print(f"Version {schema['version']} is consistent.")
 
 
 if __name__ == "__main__":
