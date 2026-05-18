@@ -6,6 +6,10 @@ Every platform has invented its own list of sports. Apple HealthKit calls it `Cy
 
 OpenSportTaxonomy provides a single canonical set of sport codes that any application can reference.
 
+> [!WARNING]
+> This taxonomy is young and only covers a few sports at the moment.
+> If yours is missing, [open an issue](https://github.com/sweatstack/open-sport-taxonomy/issues). We'd love to expand it together.
+
 ## How it works
 
 An activity is identified by a **sport string**: dots (`.`) separate the sport from its disciplines in the sport hierarchy, plusses (`+`) attach modifiers.
