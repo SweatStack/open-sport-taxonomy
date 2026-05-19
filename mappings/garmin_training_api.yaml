@@ -1,0 +1,20 @@
+# OpenSportTaxonomy — Garmin Training API V2 mapping
+# See README.md for how mappings work.
+
+platform: garmin_training_api
+platform_version: "V2 1.0 (2025-05-26)"
+fallback: CYCLING
+
+mappings:
+
+  - ost: cycling
+    target: CYCLING
+
+  - ost: generic
+    target: GENERIC
+
+  - ost: running
+    target: RUNNING
+
+  - ost: swimming
+    target: LAP_SWIMMING

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [Unreleased]
+
+### Added
+
+- Garmin Training API V2 platform mapping (`garmin_training_api`). Maps to string sport types: `CYCLING`, `RUNNING`, `LAP_SWIMMING`, `GENERIC`.
+
 ## [0.2.0] - 2026-05-19
 
 ### Added

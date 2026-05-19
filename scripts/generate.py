@@ -496,6 +496,19 @@ def generate_platforms(schema: dict) -> str:
     lines.append("}")
     lines.append("")
 
+    # Garmin Training API
+    gta = load_mapping("garmin_training_api")
+    lines.append(f'GARMIN_TRAINING_API_FALLBACK: str = "{gta["fallback"]}"')
+    lines.append("")
+    lines.append("GARMIN_TRAINING_API_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {")
+    for entry in gta["mappings"]:
+        key_code = entry["ost"]
+        key_mods = frozenset(entry.get("modifiers", []))
+        mods_repr = _frozenset_repr(key_mods)
+        lines.append(f'    ("{key_code}", {mods_repr}): "{entry["target"]}",')
+    lines.append("}")
+    lines.append("")
+
     return "\n".join(lines)
 
 

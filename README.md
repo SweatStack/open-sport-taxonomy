@@ -71,6 +71,7 @@ Mapping files in [`mappings/`](mappings/) translate OST codes to platform-specif
 
 - [`apple_healthkit.yaml`](mappings/apple_healthkit.yaml) — HKWorkoutActivityType integer values
 - [`garmin_fit.yaml`](mappings/garmin_fit.yaml) — sport + sub_sport integer pairs
+- [`garmin_training_api.yaml`](mappings/garmin_training_api.yaml) — Training API V2 sport type strings
 - [`strava.yaml`](mappings/strava.yaml) — SportType string values
 
 Translations are lossy by design. Some platforms are less granular than the taxonomy: all cycling disciplines map to a single HealthKit value (`13`). This is the platform's limitation, not an error.
@@ -189,11 +190,12 @@ Sport("running").is_subsport_of(Sport("cycling"))                  # False
 ### Platform translation
 
 ```python
-from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
+from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, garmin_training_api
 
-strava.translate(Sport("cycling.road+virtual"))  # "VirtualRide"
-apple_healthkit.translate(Sport.CYCLING_ROAD)     # 13
-garmin_fit.translate(Sport.CYCLING_ROAD)           # GarminFitCode(sport=2, sub_sport=7)
+strava.translate(Sport("cycling.road+virtual"))          # "VirtualRide"
+apple_healthkit.translate(Sport.CYCLING_ROAD)              # 13
+garmin_fit.translate(Sport.CYCLING_ROAD)                   # GarminFitCode(sport=2, sub_sport=7)
+garmin_training_api.translate(Sport.CYCLING_ROAD)          # "CYCLING"
 ```
 
 ### Pydantic integration
