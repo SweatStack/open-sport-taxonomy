@@ -4,20 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
+
 
 ## [Unreleased]
 
-### Breaking changes
+### Changed
 
-- **Constructor is now strict by default.** `Sport(raw)` rejects unknown codes and modifiers with `ValueError`. Previously it was equivalent to the now-removed `Sport.validate()`.
-- **`Sport.resolve()` is now an instance method.** Use `Sport.parse(raw).resolve()` instead of `Sport.resolve(raw)`.
-- **`Sport.validate()` classmethod removed.** Use `Sport(raw)` instead (same behavior).
-- **`raw` field removed.** `str(sport)` is now always faithful and round-trips correctly. Use `str(sport)` where you previously used `sport.raw`.
-- **`unknown_modifiers` field removed.** Unknown modifiers are now part of the unified `modifiers` frozenset as plain strings alongside `Modifier` enum instances. Use `sport.modifiers - sport.resolve().modifiers` to find unknowns.
-- **`modifiers` type changed** from `frozenset[Modifier]` to `frozenset[str]`. Known modifiers are `Modifier` instances (which are `str` subclasses), unknown modifiers are plain strings.
-- **`str()` behavior changed.** Previously lossy for resolved sports. Now always reconstructs from `.code` and all modifiers.
-- **`repr()` changed.** Shows `Sport.parse('...')` for non-standard sports, `Sport('...')` for standard.
-- **`is_standard` now checks modifier group conflicts.** A sport with conflicting modifiers (e.g. `race+commute`) is not considered standard.
+- `Sport(raw)` constructor is now strict by default: rejects unknown codes and modifiers with `ValueError`.
+- `Sport.resolve()` is now an instance method. Use `Sport.parse(raw).resolve()` instead of `Sport.resolve(raw)`.
+- `modifiers` type changed from `frozenset[Modifier]` to `frozenset[str]`. Known modifiers are `Modifier` instances (which are `str` subclasses), unknown modifiers from `Sport.parse()` are plain strings.
+- `str(sport)` now always reconstructs faithfully from `.code` and all modifiers. Previously lossy for resolved sports.
+- `repr(sport)` now shows `Sport.parse('...')` for non-standard sports.
+- `is_standard` now also checks for modifier group conflicts.
+
+### Removed
+
+- `Sport.validate()` classmethod. Use `Sport(raw)` instead (same behavior).
+- `Sport.resolve()` classmethod. Use `Sport.parse(raw).resolve()` instead.
+- `raw` field. Use `str(sport)` instead, which is now always faithful.
+- `unknown_modifiers` field. Unknown modifiers are now part of the unified `modifiers` frozenset. Use `sport.modifiers - sport.resolve().modifiers` to find unknowns.
 
 ## [0.1.0] - 2026-05-18
 
