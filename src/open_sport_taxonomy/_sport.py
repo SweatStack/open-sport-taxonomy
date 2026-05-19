@@ -262,6 +262,15 @@ class Sport:
         """Human-readable label, or None for non-standard sports."""
         return _LABELS.get(self.code)
 
+    def _with_code(self, code: str) -> Sport:
+        """Return a sport with a different code but the same modifiers."""
+        if not self.modifiers:
+            return Sport.parse(code)
+        mod_str = '+'.join(
+            sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)
+        )
+        return Sport.parse(code + '+' + mod_str)
+
     @property
     def parent(self) -> Sport | None:
         """Parent sport, preserving modifiers.
@@ -275,19 +284,16 @@ class Sport:
             parent_code = self.code[:dot] if dot != -1 else None
         if parent_code is None:
             return None
-        if not self.modifiers:
-            return Sport.parse(parent_code)
-        # Reconstruct with the same modifiers.
-        mod_str = '+'.join(
-            sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)
-        )
-        return Sport.parse(parent_code + '+' + mod_str)
+        return self._with_code(parent_code)
 
     @property
     def disciplines(self) -> tuple[Sport, ...]:
-        """Direct child sports. Empty for non-standard or leaf sports."""
+        """Direct child sports, preserving modifiers.
+
+        Empty for non-standard or leaf sports.
+        """
         children = _CHILDREN.get(self.code, ())
-        return tuple(Sport(c) for c in children)
+        return tuple(self._with_code(c) for c in children)
 
     @classmethod
     def all(cls) -> list[Sport]:

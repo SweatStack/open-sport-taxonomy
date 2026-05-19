@@ -167,9 +167,14 @@ class TestTaxonomy:
         sport = Sport("cycling.road+race")
         assert sport.parent.modifiers == frozenset({Modifier.RACE})
 
-    def test_disciplines_have_no_modifiers(self):
+    def test_disciplines_without_modifiers(self):
         for d in Sport.CYCLING.disciplines:
             assert d.modifiers == frozenset()
+
+    def test_disciplines_preserve_modifiers(self):
+        sport = Sport("cycling+commute")
+        for d in sport.disciplines:
+            assert Modifier.COMMUTE in d.modifiers
 
 
 class TestAll:

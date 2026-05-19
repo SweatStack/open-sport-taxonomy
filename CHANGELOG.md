@@ -22,6 +22,7 @@ Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 - `repr(sport)` now shows `Sport.parse('...')` for non-standard sports.
 - `is_standard` now also checks for modifier group conflicts.
 - `.parent` now preserves modifiers. `Sport("cycling.road+race").parent` returns `Sport("cycling+race")` instead of `Sport("cycling")`.
+- `.disciplines` now preserves modifiers. `Sport("cycling+commute").disciplines` returns disciplines with `+commute`.
 
 ### Removed
 
