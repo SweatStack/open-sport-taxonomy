@@ -3,7 +3,7 @@
 
 platform: garmin_training_api
 platform_version: "V2 1.0 (2025-05-26)"
-fallback: CYCLING
+fallback: GENERIC
 
 mappings:
 

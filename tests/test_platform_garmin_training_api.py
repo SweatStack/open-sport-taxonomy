@@ -34,13 +34,13 @@ class TestFallbackModifiers:
 
 class TestFallbackDefault:
     def test_unmapped_sport(self):
-        assert garmin_training_api.translate(Sport("rowing")) == "CYCLING"
+        assert garmin_training_api.translate(Sport("rowing")) == "GENERIC"
 
     def test_unmapped_walking(self):
-        assert garmin_training_api.translate(Sport("walking")) == "CYCLING"
+        assert garmin_training_api.translate(Sport("walking")) == "GENERIC"
 
     def test_unmapped_xc_skiing(self):
-        assert garmin_training_api.translate(Sport("xc_skiing")) == "CYCLING"
+        assert garmin_training_api.translate(Sport("xc_skiing")) == "GENERIC"
 
 
 class TestExhaustive:

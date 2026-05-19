@@ -106,7 +106,7 @@ GARMIN_FIT_MAPPINGS: dict[tuple[str, frozenset[str]], GarminFitCode] = {
     ("xc_skiing.skate", frozenset({"roller"})): GarminFitCode(sport=30, sub_sport=0),
 }
 
-GARMIN_TRAINING_API_FALLBACK: str = "CYCLING"
+GARMIN_TRAINING_API_FALLBACK: str = "GENERIC"
 
 GARMIN_TRAINING_API_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {
     ("cycling", frozenset()): "CYCLING",

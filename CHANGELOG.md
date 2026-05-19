@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [Unreleased]
+
+### Fixed
+
+- Garmin Training API fallback changed from `CYCLING` to `GENERIC`. Unmapped sports should not falsely report as cycling.
+
 ## [0.3.0] - 2026-05-19
 
 ### Added
