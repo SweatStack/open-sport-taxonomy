@@ -194,6 +194,31 @@ apple_healthkit.translate(Sport.CYCLING_ROAD)     # 13
 garmin_fit.translate(Sport.CYCLING_ROAD)           # GarminFitCode(sport=2, sub_sport=7)
 ```
 
+### Pydantic integration
+
+Install with the pydantic extra:
+
+```bash
+pip install open-sport-taxonomy[pydantic]
+```
+
+Use `SportField` in Pydantic models for permissive parsing, or `StrictSportField` to enforce the standard vocabulary:
+
+```python
+from pydantic import BaseModel
+from open_sport_taxonomy.pydantic import SportField, StrictSportField
+
+class Workout(BaseModel):
+    sport: SportField       # accepts any structurally valid sport string
+
+class Prescription(BaseModel):
+    sport: StrictSportField  # rejects unknown codes and modifiers
+
+w = Workout(sport="cycling.road+stationary")
+w.sport.code      # "cycling.road"
+w.model_dump()    # {"sport": "cycling.road+stationary"}
+```
+
 ## What the taxonomy does not cover
 
 - **Venue properties** like pool length (25m vs 50m) or track size. These matter for records and performance but are not distinct disciplines. Planned for a future version.

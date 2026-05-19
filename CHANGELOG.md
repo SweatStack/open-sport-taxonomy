@@ -12,6 +12,7 @@ Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 ### Added
 
 - `Sport.is_subsport_of(other)` method: check if a sport is a more specific version of another (code hierarchy + modifier superset).
+- `SportField` and `StrictSportField` Pydantic v2 field types in `open_sport_taxonomy.pydantic`. Install with `open-sport-taxonomy[pydantic]`.
 
 ### Changed
 
