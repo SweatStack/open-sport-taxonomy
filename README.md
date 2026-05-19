@@ -20,6 +20,8 @@ Example: `cycling.road+stationary+virtual`
 cycling . road + stationary + virtual
 \-----/   \--/   \--------/   \-----/
  sport discipline modifier    modifier
+\___________/   \____________________/
+  sport code          modifiers
 ```
 
 More examples:
