@@ -163,9 +163,9 @@ class TestTaxonomy:
     def test_disciplines_leaf_is_empty(self):
         assert Sport.CYCLING_ROAD.disciplines == ()
 
-    def test_parent_has_no_modifiers(self):
+    def test_parent_preserves_modifiers(self):
         sport = Sport("cycling.road+race")
-        assert sport.parent.modifiers == frozenset()
+        assert sport.parent.modifiers == frozenset({Modifier.RACE})
 
     def test_disciplines_have_no_modifiers(self):
         for d in Sport.CYCLING.disciplines:

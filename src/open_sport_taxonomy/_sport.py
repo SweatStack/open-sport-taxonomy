@@ -101,6 +101,11 @@ def _split_encoded(raw: str) -> tuple[str, list[str]]:
     return parts[0], parts[1:]
 
 
+def _is_subsport_code(child: str, parent: str) -> bool:
+    """True if child == parent or child is below parent in the dot hierarchy."""
+    return child == parent or child.startswith(parent + '.')
+
+
 @dataclass(frozen=True, init=False, slots=True)
 class Sport:
     """A sport with optional modifiers.
@@ -219,6 +224,19 @@ class Sport:
 
         return Sport(code, modifiers=known)
 
+    def is_subsport_of(self, other: Sport) -> bool:
+        """True if this sport is a more specific version of other.
+
+        Checks two conditions:
+        1. self.code is equal to or below other.code in the dot hierarchy
+        2. self.modifiers is a superset of other.modifiers
+        """
+        if not _is_subsport_code(self.code, other.code):
+            return False
+        if not other.modifiers.issubset(self.modifiers):
+            return False
+        return True
+
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
@@ -246,7 +264,10 @@ class Sport:
 
     @property
     def parent(self) -> Sport | None:
-        """Parent sport. Derived from dot notation for non-standard codes."""
+        """Parent sport, preserving modifiers.
+
+        Derived from dot notation for non-standard codes.
+        """
         if self.code in _PARENTS:
             parent_code = _PARENTS[self.code]
         else:
@@ -254,7 +275,13 @@ class Sport:
             parent_code = self.code[:dot] if dot != -1 else None
         if parent_code is None:
             return None
-        return Sport.parse(parent_code)
+        if not self.modifiers:
+            return Sport.parse(parent_code)
+        # Reconstruct with the same modifiers.
+        mod_str = '+'.join(
+            sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)
+        )
+        return Sport.parse(parent_code + '+' + mod_str)
 
     @property
     def disciplines(self) -> tuple[Sport, ...]:

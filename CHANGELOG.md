@@ -9,6 +9,10 @@ Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 ## [Unreleased]
 
+### Added
+
+- `Sport.is_subsport_of(other)` method: check if a sport is a more specific version of another (code hierarchy + modifier superset).
+
 ### Changed
 
 - `Sport(raw)` constructor is now strict by default: rejects unknown codes and modifiers with `ValueError`.
@@ -17,6 +21,7 @@ Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 - `str(sport)` now always reconstructs faithfully from `.code` and all modifiers. Previously lossy for resolved sports.
 - `repr(sport)` now shows `Sport.parse('...')` for non-standard sports.
 - `is_standard` now also checks for modifier group conflicts.
+- `.parent` now preserves modifiers. `Sport("cycling.road+race").parent` returns `Sport("cycling+race")` instead of `Sport("cycling")`.
 
 ### Removed
 

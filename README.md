@@ -161,6 +161,27 @@ Sport.SWIMMING_OPEN_WATER
 Sport.CYCLING.disciplines   # (Sport('cycling.cyclocross'), Sport('cycling.gravel'), ...)
 Sport.CYCLING_ROAD.parent   # Sport('cycling')
 Sport.all()                 # all standard sports
+
+# Parent preserves modifiers
+Sport("cycling.road+stationary").parent  # Sport('cycling+stationary')
+```
+
+### Sport matching
+
+Check if a sport is a more specific version of another:
+
+```python
+# Prescription matching: does the execution satisfy the prescription?
+executed = Sport("cycling.road+stationary")
+prescribed = Sport("cycling+stationary")
+executed.is_subsport_of(prescribed)   # True
+
+# Extra modifiers are fine
+Sport("cycling.road+stationary+race").is_subsport_of(Sport("cycling+stationary"))  # True
+
+# Missing modifiers or wrong hierarchy: no match
+Sport("cycling.road").is_subsport_of(Sport("cycling+stationary"))  # False
+Sport("running").is_subsport_of(Sport("cycling"))                  # False
 ```
 
 ### Platform translation
@@ -168,9 +189,9 @@ Sport.all()                 # all standard sports
 ```python
 from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
 
-strava.translate(Sport.resolve("cycling.road+virtual"))  # "VirtualRide"
-apple_healthkit.translate(Sport.CYCLING_ROAD)              # 13
-garmin_fit.translate(Sport.CYCLING_ROAD)                   # GarminFitCode(sport=2, sub_sport=7)
+strava.translate(Sport("cycling.road+virtual"))  # "VirtualRide"
+apple_healthkit.translate(Sport.CYCLING_ROAD)     # 13
+garmin_fit.translate(Sport.CYCLING_ROAD)           # GarminFitCode(sport=2, sub_sport=7)
 ```
 
 ## What the taxonomy does not cover
