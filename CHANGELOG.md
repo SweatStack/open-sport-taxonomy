@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Breaking changes
+
+- **Constructor is now strict by default.** `Sport(raw)` rejects unknown codes and modifiers with `ValueError`. Previously it was equivalent to the now-removed `Sport.validate()`.
+- **`Sport.resolve()` is now an instance method.** Use `Sport.parse(raw).resolve()` instead of `Sport.resolve(raw)`.
+- **`Sport.validate()` classmethod removed.** Use `Sport(raw)` instead (same behavior).
+- **`raw` field removed.** `str(sport)` is now always faithful and round-trips correctly. Use `str(sport)` where you previously used `sport.raw`.
+- **`unknown_modifiers` field removed.** Unknown modifiers are now part of the unified `modifiers` frozenset as plain strings alongside `Modifier` enum instances. Use `sport.modifiers - sport.resolve().modifiers` to find unknowns.
+- **`modifiers` type changed** from `frozenset[Modifier]` to `frozenset[str]`. Known modifiers are `Modifier` instances (which are `str` subclasses), unknown modifiers are plain strings.
+- **`str()` behavior changed.** Previously lossy for resolved sports. Now always reconstructs from `.code` and all modifiers.
+- **`repr()` changed.** Shows `Sport.parse('...')` for non-standard sports, `Sport('...')` for standard.
+- **`is_standard` now checks modifier group conflicts.** A sport with conflicting modifiers (e.g. `race+commute`) is not considered standard.
+
 ## [0.1.0] - 2026-05-18
 
 Initial release.

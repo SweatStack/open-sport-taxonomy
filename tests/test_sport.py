@@ -76,12 +76,13 @@ class TestStringRepresentation:
         sport = Sport("cycling.road", modifiers={Modifier.VIRTUAL, Modifier.RACE})
         assert str(sport) == "cycling.road+race+virtual"
 
-    def test_repr(self):
+    def test_repr_standard(self):
         assert repr(Sport("cycling.road")) == "Sport('cycling.road')"
-        assert (
-            repr(Sport("cycling.road+race"))
-            == "Sport('cycling.road+race')"
-        )
+        assert repr(Sport("cycling.road+race")) == "Sport('cycling.road+race')"
+
+    def test_repr_non_standard(self):
+        sport = Sport.parse("cycling.road.criterium")
+        assert repr(sport) == "Sport.parse('cycling.road.criterium')"
 
     def test_roundtrip(self):
         for code in TAXONOMY:

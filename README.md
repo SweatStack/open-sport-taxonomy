@@ -93,58 +93,56 @@ pip install open-sport-taxonomy
 
 ### Working with sport strings
 
-The library provides three ways to interpret a sport string:
+The library has two entry points for creating Sport objects:
 
 | Method | Use when |
 |---|---|
-| `Sport.resolve(raw)` | You received a sport string and need to work with it **(recommended)** |
-| `Sport.parse(raw)` | You need to store or forward a sport string without losing data |
-| `Sport.validate(raw)` | You want to reject non-standard sports explicitly |
+| `Sport(raw)` | Application code, constants, prescriptions. Enforces the standard vocabulary. |
+| `Sport.parse(raw)` | Receiving external input. Accepts any structurally valid sport string. |
 
-A **standard sport** is one where the code and all modifiers are defined in the current taxonomy version. A **non-standard sport** is structurally valid but contains codes or modifiers not yet in the taxonomy — typically from a newer version. Non-standard is not invalid, it's unrecognized.
-
-`Sport.resolve()` is the recommended default. It maps any structurally valid sport string to the nearest standard sport, so your code never breaks when the taxonomy grows.
+A **standard sport** is one where the code and all modifiers are defined in the current taxonomy version. A **non-standard sport** is structurally valid but contains codes or modifiers not yet in the taxonomy, typically from a newer version. Non-standard is not invalid, it's unrecognized.
 
 ```python
 from open_sport_taxonomy import Sport, Modifier
 
-# Resolve a sport string (recommended)
-sport = Sport.resolve("cycling.road+race+virtual")
+# Strict constructor for application code
+sport = Sport("cycling.road+race+virtual")
 sport.code          # "cycling.road"
 sport.label         # "road cycling"
 sport.modifiers     # frozenset({Modifier.RACE, Modifier.VIRTUAL})
 sport.is_standard   # True
 str(sport)          # "cycling.road+race+virtual"
 
-# Forward-compatible: unknown codes resolve to the nearest known parent
-sport = Sport.resolve("cycling.road.criterium+race")
-sport.code          # "cycling.road" (resolved)
-sport.label         # "road cycling"
-sport.raw           # "cycling.road.criterium+race" (original preserved)
+# Unknown codes and modifiers are rejected
+Sport("cycling.road.criterium")  # ValueError: Unknown sport code
+Sport("cycling.road+rainy")     # ValueError (unknown modifier)
 
-# Parse: preserve unknown codes and modifiers without interpretation
+# Parse: for external input, preserves everything
 sport = Sport.parse("cycling.road.criterium+race+rainy")
 sport.code          # "cycling.road.criterium" (preserved)
+sport.modifiers     # frozenset({Modifier.RACE, "rainy"})
 sport.is_standard   # False
-sport.label         # None (unknown code)
 str(sport)          # "cycling.road.criterium+race+rainy" (round-trips)
 
-# Validate: strict, rejects unknowns
-sport = Sport.validate("cycling.road+race")  # ok
-sport = Sport.validate("cycling.road.criterium")  # ValueError
+# Resolve: map a non-standard sport to the nearest standard equivalent
+resolved = sport.resolve()
+resolved.code       # "cycling.road"
+resolved.modifiers  # frozenset({Modifier.RACE})
+resolved.is_standard  # True
 ```
 
 ### Storage pattern
 
-Always store `.raw` in your database — it's the original sport string with full fidelity. Use `Sport.resolve()` when loading for application logic. When you upgrade the library, previously non-standard sports become standard automatically. No data migration needed.
+Always store `str(sport)` in your database. It preserves the original sport string with full fidelity. Use `Sport.parse()` when loading, then `.resolve()` for application logic. When you upgrade the library, previously non-standard sports become standard automatically. No data migration needed.
 
 ```python
 # On ingest
-sport = Sport.resolve(api_response["sport"])
-db.activity.sport = sport.raw    # store original
+sport = Sport.parse(api_response["sport"])
+db.activity.sport = str(sport)    # store faithfully
 
 # On load
-sport = Sport.resolve(db.activity.sport)
+sport = Sport.parse(db.activity.sport)
+resolved = sport.resolve()         # for application logic
 ```
 
 ### Class constants

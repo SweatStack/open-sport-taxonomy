@@ -3,61 +3,56 @@ import pytest
 from open_sport_taxonomy import Modifier, Sport
 
 
-class TestResolveEqualsValidate:
+class TestResolveEqualsConstructor:
     def test_standard_input(self):
-        assert Sport.resolve("cycling.road+race") == Sport.validate("cycling.road+race")
+        assert Sport.parse("cycling.road+race").resolve() == Sport("cycling.road+race")
 
     def test_resolved_non_standard_equals_standard(self):
-        assert Sport.resolve("cycling.road.criterium+race") == Sport.validate("cycling.road+race")
+        assert Sport.parse("cycling.road.criterium+race").resolve() == Sport("cycling.road+race")
 
     def test_resolved_with_unknown_modifiers(self):
-        assert Sport.resolve("cycling.road+race+rainy") == Sport.validate("cycling.road+race")
+        assert Sport.parse("cycling.road+race+rainy").resolve() == Sport("cycling.road+race")
 
     def test_two_different_resolves_same_result(self):
-        a = Sport.resolve("cycling.road.criterium+race")
-        b = Sport.resolve("cycling.road.sprint+race")
+        a = Sport.parse("cycling.road.criterium+race").resolve()
+        b = Sport.parse("cycling.road.sprint+race").resolve()
         assert a == b
 
 
-class TestParseNotEqualsValidate:
+class TestParseNotEqualsConstructor:
     def test_non_standard_code(self):
-        assert Sport.parse("cycling.road.criterium") != Sport.validate("cycling.road")
+        assert Sport.parse("cycling.road.criterium") != Sport("cycling.road")
 
     def test_non_standard_modifier(self):
-        assert Sport.parse("cycling.road+rainy") != Sport.validate("cycling.road")
+        assert Sport.parse("cycling.road+rainy") != Sport("cycling.road")
 
-    def test_standard_parse_equals_validate(self):
-        assert Sport.parse("cycling.road+race") == Sport.validate("cycling.road+race")
+    def test_standard_parse_equals_constructor(self):
+        assert Sport.parse("cycling.road+race") == Sport("cycling.road+race")
 
 
-class TestRawPreservation:
-    def test_resolve_raw_differs_from_str(self):
-        sport = Sport.resolve("cycling.road.criterium+race+rainy")
+class TestStrAlwaysFaithful:
+    def test_resolve_str_is_canonical(self):
+        sport = Sport.parse("cycling.road.criterium+race+rainy").resolve()
         assert str(sport) == "cycling.road+race"
-        assert sport.raw == "cycling.road.criterium+race+rainy"
 
-    def test_resolve_standard_raw_equals_str(self):
-        sport = Sport.resolve("cycling.road+race")
-        assert sport.raw == str(sport)
-
-    def test_parse_raw_equals_str(self):
+    def test_parse_str_preserves_input(self):
         sport = Sport.parse("cycling.road.criterium+race+rainy")
-        assert sport.raw == str(sport)
+        assert str(sport) == "cycling.road.criterium+race+rainy"
 
-    def test_validate_raw_equals_str(self):
-        sport = Sport.validate("cycling.road+race")
-        assert sport.raw == str(sport)
+    def test_constructor_str(self):
+        sport = Sport("cycling.road+race")
+        assert str(sport) == "cycling.road+race"
 
-    def test_class_constant_raw(self):
-        assert Sport.CYCLING_ROAD.raw == "cycling.road"
+    def test_class_constant_str(self):
+        assert str(Sport.CYCLING_ROAD) == "cycling.road"
 
 
 class TestIsStandard:
-    def test_validate_always_standard(self):
-        assert Sport.validate("cycling.road").is_standard is True
+    def test_constructor_always_standard(self):
+        assert Sport("cycling.road").is_standard is True
 
     def test_resolve_always_standard(self):
-        assert Sport.resolve("cycling.road.criterium").is_standard is True
+        assert Sport.parse("cycling.road.criterium").resolve().is_standard is True
 
     def test_parse_standard_when_known(self):
         assert Sport.parse("cycling.road+race").is_standard is True
@@ -72,23 +67,24 @@ class TestIsStandard:
         assert Sport.CYCLING_ROAD.is_standard is True
 
 
-class TestRawDoesNotAffectEquality:
-    def test_different_raw_same_identity(self):
-        a = Sport.resolve("cycling.road.criterium+race")
-        b = Sport.resolve("cycling.road+race")
-        assert a == b
-        assert a.raw != b.raw
+class TestUnifiedModifiers:
+    def test_parse_mixed_modifiers_in_single_set(self):
+        sport = Sport.parse("cycling.road+race+rainy")
+        assert Modifier.RACE in sport.modifiers
+        assert "rainy" in sport.modifiers
+        assert "race" in sport.modifiers  # Modifier.RACE == "race"
 
-    def test_same_hash_different_raw(self):
-        a = Sport.resolve("cycling.road.criterium+race")
-        b = Sport.resolve("cycling.road+race")
-        assert hash(a) == hash(b)
+    def test_resolve_drops_unknown_modifiers(self):
+        sport = Sport.parse("cycling.road+race+rainy")
+        resolved = sport.resolve()
+        assert Modifier.RACE in resolved.modifiers
+        assert "rainy" not in resolved.modifiers
 
-    def test_dict_key_works(self):
-        a = Sport.resolve("cycling.road.criterium+race")
-        b = Sport.resolve("cycling.road+race")
-        d = {a: "value"}
-        assert d[b] == "value"
+    def test_diff_reveals_unknowns(self):
+        sport = Sport.parse("cycling.road+race+rainy")
+        resolved = sport.resolve()
+        unknowns = sport.modifiers - resolved.modifiers
+        assert unknowns == {"rainy"}
 
 
 class TestPlatformTranslationConsistency:
@@ -96,7 +92,7 @@ class TestPlatformTranslationConsistency:
         from open_sport_taxonomy.platforms import strava
 
         raw = "cycling.road.criterium+race+rainy"
-        assert strava.translate(Sport.resolve(raw)) == strava.translate(Sport.parse(raw))
+        assert strava.translate(Sport.parse(raw).resolve()) == strava.translate(Sport.parse(raw))
 
     def test_non_standard_falls_through(self):
         from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit

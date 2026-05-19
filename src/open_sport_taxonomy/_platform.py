@@ -20,7 +20,9 @@ class Platform:
         self._fallback = fallback
 
     def translate(self, sport: Sport) -> Any:
-        mod_codes = frozenset(m.value for m in sport.modifiers)
+        mod_codes = frozenset(
+            m.value if hasattr(m, "value") else m for m in sport.modifiers
+        )
 
         # 1. Exact match (code + modifiers).
         key = (sport.code, mod_codes)

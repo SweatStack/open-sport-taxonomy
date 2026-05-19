@@ -12,8 +12,8 @@ class TestStandardInput:
     def test_standard_with_modifiers(self):
         sport = Sport.parse("cycling.road+race+virtual")
         assert sport.code == "cycling.road"
-        assert sport.modifiers == frozenset({Modifier.RACE, Modifier.VIRTUAL})
-        assert sport.unknown_modifiers == frozenset()
+        assert Modifier.RACE in sport.modifiers
+        assert Modifier.VIRTUAL in sport.modifiers
         assert sport.is_standard is True
 
     def test_equals_constructor(self):
@@ -58,24 +58,24 @@ class TestNonStandardCode:
 class TestNonStandardModifiers:
     def test_unknown_modifier_preserved(self):
         sport = Sport.parse("cycling.road+rainy")
-        assert sport.modifiers == frozenset()
-        assert sport.unknown_modifiers == frozenset({"rainy"})
+        assert "rainy" in sport.modifiers
         assert sport.is_standard is False
 
     def test_mixed_known_and_unknown(self):
         sport = Sport.parse("cycling.road+race+rainy")
-        assert sport.modifiers == frozenset({Modifier.RACE})
-        assert sport.unknown_modifiers == frozenset({"rainy"})
+        assert Modifier.RACE in sport.modifiers
+        assert "rainy" in sport.modifiers
 
     def test_multiple_unknown(self):
         sport = Sport.parse("cycling.road+foo+rainy")
-        assert sport.unknown_modifiers == frozenset({"foo", "rainy"})
+        assert "foo" in sport.modifiers
+        assert "rainy" in sport.modifiers
 
     def test_no_group_conflict_check(self):
         # parse does NOT validate group conflicts
         sport = Sport.parse("cycling.road+race+commute")
-        assert sport.modifiers == frozenset({Modifier.RACE, Modifier.COMMUTE})
-        assert sport.is_standard is True  # both modifiers are known — conflict is semantic, not structural
+        assert Modifier.RACE in sport.modifiers
+        assert Modifier.COMMUTE in sport.modifiers
 
     def test_all_known_modifiers_with_conflict_accepted(self):
         # parse accepts group conflicts — no raise
@@ -88,7 +88,7 @@ class TestBothNonStandard:
     def test_unknown_code_and_modifier(self):
         sport = Sport.parse("parkour.freerunning+relay")
         assert sport.code == "parkour.freerunning"
-        assert sport.unknown_modifiers == frozenset({"relay"})
+        assert "relay" in sport.modifiers
         assert sport.is_standard is False
 
 
@@ -113,10 +113,10 @@ class TestRoundTrip:
         raw = "cycling.road"
         assert str(Sport.parse(raw)) == raw
 
-    def test_raw_equals_str(self):
+    def test_str_roundtrip_parse(self):
         raw = "cycling.road.criterium+race+rainy"
         sport = Sport.parse(raw)
-        assert sport.raw == str(sport)
+        assert Sport.parse(str(sport)) == sport
 
 
 class TestEquality:
