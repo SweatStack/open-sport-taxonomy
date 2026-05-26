@@ -170,10 +170,10 @@ class TestPlatformTranslation:
         from open_sport_taxonomy.platforms import strava
 
         sport = Sport.parse("cycling.road.criterium+race")
-        assert strava.translate(sport) == "Ride"
+        assert strava.encode(sport) == "Ride"
 
     def test_totally_unknown_falls_to_platform_fallback(self):
         from open_sport_taxonomy.platforms import strava
 
         sport = Sport.parse("parkour.freerunning")
-        assert strava.translate(sport) == "Workout"
+        assert strava.encode(sport) == "Workout"

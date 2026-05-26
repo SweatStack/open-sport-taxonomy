@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [Unreleased]
+
+### Added
+
+- `Platform.decode(target) -> Sport` on every platform. Strava, Apple HealthKit, Garmin Training API, and Garmin FIT all support reverse translation.
+- Garmin FIT `decode(sport, sub_sport=None)` accepts ints, FIT enum names, or `None` (= generic) in either position. Drop-in for values from FIT parsers.
+- `GarminFitCode` carries both `sport_id`/`sport_name` and `sub_sport_id`/`sub_sport_name`; constructible from ints, names, or a mix.
+- [`docs/translation.md`](docs/translation.md): language-agnostic spec of the encode/decode algorithms.
+
+### Changed
+
+- **Breaking:** `Platform.translate` renamed to `Platform.encode`.
+- **Breaking:** `GarminFitCode` fields renamed from `sport`/`sub_sport` to `sport_id`/`sub_sport_id`. Kwargs still accepted as `sport=`/`sub_sport=`.
+- **Breaking:** `encode(Sport.CYCLING_TIME_TRIAL)` now returns `GarminFitCode(2, 0)` instead of `GarminFitCode(2, 7)` — FIT has no `time_trial` sub_sport.
+
 ## [0.3.1] - 2026-05-19
 
 ### Fixed

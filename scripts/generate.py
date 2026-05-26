@@ -15,6 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "schema.yaml"
 MAPPINGS_DIR = ROOT / "mappings"
+REFERENCE_DIR = ROOT / "reference"
 OUT_DIR = ROOT / "src" / "open_sport_taxonomy"
 
 HEADER = '# Auto-generated from schema.yaml — do not edit.\n# Run: uv run scripts/generate.py\n'
@@ -27,6 +28,37 @@ def load_schema() -> dict:
 def load_mapping(name: str) -> dict:
     path = MAPPINGS_DIR / f"{name}.yaml"
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def load_reference(*parts: str) -> dict:
+    path = REFERENCE_DIR.joinpath(*parts)
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def assert_bijective(platform_name: str, entries: list[dict]) -> None:
+    """Each target must appear exactly once across all entries.
+
+    This is what makes the reverse table well-defined: every platform
+    code maps back to exactly one (OST code, modifiers) pair.
+
+    Targets may be dicts (FIT) — convert to hashable form for the check.
+    """
+    seen: dict = {}
+    for entry in entries:
+        target = entry["target"]
+        target_key = (
+            tuple(sorted(target.items())) if isinstance(target, dict) else target
+        )
+        if target_key in seen:
+            existing_ost, existing_mods = seen[target_key]
+            mods = entry.get("modifiers", [])
+            raise ValueError(
+                f"{platform_name}: target {target!r} appears for both "
+                f"({existing_ost!r}, modifiers={existing_mods}) and "
+                f"({entry['ost']!r}, modifiers={mods}). "
+                f"The mapping must be one-to-one on target."
+            )
+        seen[target_key] = (entry["ost"], entry.get("modifiers", []))
 
 
 # ---------------------------------------------------------------------------
@@ -449,6 +481,7 @@ def generate_platforms(schema: dict) -> str:
 
     # Strava
     strava = load_mapping("strava")
+    assert_bijective("strava", strava["mappings"])
     lines.append(f'STRAVA_FALLBACK: str = "{strava["fallback"]}"')
     lines.append("")
     lines.append("STRAVA_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {")
@@ -462,6 +495,7 @@ def generate_platforms(schema: dict) -> str:
 
     # Apple HealthKit
     hk = load_mapping("apple_healthkit")
+    assert_bijective("apple_healthkit", hk["mappings"])
     lines.append(f"APPLE_HEALTHKIT_FALLBACK: int = {hk['fallback']}")
     lines.append("")
     lines.append("APPLE_HEALTHKIT_MAPPINGS: dict[tuple[str, frozenset[str]], int] = {")
@@ -475,6 +509,7 @@ def generate_platforms(schema: dict) -> str:
 
     # Garmin FIT
     gf = load_mapping("garmin_fit")
+    assert_bijective("garmin_fit", gf["mappings"])
     fb = gf["fallback"]
     lines.append(
         f"GARMIN_FIT_FALLBACK: GarminFitCode = "
@@ -498,6 +533,7 @@ def generate_platforms(schema: dict) -> str:
 
     # Garmin Training API
     gta = load_mapping("garmin_training_api")
+    assert_bijective("garmin_training_api", gta["mappings"])
     lines.append(f'GARMIN_TRAINING_API_FALLBACK: str = "{gta["fallback"]}"')
     lines.append("")
     lines.append("GARMIN_TRAINING_API_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {")
@@ -507,6 +543,29 @@ def generate_platforms(schema: dict) -> str:
         mods_repr = _frozenset_repr(key_mods)
         lines.append(f'    ("{key_code}", {mods_repr}): "{entry["target"]}",')
     lines.append("}")
+    lines.append("")
+
+    # FIT enum reference tables — used by GarminFitCode to translate between
+    # int ids and string names. Source: reference/garmin-fit-sdk/.
+    fit_sports = load_reference("garmin-fit-sdk", "sports.yaml")["cases"]
+    fit_sub_sports = load_reference("garmin-fit-sdk", "sub_sports.yaml")["cases"]
+
+    lines.append("FIT_SPORT_IDS: dict[str, int] = {")
+    for case in fit_sports:
+        lines.append(f'    "{case["name"]}": {case["value"]},')
+    lines.append("}")
+    lines.append("")
+
+    lines.append("FIT_SPORT_NAMES: dict[int, str] = {v: k for k, v in FIT_SPORT_IDS.items()}")
+    lines.append("")
+
+    lines.append("FIT_SUB_SPORT_IDS: dict[str, int] = {")
+    for case in fit_sub_sports:
+        lines.append(f'    "{case["name"]}": {case["value"]},')
+    lines.append("}")
+    lines.append("")
+
+    lines.append("FIT_SUB_SPORT_NAMES: dict[int, str] = {v: k for k, v in FIT_SUB_SPORT_IDS.items()}")
     lines.append("")
 
     return "\n".join(lines)

@@ -1,5 +1,8 @@
 # OpenSportTaxonomy — Garmin FIT mapping
-# See README.md for how mappings work.
+#
+# Bidirectional. Every target appears exactly once: the mapping is a
+# bijection. Reverse lookup is derived automatically; encode and decode
+# share this data. See docs/translation.md for the algorithm.
 
 platform: garmin_fit
 platform_version: "FIT SDK 21.133"
@@ -8,7 +11,7 @@ fallback: { sport: 0, sub_sport: 0 }  # generic
 mappings:
 
   - ost: cycling
-    target: { sport: 2, sub_sport: 0 }   # cycling / generic
+    target: { sport: 2, sub_sport: 0 }    # cycling / generic
 
   - ost: cycling.cyclocross
     target: { sport: 2, sub_sport: 11 }   # cycling / cyclocross
@@ -20,9 +23,6 @@ mappings:
     target: { sport: 2, sub_sport: 8 }    # cycling / mountain
 
   - ost: cycling.road
-    target: { sport: 2, sub_sport: 7 }    # cycling / road
-
-  - ost: cycling.time_trial
     target: { sport: 2, sub_sport: 7 }    # cycling / road
 
   - ost: cycling.track
@@ -68,23 +68,5 @@ mappings:
     modifiers: [roller]
     target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
 
-  - ost: xc_skiing.classic
-    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
-
-  - ost: xc_skiing.classic
-    modifiers: [roller]
-    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
-
-  - ost: xc_skiing.double_poling
-    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
-
-  - ost: xc_skiing.double_poling
-    modifiers: [roller]
-    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
-
   - ost: xc_skiing.skate
     target: { sport: 12, sub_sport: 42 }  # cross_country_skiing / skate_skiing
-
-  - ost: xc_skiing.skate
-    modifiers: [roller]
-    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic

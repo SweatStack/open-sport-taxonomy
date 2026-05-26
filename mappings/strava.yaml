@@ -1,5 +1,8 @@
 # OpenSportTaxonomy — Strava mapping
-# See README.md for how mappings work.
+#
+# Bidirectional. Every target appears exactly once: the mapping is a
+# bijection. Reverse lookup is derived automatically; encode and decode
+# share this data. See docs/translation.md for the algorithm.
 
 platform: strava
 platform_version: "v3 API, 2024"
@@ -8,9 +11,6 @@ fallback: Workout
 mappings:
 
   - ost: cycling
-    target: Ride
-
-  - ost: cycling.cyclocross
     target: Ride
 
   - ost: cycling.gravel
@@ -24,21 +24,12 @@ mappings:
     target: EMountainBikeRide
 
   - ost: cycling.road
-    target: Ride
-
-  - ost: cycling.road
     modifiers: [assisted]
     target: EBikeRide
 
   - ost: cycling.road
     modifiers: [virtual]
     target: VirtualRide
-
-  - ost: cycling.time_trial
-    target: Ride
-
-  - ost: cycling.track
-    target: Ride
 
   - ost: generic
     target: Workout
@@ -54,25 +45,13 @@ mappings:
     target: Run
 
   - ost: running.road
-    target: Run
-
-  - ost: running.road
     modifiers: [virtual]
     target: VirtualRun
-
-  - ost: running.track
-    target: Run
 
   - ost: running.trail
     target: TrailRun
 
   - ost: swimming
-    target: Swim
-
-  - ost: swimming.open_water
-    target: Swim
-
-  - ost: swimming.pool
     target: Swim
 
   - ost: walking
@@ -85,26 +64,5 @@ mappings:
     target: NordicSki
 
   - ost: xc_skiing
-    modifiers: [roller]
-    target: RollerSki
-
-  - ost: xc_skiing.classic
-    target: NordicSki
-
-  - ost: xc_skiing.classic
-    modifiers: [roller]
-    target: RollerSki
-
-  - ost: xc_skiing.double_poling
-    target: NordicSki
-
-  - ost: xc_skiing.double_poling
-    modifiers: [roller]
-    target: RollerSki
-
-  - ost: xc_skiing.skate
-    target: NordicSki
-
-  - ost: xc_skiing.skate
     modifiers: [roller]
     target: RollerSki

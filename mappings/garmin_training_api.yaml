@@ -1,5 +1,8 @@
 # OpenSportTaxonomy — Garmin Training API V2 mapping
-# See README.md for how mappings work.
+#
+# Bidirectional. Every target appears exactly once: the mapping is a
+# bijection. Reverse lookup is derived automatically; encode and decode
+# share this data. See docs/translation.md for the algorithm.
 
 platform: garmin_training_api
 platform_version: "V2 1.0 (2025-05-26)"

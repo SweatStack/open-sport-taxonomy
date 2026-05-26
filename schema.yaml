@@ -1,6 +1,6 @@
 # OpenSportTaxonomy — https://github.com/sweatstack/open-sport-taxonomy
 
-version: "0.1.0"
+version: "0.4.0"
 
 sports:
 
@@ -75,9 +75,6 @@ modifiers:
   - code: assisted
     label: assisted
 
-  - code: roller
-    label: roller
-
   - code: commute
     group: purpose
     label: commute
@@ -93,6 +90,9 @@ modifiers:
   - code: race
     group: purpose
     label: race
+
+  - code: roller
+    label: roller
 
   - code: solo
     group: company

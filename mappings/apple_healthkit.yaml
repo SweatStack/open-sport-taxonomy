@@ -1,5 +1,8 @@
 # OpenSportTaxonomy — Apple HealthKit mapping
-# See README.md for how mappings work.
+#
+# Bidirectional. Every target appears exactly once: the mapping is a
+# bijection. Reverse lookup is derived automatically; encode and decode
+# share this data. See docs/translation.md for the algorithm.
 
 platform: apple_healthkit
 platform_version: "iOS 18"
@@ -8,24 +11,6 @@ fallback: 3000  # other
 mappings:
 
   - ost: cycling
-    target: 13  # cycling
-
-  - ost: cycling.cyclocross
-    target: 13  # cycling
-
-  - ost: cycling.gravel
-    target: 13  # cycling
-
-  - ost: cycling.mountain
-    target: 13  # cycling
-
-  - ost: cycling.road
-    target: 13  # cycling
-
-  - ost: cycling.time_trial
-    target: 13  # cycling
-
-  - ost: cycling.track
     target: 13  # cycling
 
   - ost: generic
@@ -37,22 +22,7 @@ mappings:
   - ost: running
     target: 37  # running
 
-  - ost: running.road
-    target: 37  # running
-
-  - ost: running.track
-    target: 37  # running
-
-  - ost: running.trail
-    target: 37  # running
-
   - ost: swimming
-    target: 46  # swimming
-
-  - ost: swimming.open_water
-    target: 46  # swimming
-
-  - ost: swimming.pool
     target: 46  # swimming
 
   - ost: walking
@@ -65,26 +35,5 @@ mappings:
     target: 60  # crossCountrySkiing
 
   - ost: xc_skiing
-    modifiers: [roller]
-    target: 30  # inlineSkate
-
-  - ost: xc_skiing.classic
-    target: 60  # crossCountrySkiing
-
-  - ost: xc_skiing.classic
-    modifiers: [roller]
-    target: 30  # inlineSkate
-
-  - ost: xc_skiing.double_poling
-    target: 60  # crossCountrySkiing
-
-  - ost: xc_skiing.double_poling
-    modifiers: [roller]
-    target: 30  # inlineSkate
-
-  - ost: xc_skiing.skate
-    target: 60  # crossCountrySkiing
-
-  - ost: xc_skiing.skate
     modifiers: [roller]
     target: 30  # inlineSkate

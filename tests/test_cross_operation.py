@@ -92,13 +92,13 @@ class TestPlatformTranslationConsistency:
         from open_sport_taxonomy.platforms import strava
 
         raw = "cycling.road.criterium+race+rainy"
-        assert strava.translate(Sport.parse(raw).resolve()) == strava.translate(Sport.parse(raw))
+        assert strava.encode(Sport.parse(raw).resolve()) == strava.encode(Sport.parse(raw))
 
     def test_non_standard_falls_through(self):
         from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
         from open_sport_taxonomy import GarminFitCode
 
         sport = Sport.parse("cycling.road.criterium")
-        assert strava.translate(sport) == "Ride"
-        assert apple_healthkit.translate(sport) == 13
-        assert garmin_fit.translate(sport) == GarminFitCode(sport=2, sub_sport=7)
+        assert strava.encode(sport) == "Ride"
+        assert apple_healthkit.encode(sport) == 13
+        assert garmin_fit.encode(sport) == GarminFitCode(sport=2, sub_sport=7)

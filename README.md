@@ -74,17 +74,9 @@ Mapping files in [`mappings/`](mappings/) translate OST codes to platform-specif
 - [`garmin_training_api.yaml`](mappings/garmin_training_api.yaml) — Training API V2 sport type strings
 - [`strava.yaml`](mappings/strava.yaml) — SportType string values
 
-Translations are lossy by design. Some platforms are less granular than the taxonomy: all cycling disciplines map to a single HealthKit value (`13`). This is the platform's limitation, not an error.
+Mappings are bidirectional: every entry supports both encoding (OST → platform) and decoding (platform → OST). Translations are lossy by design — some platforms are less granular than the taxonomy, so multiple OST codes may encode to the same platform value (e.g. all cycling disciplines map to HealthKit `13`). The decoded result is the most-specific OST code that the platform actually represents.
 
-```yaml
-# The same OST code on three platforms:
-- ost: cycling.road
-  target: 13                            # Apple HealthKit
-- ost: cycling.road
-  target: { sport: 2, sub_sport: 7 }   # Garmin FIT
-- ost: cycling.road
-  target: Ride                          # Strava
-```
+See [`docs/translation.md`](docs/translation.md) for the language-agnostic encode/decode specification.
 
 ## Python library
 
@@ -189,14 +181,34 @@ Sport("running").is_subsport_of(Sport("cycling"))                  # False
 
 ### Platform translation
 
+Every platform supports `encode` (OST → platform code) and `decode` (platform code → OST):
+
 ```python
 from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, garmin_training_api
 
-strava.translate(Sport("cycling.road+virtual"))          # "VirtualRide"
-apple_healthkit.translate(Sport.CYCLING_ROAD)              # 13
-garmin_fit.translate(Sport.CYCLING_ROAD)                   # GarminFitCode(sport=2, sub_sport=7)
-garmin_training_api.translate(Sport.CYCLING_ROAD)          # "CYCLING"
+# Encode: OST → platform
+strava.encode(Sport("cycling.road+virtual"))     # "VirtualRide"
+apple_healthkit.encode(Sport.CYCLING_ROAD)       # 13
+garmin_fit.encode(Sport.CYCLING_ROAD)            # GarminFitCode(sport=2, sub_sport=7)
+garmin_training_api.encode(Sport.CYCLING_ROAD)   # "CYCLING"
+
+# Decode: platform → OST
+strava.decode("VirtualRide")                     # Sport('cycling.road+virtual')
+apple_healthkit.decode(13)                       # Sport('cycling')
+garmin_fit.decode(2, 7)                          # Sport('cycling.road')
+garmin_training_api.decode("CYCLING")            # Sport('cycling')
 ```
+
+Garmin FIT `decode` accepts both raw integer enum values and FIT enum names (interchangeably), and tolerates `None` for missing fields:
+
+```python
+garmin_fit.decode(2, 7)                # ints
+garmin_fit.decode("cycling", "road")   # names
+garmin_fit.decode(2)                   # sub_sport omitted → generic
+garmin_fit.decode(2, None)             # None → generic (e.g. from a FIT parser)
+```
+
+Translation is lossy by design — see [`docs/translation.md`](docs/translation.md) for the encode/decode algorithm and the bijection invariant that makes both directions well-defined.
 
 ### Pydantic integration
 
