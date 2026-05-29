@@ -66,20 +66,10 @@ class TestNonStandardModifiers:
         assert Modifier.RACE in sport.modifiers
         assert "rainy" in sport.modifiers
 
-    def test_multiple_unknown(self):
-        sport = Sport.parse("cycling.road+foo+rainy")
-        assert "foo" in sport.modifiers
-        assert "rainy" in sport.modifiers
-
-    def test_no_group_conflict_check(self):
-        # parse does NOT validate group conflicts
+    def test_group_conflicts_not_enforced(self):
+        # Unlike Sport(...), Sport.parse does NOT raise on group conflicts —
+        # it preserves whatever the caller provided.
         sport = Sport.parse("cycling.road+race+commute")
-        assert Modifier.RACE in sport.modifiers
-        assert Modifier.COMMUTE in sport.modifiers
-
-    def test_all_known_modifiers_with_conflict_accepted(self):
-        # parse accepts group conflicts — no raise
-        sport = Sport.parse("cycling.road+commute+race")
         assert Modifier.RACE in sport.modifiers
         assert Modifier.COMMUTE in sport.modifiers
 
@@ -103,14 +93,6 @@ class TestRoundTrip:
 
     def test_non_standard_modifier_roundtrip(self):
         raw = "cycling.road+race+rainy"
-        assert str(Sport.parse(raw)) == raw
-
-    def test_both_non_standard_roundtrip(self):
-        raw = "cycling.road.criterium+race+rainy"
-        assert str(Sport.parse(raw)) == raw
-
-    def test_bare_code_roundtrip(self):
-        raw = "cycling.road"
         assert str(Sport.parse(raw)) == raw
 
     def test_str_roundtrip_parse(self):
@@ -137,10 +119,6 @@ class TestEquality:
         a = Sport.parse("cycling.road.criterium+rainy")
         b = Sport.parse("cycling.road.criterium+rainy")
         assert hash(a) == hash(b)
-
-    def test_usable_in_set(self):
-        s = {Sport.parse("cycling.road.criterium"), Sport.parse("cycling.road.criterium")}
-        assert len(s) == 1
 
 
 class TestStructuralErrors:

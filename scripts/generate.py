@@ -36,7 +36,7 @@ MAPPINGS_DIR = ROOT / "mappings"
 REFERENCE_DIR = ROOT / "reference"
 OUT_DIR = ROOT / "src" / "open_sport_taxonomy"
 
-HEADER = '# Auto-generated from schema.yaml — do not edit.\n# Run: uv run scripts/generate.py\n'
+HEADER = "# Auto-generated from schema.yaml — do not edit.\n# Run: uv run scripts/generate.py\n"
 
 PLATFORM_REF_DIR = {
     "garmin_fit": "garmin-fit-sdk",
@@ -73,8 +73,12 @@ class ValidationError(Exception):
 
 
 ALLOWED_TOP_KEYS = {
-    "format_version", "platform", "platform_version",
-    "fallback", "target_coarsening", "entries",
+    "format_version",
+    "platform",
+    "platform_version",
+    "fallback",
+    "target_coarsening",
+    "entries",
 }
 ALLOWED_ENTRY_KEYS = {"target", "sport", "preferred"}
 ALLOWED_FALLBACK_KEYS = {"encode", "decode"}
@@ -87,7 +91,9 @@ def target_key(t: Any) -> Any:
     return t
 
 
-def parse_sport(raw: str, sport_codes: set[str], modifier_codes: set[str]) -> tuple[str, frozenset[str]]:
+def parse_sport(
+    raw: str, sport_codes: set[str], modifier_codes: set[str]
+) -> tuple[str, frozenset[str]]:
     """Parse a sport string into (code, modifiers); enforce rule 7."""
     if not raw or "+" in raw[:1] or raw.endswith("+") or "++" in raw:
         raise ValidationError(f"malformed sport string: {raw!r}")
@@ -221,15 +227,13 @@ def validate_mapping(
         parsed_entries.append((e["target"], parsed, preferred))
 
     # Rule 9: preferred forbidden when sport is null.
-    for i, (target, parsed, preferred) in enumerate(parsed_entries):
+    for i, (_target, parsed, preferred) in enumerate(parsed_entries):
         if parsed is None and preferred:
-            raise ValidationError(
-                f"{file_label}: entries[{i}] has sport: null but preferred: true"
-            )
+            raise ValidationError(f"{file_label}: entries[{i}] has sport: null but preferred: true")
 
     # Rule 8: exactly one preferred per non-null sport.
     pref_count: dict[tuple[str, frozenset[str]], int] = {}
-    for target, parsed, preferred in parsed_entries:
+    for _target, parsed, preferred in parsed_entries:
         if parsed is None:
             continue
         if preferred:
@@ -342,6 +346,7 @@ def _runtime_target(platform: str, target: Any) -> Any:
     """Convert a YAML-loaded target into its runtime form."""
     if platform == "garmin_fit":
         from open_sport_taxonomy._platform import GarminFitCode
+
         return GarminFitCode(target["sport"], target["sub_sport"])
     return target
 
@@ -349,6 +354,7 @@ def _runtime_target(platform: str, target: Any) -> Any:
 # ---------------------------------------------------------------------------
 # _modifier.py
 # ---------------------------------------------------------------------------
+
 
 def generate_modifier(schema: dict) -> str:
     modifiers = schema["modifiers"]
@@ -370,25 +376,27 @@ def generate_modifier(schema: dict) -> str:
         lines.append(f'    {name} = "{entry["code"]}"')
     lines.append("")
 
-    lines.extend([
-        "    @property",
-        "    def code(self) -> str:",
-        "        return self.value",
-        "",
-        "    @property",
-        "    def label(self) -> str:",
-        "        return _LABELS[self.value]",
-        "",
-        "    @property",
-        "    def group(self) -> str | None:",
-        "        return _GROUPS.get(self.value)",
-        "",
-        "    @classmethod",
-        "    def in_group(cls, group: str) -> list[Modifier]:",
-        "        return [m for m in cls if m.group == group]",
-        "",
-        "",
-    ])
+    lines.extend(
+        [
+            "    @property",
+            "    def code(self) -> str:",
+            "        return self.value",
+            "",
+            "    @property",
+            "    def label(self) -> str:",
+            "        return _LABELS[self.value]",
+            "",
+            "    @property",
+            "    def group(self) -> str | None:",
+            "        return _GROUPS.get(self.value)",
+            "",
+            "    @classmethod",
+            "    def in_group(cls, group: str) -> list[Modifier]:",
+            "        return [m for m in cls if m.group == group]",
+            "",
+            "",
+        ]
+    )
 
     lines.append("_LABELS: dict[str, str] = {")
     for entry in modifiers:
@@ -403,25 +411,27 @@ def generate_modifier(schema: dict) -> str:
     lines.append("")
 
     # validate_modifiers helper.
-    lines.extend([
-        "",
-        "def validate_modifiers(modifiers: frozenset) -> None:",
-        '    """Raise ValueError if modifiers from the same group are combined."""',
-        "    groups_seen: dict[str, str] = {}",
-        "    for m in modifiers:",
-        "        code = m.value if isinstance(m, Modifier) else m",
-        "        g = _GROUPS.get(code)",
-        "        if g is None:",
-        "            continue",
-        "        if g in groups_seen:",
-        "            conflict = groups_seen[g]",
-        "            raise ValueError(",
-        '                f"Modifiers {conflict!r} and {code!r} "',
-        '                f"conflict (same group: {g!r})"',
-        "            )",
-        "        groups_seen[g] = code",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "def validate_modifiers(modifiers: frozenset) -> None:",
+            '    """Raise ValueError if modifiers from the same group are combined."""',
+            "    groups_seen: dict[str, str] = {}",
+            "    for m in modifiers:",
+            "        code = m.value if isinstance(m, Modifier) else m",
+            "        g = _GROUPS.get(code)",
+            "        if g is None:",
+            "            continue",
+            "        if g in groups_seen:",
+            "            conflict = groups_seen[g]",
+            "            raise ValueError(",
+            '                f"Modifiers {conflict!r} and {code!r} "',
+            '                f"conflict (same group: {g!r})"',
+            "            )",
+            "        groups_seen[g] = code",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -429,6 +439,7 @@ def generate_modifier(schema: dict) -> str:
 # ---------------------------------------------------------------------------
 # _sport.py
 # ---------------------------------------------------------------------------
+
 
 def generate_sport(schema: dict) -> str:
     """Regenerate _sport.py preserving existing structure."""
@@ -446,13 +457,19 @@ def generate_sport(schema: dict) -> str:
         else:
             parents[c] = None
 
-    lines = [HEADER, "from __future__ import annotations", "",
-             "from collections.abc import Iterable", "from dataclasses import dataclass",
-             "",
-             "from open_sport_taxonomy._modifier import Modifier, validate_modifiers",
-             "", "",
-             "# Taxonomy data — generated from schema.yaml.",
-             "_LABELS: dict[str, str] = {"]
+    lines = [
+        HEADER,
+        "from __future__ import annotations",
+        "",
+        "from collections.abc import Iterable",
+        "from dataclasses import dataclass",
+        "",
+        "from open_sport_taxonomy._modifier import Modifier, validate_modifiers",
+        "",
+        "",
+        "# Taxonomy data — generated from schema.yaml.",
+        "_LABELS: dict[str, str] = {",
+    ]
     for c in codes:
         lines.append(f'    "{c}": "{labels[c]}",')
     lines.append("}")
@@ -513,155 +530,157 @@ def generate_sport(schema: dict) -> str:
     lines.append("    modifiers: frozenset[str]")
     lines.append("")
     # Constructor.
-    lines.extend([
-        "    def __init__(self, code: str, *, modifiers: Iterable[Modifier] | None = None) -> None:",
-        "        if not isinstance(code, str):",
-        '            raise TypeError(f"Expected str, got {type(code).__name__}")',
-        '        if modifiers is not None and "+" in code:',
-        "            raise ValueError(",
-        '                "Cannot pass both an encoded string and modifiers keyword. "',
-        '                "Use either Sport(\'cycling.road+virtual\') or "',
-        '                "Sport(\'cycling.road\', modifiers={Modifier.VIRTUAL})."',
-        "            )",
-        '        if "+" in code:',
-        '            parts = code.split("+")',
-        '            if "" in parts:',
-        '                raise ValueError(f"Invalid encoded string: {code!r}")',
-        "            parsed_code = parts[0]",
-        "            parsed_modifiers = frozenset(Modifier(m) for m in parts[1:])",
-        "        else:",
-        "            parsed_code = code",
-        "            parsed_modifiers = (",
-        "                frozenset(modifiers) if modifiers is not None else frozenset()",
-        "            )",
-        "        if not parsed_code:",
-        '            raise ValueError("Sport code cannot be empty")',
-        "        if parsed_code not in _LABELS:",
-        '            raise ValueError(f"Unknown sport code: {parsed_code!r}")',
-        "        validate_modifiers(parsed_modifiers)",
-        '        object.__setattr__(self, "code", parsed_code)',
-        '        object.__setattr__(self, "modifiers", frozenset(parsed_modifiers))',
-        "",
-        "    @classmethod",
-        "    def parse(cls, raw: str) -> Sport:",
-        '        """Parse a sport string, preserving unknown codes and modifiers.',
-        "",
-        "        Returns a standard or non-standard sport. Only structural errors",
-        "        raise ValueError. No schema validation, no modifier group checks.",
-        '        """',
-        "        code, raw_modifiers = _split_encoded(raw)",
-        "        mods: set[str] = set()",
-        "        for m in raw_modifiers:",
-        "            try:",
-        "                mods.add(Modifier(m))",
-        "            except ValueError:",
-        "                mods.add(m)",
-        "        sport = object.__new__(cls)",
-        '        object.__setattr__(sport, "code", code)',
-        '        object.__setattr__(sport, "modifiers", frozenset(mods))',
-        "        return sport",
-        "",
-        "    def resolve(self) -> Sport:",
-        '        """Resolve to the nearest standard sport."""',
-        "        if self.is_standard:",
-        "            return self",
-        "        code = self.code",
-        "        while code and code not in _LABELS:",
-        '            dot = code.rfind(".")',
-        '            code = code[:dot] if dot != -1 else ""',
-        "        if not code:",
-        '            code = "generic"',
-        "        known: set[Modifier] = set()",
-        "        for m in self.modifiers:",
-        "            if isinstance(m, Modifier):",
-        "                known.add(m)",
-        "        return Sport(code, modifiers=known)",
-        "",
-        "    def is_subsport_of(self, other: Sport) -> bool:",
-        '        """True if this sport is a more specific version of other."""',
-        "        if not _is_subsport_code(self.code, other.code):",
-        "            return False",
-        "        if not other.modifiers.issubset(self.modifiers):",
-        "            return False",
-        "        return True",
-        "",
-        "    @property",
-        "    def is_standard(self) -> bool:",
-        '        """True if code and all modifiers are defined in the schema."""',
-        "        if self.code not in _LABELS:",
-        "            return False",
-        "        known = []",
-        "        for m in self.modifiers:",
-        "            if not isinstance(m, Modifier):",
-        "                return False",
-        "            known.append(m)",
-        "        try:",
-        "            validate_modifiers(frozenset(known))",
-        "        except ValueError:",
-        "            return False",
-        "        return True",
-        "",
-        "    @property",
-        "    def label(self) -> str | None:",
-        '        """Human-readable label, or None for non-standard sports."""',
-        "        return _LABELS.get(self.code)",
-        "",
-        "    def _with_code(self, code: str) -> Sport:",
-        '        """Return a sport with a different code but the same modifiers."""',
-        "        if not self.modifiers:",
-        "            return Sport.parse(code)",
-        "        mod_str = '+'.join(",
-        "            sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)",
-        "        )",
-        "        return Sport.parse(code + '+' + mod_str)",
-        "",
-        "    @property",
-        "    def parent(self) -> Sport | None:",
-        '        """Parent sport, preserving modifiers."""',
-        "        if self.code in _PARENTS:",
-        "            parent_code = _PARENTS[self.code]",
-        "        else:",
-        '            dot = self.code.rfind(".")',
-        "            parent_code = self.code[:dot] if dot != -1 else None",
-        "        if parent_code is None:",
-        "            return None",
-        "        return self._with_code(parent_code)",
-        "",
-        "    @property",
-        "    def disciplines(self) -> tuple[Sport, ...]:",
-        '        """Direct child sports, preserving modifiers."""',
-        "        children = _CHILDREN.get(self.code, ())",
-        "        return tuple(self._with_code(c) for c in children)",
-        "",
-        "    @classmethod",
-        "    def all(cls) -> list[Sport]:",
-        '        """All standard sports defined in the schema."""',
-        "        return [Sport(code) for code in _LABELS]",
-        "",
-        "    def __eq__(self, other: object) -> bool:",
-        "        if not isinstance(other, Sport):",
-        "            return NotImplemented",
-        "        return self.code == other.code and self.modifiers == other.modifiers",
-        "",
-        "    def __hash__(self) -> int:",
-        "        return hash((self.code, self.modifiers))",
-        "",
-        "    def __str__(self) -> str:",
-        "        all_mods = sorted(",
-        "            m.value if isinstance(m, Modifier) else m for m in self.modifiers",
-        "        )",
-        "        if all_mods:",
-        '            return self.code + "+" + "+".join(all_mods)',
-        "        return self.code",
-        "",
-        "    def __repr__(self) -> str:",
-        "        if self.is_standard:",
-        '            return f"Sport({str(self)!r})"',
-        '        return f"Sport.parse({str(self)!r})"',
-        "",
-        "",
-        "# Class constants.",
-    ])
+    lines.extend(
+        [
+            "    def __init__(self, code: str, *, modifiers: Iterable[Modifier] | None = None) -> None:",
+            "        if not isinstance(code, str):",
+            '            raise TypeError(f"Expected str, got {type(code).__name__}")',
+            '        if modifiers is not None and "+" in code:',
+            "            raise ValueError(",
+            '                "Cannot pass both an encoded string and modifiers keyword. "',
+            "                \"Use either Sport('cycling.road+virtual') or \"",
+            "                \"Sport('cycling.road', modifiers={Modifier.VIRTUAL}).\"",
+            "            )",
+            '        if "+" in code:',
+            '            parts = code.split("+")',
+            '            if "" in parts:',
+            '                raise ValueError(f"Invalid encoded string: {code!r}")',
+            "            parsed_code = parts[0]",
+            "            parsed_modifiers = frozenset(Modifier(m) for m in parts[1:])",
+            "        else:",
+            "            parsed_code = code",
+            "            parsed_modifiers = (",
+            "                frozenset(modifiers) if modifiers is not None else frozenset()",
+            "            )",
+            "        if not parsed_code:",
+            '            raise ValueError("Sport code cannot be empty")',
+            "        if parsed_code not in _LABELS:",
+            '            raise ValueError(f"Unknown sport code: {parsed_code!r}")',
+            "        validate_modifiers(parsed_modifiers)",
+            '        object.__setattr__(self, "code", parsed_code)',
+            '        object.__setattr__(self, "modifiers", frozenset(parsed_modifiers))',
+            "",
+            "    @classmethod",
+            "    def parse(cls, raw: str) -> Sport:",
+            '        """Parse a sport string, preserving unknown codes and modifiers.',
+            "",
+            "        Returns a standard or non-standard sport. Only structural errors",
+            "        raise ValueError. No schema validation, no modifier group checks.",
+            '        """',
+            "        code, raw_modifiers = _split_encoded(raw)",
+            "        mods: set[str] = set()",
+            "        for m in raw_modifiers:",
+            "            try:",
+            "                mods.add(Modifier(m))",
+            "            except ValueError:",
+            "                mods.add(m)",
+            "        sport = object.__new__(cls)",
+            '        object.__setattr__(sport, "code", code)',
+            '        object.__setattr__(sport, "modifiers", frozenset(mods))',
+            "        return sport",
+            "",
+            "    def resolve(self) -> Sport:",
+            '        """Resolve to the nearest standard sport."""',
+            "        if self.is_standard:",
+            "            return self",
+            "        code = self.code",
+            "        while code and code not in _LABELS:",
+            '            dot = code.rfind(".")',
+            '            code = code[:dot] if dot != -1 else ""',
+            "        if not code:",
+            '            code = "generic"',
+            "        known: set[Modifier] = set()",
+            "        for m in self.modifiers:",
+            "            if isinstance(m, Modifier):",
+            "                known.add(m)",
+            "        return Sport(code, modifiers=known)",
+            "",
+            "    def is_subsport_of(self, other: Sport) -> bool:",
+            '        """True if this sport is a more specific version of other."""',
+            "        if not _is_subsport_code(self.code, other.code):",
+            "            return False",
+            "        if not other.modifiers.issubset(self.modifiers):",
+            "            return False",
+            "        return True",
+            "",
+            "    @property",
+            "    def is_standard(self) -> bool:",
+            '        """True if code and all modifiers are defined in the schema."""',
+            "        if self.code not in _LABELS:",
+            "            return False",
+            "        known = []",
+            "        for m in self.modifiers:",
+            "            if not isinstance(m, Modifier):",
+            "                return False",
+            "            known.append(m)",
+            "        try:",
+            "            validate_modifiers(frozenset(known))",
+            "        except ValueError:",
+            "            return False",
+            "        return True",
+            "",
+            "    @property",
+            "    def label(self) -> str | None:",
+            '        """Human-readable label, or None for non-standard sports."""',
+            "        return _LABELS.get(self.code)",
+            "",
+            "    def _with_code(self, code: str) -> Sport:",
+            '        """Return a sport with a different code but the same modifiers."""',
+            "        if not self.modifiers:",
+            "            return Sport.parse(code)",
+            "        mod_str = '+'.join(",
+            "            sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)",
+            "        )",
+            "        return Sport.parse(code + '+' + mod_str)",
+            "",
+            "    @property",
+            "    def parent(self) -> Sport | None:",
+            '        """Parent sport, preserving modifiers."""',
+            "        if self.code in _PARENTS:",
+            "            parent_code = _PARENTS[self.code]",
+            "        else:",
+            '            dot = self.code.rfind(".")',
+            "            parent_code = self.code[:dot] if dot != -1 else None",
+            "        if parent_code is None:",
+            "            return None",
+            "        return self._with_code(parent_code)",
+            "",
+            "    @property",
+            "    def disciplines(self) -> tuple[Sport, ...]:",
+            '        """Direct child sports, preserving modifiers."""',
+            "        children = _CHILDREN.get(self.code, ())",
+            "        return tuple(self._with_code(c) for c in children)",
+            "",
+            "    @classmethod",
+            "    def all(cls) -> list[Sport]:",
+            '        """All standard sports defined in the schema."""',
+            "        return [Sport(code) for code in _LABELS]",
+            "",
+            "    def __eq__(self, other: object) -> bool:",
+            "        if not isinstance(other, Sport):",
+            "            return NotImplemented",
+            "        return self.code == other.code and self.modifiers == other.modifiers",
+            "",
+            "    def __hash__(self) -> int:",
+            "        return hash((self.code, self.modifiers))",
+            "",
+            "    def __str__(self) -> str:",
+            "        all_mods = sorted(",
+            "            m.value if isinstance(m, Modifier) else m for m in self.modifiers",
+            "        )",
+            "        if all_mods:",
+            '            return self.code + "+" + "+".join(all_mods)',
+            "        return self.code",
+            "",
+            "    def __repr__(self) -> str:",
+            "        if self.is_standard:",
+            '            return f"Sport({str(self)!r})"',
+            '        return f"Sport.parse({str(self)!r})"',
+            "",
+            "",
+            "# Class constants.",
+        ]
+    )
     for c in codes:
         name = c.replace(".", "_").upper()
         lines.append(f'Sport.{name} = Sport("{c}")  # type: ignore[attr-defined]')
@@ -672,6 +691,7 @@ def generate_sport(schema: dict) -> str:
 # ---------------------------------------------------------------------------
 # _platforms.py — format v3 tables.
 # ---------------------------------------------------------------------------
+
 
 def _platform_var_prefix(platform: str) -> str:
     return platform.upper()
@@ -688,17 +708,17 @@ def _emit_target_literal(platform: str, target: Any) -> str:
 def _emit_sport_call(parsed: tuple[str, frozenset[str]]) -> str:
     code, mods = parsed
     if not mods:
-        return f'Sport({code!r})'
+        return f"Sport({code!r})"
     s = code + "+" + "+".join(sorted(mods))
-    return f'Sport({s!r})'
+    return f"Sport({s!r})"
 
 
 def _emit_sport_key(parsed: tuple[str, frozenset[str]]) -> str:
     code, mods = parsed
     if not mods:
-        return f'({code!r}, frozenset())'
+        return f"({code!r}, frozenset())"
     items = ", ".join(repr(m) for m in sorted(mods))
-    return f'({code!r}, frozenset({{{items}}}))'
+    return f"({code!r}, frozenset({{{items}}}))"
 
 
 def _emit_target_field_value(v: Any) -> str:
@@ -711,7 +731,7 @@ def _emit_coarsening(coarsening: list[dict]) -> str:
     parts = []
     for rule in coarsening:
         reset = rule["reset"]
-        items = ", ".join(f'{k!r}: {v!r}' for k, v in reset.items())
+        items = ", ".join(f"{k!r}: {v!r}" for k, v in reset.items())
         parts.append(f'{{"reset": {{{items}}}}}')
     return "(" + ", ".join(parts) + ",)"
 
@@ -749,10 +769,7 @@ def generate_platforms(schema: dict, validated: dict[str, dict]) -> str:
         lines.append(f"{prefix}_ENTRIES_BY_TARGET: dict = {{")
         for target, parsed, preferred in entries:
             target_repr = _emit_target_literal(platform, target)
-            if parsed is None:
-                sport_repr = "None"
-            else:
-                sport_repr = _emit_sport_call(parsed)
+            sport_repr = "None" if parsed is None else _emit_sport_call(parsed)
             lines.append(f"    {target_repr}: ({sport_repr}, {preferred}),")
         lines.append("}")
         lines.append("")
@@ -790,7 +807,9 @@ def generate_platforms(schema: dict, validated: dict[str, dict]) -> str:
         lines.append(f'    "{case["name"]}": {case["value"]},')
     lines.append("}")
     lines.append("")
-    lines.append("FIT_SUB_SPORT_NAMES: dict[int, str] = {v: k for k, v in FIT_SUB_SPORT_IDS.items()}")
+    lines.append(
+        "FIT_SUB_SPORT_NAMES: dict[int, str] = {v: k for k, v in FIT_SUB_SPORT_IDS.items()}"
+    )
     lines.append("")
     return "\n".join(lines)
 
@@ -798,6 +817,7 @@ def generate_platforms(schema: dict, validated: dict[str, dict]) -> str:
 # ---------------------------------------------------------------------------
 # __init__.py
 # ---------------------------------------------------------------------------
+
 
 def generate_init(schema: dict) -> str:
     version = schema["version"]
@@ -862,7 +882,9 @@ def main() -> int:
     }
 
     if args.check:
-        stale = [p for p, e in files.items() if not p.exists() or p.read_text(encoding="utf-8") != e]
+        stale = [
+            p for p, e in files.items() if not p.exists() or p.read_text(encoding="utf-8") != e
+        ]
         version_errors = _check_version_consistency(schema)
         if stale or version_errors:
             for p in stale:
@@ -882,10 +904,13 @@ def main() -> int:
     # Rules 10–11: round-trip validation against the freshly generated runtime.
     # Re-import the module to pick up the new file.
     import importlib
-    import open_sport_taxonomy._platforms  # noqa: F401
+
+    import open_sport_taxonomy._platforms
+
     importlib.reload(open_sport_taxonomy._platforms)
 
     from open_sport_taxonomy._platform import Platform
+
     pkg = importlib.import_module("open_sport_taxonomy._platforms")
     for platform in PLATFORM_REF_DIR:
         prefix = _platform_var_prefix(platform)

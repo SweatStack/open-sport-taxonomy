@@ -1,5 +1,3 @@
-import pytest
-
 from open_sport_taxonomy import Modifier, Sport
 
 
@@ -90,7 +88,7 @@ class TestParentPreservesModifiers:
 
     def test_parent_chain_preserves_modifiers(self):
         sport = Sport.parse("cycling.road.criterium+race")
-        parent = sport.parent       # cycling.road+race
+        parent = sport.parent  # cycling.road+race
         grandparent = parent.parent  # cycling+race
         assert grandparent.code == "cycling"
         assert Modifier.RACE in grandparent.modifiers

@@ -9,7 +9,7 @@ Covers:
 
 from __future__ import annotations
 
-from open_sport_taxonomy import GarminFitCode, Sport
+from open_sport_taxonomy import Sport
 from open_sport_taxonomy.platforms import garmin_fit
 
 

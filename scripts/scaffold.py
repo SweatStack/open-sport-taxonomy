@@ -135,12 +135,14 @@ def render_file(
     lines.append("entries:")
     for entry in entries:
         lines.append("")
-        lines.extend(render_entry(
-            entry["target"],
-            entry.get("sport"),
-            entry.get("preferred", False),
-            comments.get(target_key(entry["target"])),
-        ))
+        lines.extend(
+            render_entry(
+                entry["target"],
+                entry.get("sport"),
+                entry.get("preferred", False),
+                comments.get(target_key(entry["target"])),
+            )
+        )
     lines.append("")
     return "\n".join(lines)
 
@@ -209,19 +211,17 @@ def main() -> int:
 
     # Build entries: one row per target, sourcing annotations from existing.
     entries: list[dict[str, Any]] = []
-    for t in targets:
-        if isinstance(t, dict):
-            target = t
-        else:
-            target = t
+    for target in targets:
         key = target_key(target)
         existing_entry = existing_by_target.get(key)
         if existing_entry is not None:
-            entries.append({
-                "target": target,
-                "sport": existing_entry.get("sport"),
-                "preferred": existing_entry.get("preferred", False),
-            })
+            entries.append(
+                {
+                    "target": target,
+                    "sport": existing_entry.get("sport"),
+                    "preferred": existing_entry.get("preferred", False),
+                }
+            )
         else:
             entries.append({"target": target, "sport": None, "preferred": False})
 

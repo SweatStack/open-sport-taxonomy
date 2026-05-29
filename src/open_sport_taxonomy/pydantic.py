@@ -11,10 +11,12 @@ from pydantic import BeforeValidator, PlainSerializer, WithJsonSchema
 
 from open_sport_taxonomy._sport import Sport
 
-_SPORT_SCHEMA = WithJsonSchema({
-    "type": "string",
-    "description": "Sport string in OpenSportTaxonomy format (e.g., 'cycling.road+stationary')",
-})
+_SPORT_SCHEMA = WithJsonSchema(
+    {
+        "type": "string",
+        "description": "Sport string in OpenSportTaxonomy format (e.g., 'cycling.road+stationary')",
+    }
+)
 
 _SPORT_SERIALIZER = PlainSerializer(str, return_type=str)
 
@@ -40,5 +42,7 @@ def _validate_sport(value: object) -> Sport:
 SportField = Annotated[Sport, BeforeValidator(_parse_sport), _SPORT_SERIALIZER, _SPORT_SCHEMA]
 """Permissive sport field. Accepts any structurally valid sport string via Sport.parse()."""
 
-StrictSportField = Annotated[Sport, BeforeValidator(_validate_sport), _SPORT_SERIALIZER, _SPORT_SCHEMA]
+StrictSportField = Annotated[
+    Sport, BeforeValidator(_validate_sport), _SPORT_SERIALIZER, _SPORT_SCHEMA
+]
 """Strict sport field. Rejects unknown codes and modifiers via Sport()."""

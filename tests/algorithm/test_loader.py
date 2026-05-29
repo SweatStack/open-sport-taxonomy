@@ -15,14 +15,12 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _load_generate_module():
     """Import scripts/generate.py as a module (it has no __init__.py)."""
-    spec = importlib.util.spec_from_file_location(
-        "generate", ROOT / "scripts" / "generate.py"
-    )
+    spec = importlib.util.spec_from_file_location("generate", ROOT / "scripts" / "generate.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules["generate"] = module
     spec.loader.exec_module(module)
@@ -31,8 +29,15 @@ def _load_generate_module():
 
 generate = _load_generate_module()
 SPORT_CODES = {
-    "cycling", "cycling.road", "cycling.cyclocross", "generic", "running",
-    "running.road", "rowing", "swimming", "walking",
+    "cycling",
+    "cycling.road",
+    "cycling.cyclocross",
+    "generic",
+    "running",
+    "running.road",
+    "rowing",
+    "swimming",
+    "walking",
 }
 MODIFIER_CODES = {"stationary", "virtual", "race", "assisted", "commute"}
 
@@ -83,14 +88,29 @@ def _validate(mapping, targets=None, platform="garmin_fit"):
     )
 
 
-class TestRule1FormatVersion:
-    def test_correct_version_passes(self):
+class TestSmoke:
+    """A minimal valid mapping passes all 13 validation rules."""
+
+    def test_minimal_valid_mapping_passes(self):
+        # Defense-in-depth against a regression where one rule's "pass"
+        # condition is implemented incorrectly — if any rule's positive
+        # branch is broken, the minimal mapping will fail to validate.
         _validate(_minimal_valid_mapping())
 
+
+class TestRule1FormatVersion:
     def test_wrong_version_rejected(self):
         m = _minimal_valid_mapping({"format_version": 2})
         with pytest.raises(generate.ValidationError, match="format_version"):
             _validate(m)
+
+
+class TestRule2PlatformField:
+    def test_platform_mismatch_rejected(self):
+        # Filename says "garmin_fit" but the field says "strava".
+        m = _minimal_valid_mapping({"platform": "strava"})
+        with pytest.raises(generate.ValidationError, match="platform"):
+            _validate(m, platform="garmin_fit")
 
 
 class TestRule3UnknownKeys:
@@ -109,11 +129,13 @@ class TestRule3UnknownKeys:
 class TestRule4UniqueTargets:
     def test_duplicate_target_rejected(self):
         m = _minimal_valid_mapping()
-        m["entries"].append({
-            "target": {"sport": 0, "sub_sport": 0},  # duplicates entry[0]
-            "sport": "cycling",
-            "preferred": False,
-        })
+        m["entries"].append(
+            {
+                "target": {"sport": 0, "sub_sport": 0},  # duplicates entry[0]
+                "sport": "cycling",
+                "preferred": False,
+            }
+        )
         with pytest.raises(generate.ValidationError, match="duplicate"):
             _validate(m)
 
@@ -121,10 +143,12 @@ class TestRule4UniqueTargets:
 class TestRule5LegalTargets:
     def test_unknown_target_rejected(self):
         m = _minimal_valid_mapping()
-        m["entries"].append({
-            "target": {"sport": 99, "sub_sport": 99},
-            "sport": None,
-        })
+        m["entries"].append(
+            {
+                "target": {"sport": 99, "sub_sport": 99},
+                "sport": None,
+            }
+        )
         with pytest.raises(generate.ValidationError, match="not in reference"):
             _validate(m)
 
@@ -134,7 +158,7 @@ class TestRule6Coverage:
         m = _minimal_valid_mapping()
         # Drop entry[1] so target (2, 0) becomes uncovered.
         m["entries"].pop()
-        with pytest.raises(generate.ValidationError, match="target.*no row"):
+        with pytest.raises(generate.ValidationError, match=r"target.*no row"):
             _validate(m)
 
 
@@ -161,13 +185,15 @@ class TestRule7SportString:
 class TestRule8OnePreferredPerSport:
     def test_two_preferred_same_sport_rejected(self):
         m = _minimal_valid_mapping()
-        m["entries"].append({
-            "target": {"sport": 0, "sub_sport": 0},
-            "sport": "cycling",
-            "preferred": True,  # second preferred for cycling
-        })
+        m["entries"].append(
+            {
+                "target": {"sport": 0, "sub_sport": 0},
+                "sport": "cycling",
+                "preferred": True,  # second preferred for cycling
+            }
+        )
         # First trigger: duplicate target. Skip — adjust to a new target.
-        targets = _minimal_targets() + [{"sport": 2, "sub_sport": 7}]
+        targets = [*_minimal_targets(), {"sport": 2, "sub_sport": 7}]
         m["entries"][-1]["target"] = {"sport": 2, "sub_sport": 7}
         with pytest.raises(generate.ValidationError, match="preferred entries"):
             _validate(m, targets=targets)
@@ -182,13 +208,15 @@ class TestRule8OnePreferredPerSport:
 class TestRule9NullCannotBePreferred:
     def test_null_sport_with_preferred_rejected(self):
         m = _minimal_valid_mapping()
-        targets = _minimal_targets() + [{"sport": 2, "sub_sport": 7}]
-        m["entries"].append({
-            "target": {"sport": 2, "sub_sport": 7},
-            "sport": None,
-            "preferred": True,
-        })
-        with pytest.raises(generate.ValidationError, match="null.*preferred"):
+        targets = [*_minimal_targets(), {"sport": 2, "sub_sport": 7}]
+        m["entries"].append(
+            {
+                "target": {"sport": 2, "sub_sport": 7},
+                "sport": None,
+                "preferred": True,
+            }
+        )
+        with pytest.raises(generate.ValidationError, match=r"null.*preferred"):
             _validate(m, targets=targets)
 
 

@@ -1,5 +1,3 @@
-import pytest
-
 from open_sport_taxonomy import Modifier, Sport
 
 
@@ -43,9 +41,6 @@ class TestStrAlwaysFaithful:
         sport = Sport("cycling.road+race")
         assert str(sport) == "cycling.road+race"
 
-    def test_class_constant_str(self):
-        assert str(Sport.CYCLING_ROAD) == "cycling.road"
-
 
 class TestIsStandard:
     def test_constructor_always_standard(self):
@@ -62,9 +57,6 @@ class TestIsStandard:
 
     def test_parse_non_standard_unknown_modifier(self):
         assert Sport.parse("cycling.road+rainy").is_standard is False
-
-    def test_class_constant_standard(self):
-        assert Sport.CYCLING_ROAD.is_standard is True
 
 
 class TestUnifiedModifiers:
@@ -95,8 +87,8 @@ class TestPlatformTranslationConsistency:
         assert strava.encode(Sport.parse(raw).resolve()) == strava.encode(Sport.parse(raw))
 
     def test_non_standard_falls_through(self):
-        from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit
         from open_sport_taxonomy import GarminFitCode
+        from open_sport_taxonomy.platforms import apple_healthkit, garmin_fit, strava
 
         sport = Sport.parse("cycling.road.criterium")
         assert strava.encode(sport) == "Ride"

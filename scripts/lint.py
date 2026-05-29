@@ -1,8 +1,3 @@
-# /// script
-# requires-python = ">=3.11"
-# dependencies = ["pyyaml"]
-# ///
-
 """Lint schema.yaml and mappings/<platform>.yaml.
 
 The mapping lint defers to scripts/generate.py — running generate.py
@@ -152,7 +147,10 @@ BUILD_SCRIPTS = [
     ("scripts/build_reference/garmin_fit.py", "reference/garmin-fit-sdk/targets.yaml"),
     ("scripts/build_reference/strava.py", "reference/strava/targets.yaml"),
     ("scripts/build_reference/apple_healthkit.py", "reference/apple-healthkit/targets.yaml"),
-    ("scripts/build_reference/garmin_training_api.py", "reference/garmin-training-api/targets.yaml"),
+    (
+        "scripts/build_reference/garmin_training_api.py",
+        "reference/garmin-training-api/targets.yaml",
+    ),
 ]
 
 
@@ -183,6 +181,53 @@ def lint_reference_drift() -> int:
 
 
 # --------------------------------------------------------------------------
+# Static analysis (ruff lint + format check).
+# --------------------------------------------------------------------------
+
+
+def lint_ruff() -> int:
+    """Run ruff lint and ruff format --check against src/, tests/, scripts/."""
+    targets = ["src/", "tests/", "scripts/"]
+    check = subprocess.run(
+        [sys.executable, "-m", "ruff", "check", *targets],
+        capture_output=True,
+        text=True,
+        cwd=str(ROOT),
+    )
+    fmt = subprocess.run(
+        [sys.executable, "-m", "ruff", "format", "--check", *targets],
+        capture_output=True,
+        text=True,
+        cwd=str(ROOT),
+    )
+    rc = check.returncode | fmt.returncode
+    if rc != 0:
+        sys.stdout.write(check.stdout)
+        sys.stderr.write(check.stderr)
+        sys.stdout.write(fmt.stdout)
+        sys.stderr.write(fmt.stderr)
+    else:
+        print("ruff: ok")
+    return rc
+
+
+def lint_mypy() -> int:
+    """Run mypy --strict against src/open_sport_taxonomy/."""
+    result = subprocess.run(
+        [sys.executable, "-m", "mypy"],
+        capture_output=True,
+        text=True,
+        cwd=str(ROOT),
+    )
+    if result.returncode != 0:
+        sys.stdout.write(result.stdout)
+        sys.stderr.write(result.stderr)
+    else:
+        print("mypy: ok")
+    return result.returncode
+
+
+# --------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------
 
@@ -193,6 +238,8 @@ def main():
     rc = 0
     rc |= lint_schema(fix)
     rc |= lint_reference_drift()
+    rc |= lint_ruff()
+    rc |= lint_mypy()
     rc |= lint_mappings()
     return rc
 

@@ -64,7 +64,9 @@ def build_targets() -> list[dict]:
     return [{"sport": s, "sub_sport": ss} for s, ss in targets]
 
 
-def render(targets: list[dict], sport_names: dict[int, str], sub_sport_names: dict[int, str]) -> str:
+def render(
+    targets: list[dict], sport_names: dict[int, str], sub_sport_names: dict[int, str]
+) -> str:
     lines = [
         "# Garmin FIT SDK — legal (sport, sub_sport) target enumeration.",
         "#",
@@ -82,9 +84,7 @@ def render(targets: list[dict], sport_names: dict[int, str], sub_sport_names: di
         s, ss = t["sport"], t["sub_sport"]
         s_name = sport_names.get(s, "?")
         ss_name = sub_sport_names.get(ss, "?")
-        lines.append(
-            f"  - {{ sport: {s:>3}, sub_sport: {ss:>3} }}  # {s_name} / {ss_name}"
-        )
+        lines.append(f"  - {{ sport: {s:>3}, sub_sport: {ss:>3} }}  # {s_name} / {ss_name}")
     lines.append("")
     return "\n".join(lines)
 

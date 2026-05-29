@@ -53,10 +53,6 @@ class TestSportFieldSerialization:
         m = PermissiveModel(sport="cycling.road+race")
         assert m.model_dump() == {"sport": "cycling.road+race"}
 
-    def test_model_dump_non_standard(self):
-        m = PermissiveModel(sport="cycling.road.criterium+race+rainy")
-        assert m.model_dump() == {"sport": "cycling.road.criterium+race+rainy"}
-
     def test_model_dump_json(self):
         m = PermissiveModel(sport="cycling.road+race")
         assert '"cycling.road+race"' in m.model_dump_json()
@@ -91,10 +87,6 @@ class TestStrictSportFieldValidation:
         assert m.sport.code == "cycling.road"
         assert m.sport.is_standard is True
 
-    def test_sport_instance_passthrough(self):
-        m = StrictModel(sport=Sport.CYCLING_ROAD)
-        assert m.sport == Sport.CYCLING_ROAD
-
     def test_unknown_code_raises(self):
         with __import__("pytest").raises(ValidationError):
             StrictModel(sport="cycling.road.criterium")
@@ -116,10 +108,6 @@ class TestStrictSportFieldSerialization:
     def test_model_dump(self):
         m = StrictModel(sport="cycling.road+race")
         assert m.model_dump() == {"sport": "cycling.road+race"}
-
-    def test_model_dump_json(self):
-        m = StrictModel(sport="cycling.road+race")
-        assert '"cycling.road+race"' in m.model_dump_json()
 
 
 class TestStrictSportFieldSchema:

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
-from typing import Any, Callable, Mapping, NamedTuple
+from collections.abc import Iterator, Mapping
+from typing import Any, NamedTuple
 
 from open_sport_taxonomy._modifier import Modifier
 from open_sport_taxonomy._sport import Sport
-
 
 # ---------------------------------------------------------------------------
 # Garmin FIT — dual-form value carrying both name and id.
@@ -43,7 +42,7 @@ class GarminFitCode(_GarminFitCodeBase):
         cls,
         sport: int | str,
         sub_sport: int | str = 0,
-    ) -> "GarminFitCode":
+    ) -> GarminFitCode:
         sport_id = _resolve_fit_value(sport, "sport")
         sub_sport_id = _resolve_fit_value(sub_sport, "sub_sport")
         return _GarminFitCodeBase.__new__(cls, sport_id, sub_sport_id)
@@ -52,12 +51,14 @@ class GarminFitCode(_GarminFitCodeBase):
     def sport_name(self) -> str | None:
         """The FIT sport enum name, or ``None`` if this id is not in the SDK tables."""
         from open_sport_taxonomy._platforms import FIT_SPORT_NAMES
+
         return FIT_SPORT_NAMES.get(self.sport)
 
     @property
     def sub_sport_name(self) -> str | None:
         """The FIT sub_sport enum name, or ``None`` if this id is not in the SDK tables."""
         from open_sport_taxonomy._platforms import FIT_SUB_SPORT_NAMES
+
         return FIT_SUB_SPORT_NAMES.get(self.sub_sport)
 
     def __repr__(self) -> str:
@@ -73,13 +74,12 @@ def _resolve_fit_value(value: int | str, field: str) -> int:
     if isinstance(value, str):
         # Lazy import: avoids a circular import during _platforms module init.
         from open_sport_taxonomy._platforms import FIT_SPORT_IDS, FIT_SUB_SPORT_IDS
+
         table = FIT_SPORT_IDS if field == "sport" else FIT_SUB_SPORT_IDS
         if value not in table:
             raise ValueError(f"Unknown FIT {field} name: {value!r}")
         return table[value]
-    raise TypeError(
-        f"FIT {field} must be int or str, got {type(value).__name__}"
-    )
+    raise TypeError(f"FIT {field} must be int or str, got {type(value).__name__}")
 
 
 # ---------------------------------------------------------------------------
@@ -194,9 +194,7 @@ def _ost_hierarchy_walk(sport: Sport) -> Iterator[SportKey]:
     3. If modifiers are non-empty, repeat steps 1–2 with the empty
        modifier set.
     """
-    mods = frozenset(
-        m.value if isinstance(m, Modifier) else m for m in sport.modifiers
-    )
+    mods = frozenset(m.value if isinstance(m, Modifier) else m for m in sport.modifiers)
 
     # Step 1–2: exact and ancestors-with-modifiers.
     yield (sport.code, mods)
@@ -228,7 +226,6 @@ def _apply_coarsening_rule(rule: CoarseningRule, target: Any) -> Any:
         if hasattr(target, "_replace"):
             return target._replace(**values)
         raise TypeError(
-            f"`reset` coarsening rule requires a NamedTuple target, "
-            f"got {type(target).__name__}"
+            f"`reset` coarsening rule requires a NamedTuple target, got {type(target).__name__}"
         )
     raise ValueError(f"Unknown coarsening rule kind: {rule!r}")

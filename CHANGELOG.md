@@ -27,6 +27,7 @@ Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 - **Algorithm change (encode):** modifiers now dominate discipline depth in the hierarchy walk. `cycling.road+stationary` encodes to FIT `(2, 6)` indoor_cycling rather than `(2, 7)` road, since dropping `+stationary` to keep `.road` would render an indoor trainer ride as outdoor — a worse error than dropping `.road` to keep `+stationary`. See [`docs/translation.md`](docs/translation.md) for the full priority ordering.
 - **Algorithm change (decode):** direct lookup against the platform-keyed table. Forward-compat is handled by data-driven `target_coarsening` rules (FIT's hand-coded `_reduce` is replaced by `reset: { sub_sport: 0 }`).
 - `validate_modifiers` (internal) now accepts both `Modifier` enum members and plain modifier-code strings, so generate-time validation of YAML data can run without instantiating enums.
+- **Test suite refactor (plan 017).** Trimmed from 643 to ~268 example-based tests plus 11 property-based tests. New `tests/{domain,algorithm,integration,properties}/` directory structure. Quality infrastructure added: `pytest-cov` (≥95% coverage gate, currently 97.6%), `hypothesis` property-based tests, `pytest-benchmark` performance bounds, `ruff` lint + format, `mypy --strict`, and a `mutmut` baseline (77.8% kill rate, all surviving mutants categorized in CONTRIBUTING.md). `scripts/lint.py` now drives schema + ruff + mypy + reference drift + generator check from one entry point.
 
 ### Removed
 

@@ -20,7 +20,7 @@ class _GarminFitPlatform(Platform):
     — useful when a FIT parser returns ``None`` for an absent field.
     """
 
-    def decode(  # type: ignore[override]
+    def decode(
         self,
         sport: int | str | None,
         sub_sport: int | str | None = None,

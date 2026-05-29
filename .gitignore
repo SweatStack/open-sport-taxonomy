@@ -2,6 +2,24 @@
 __pycache__/
 *.pyc
 .venv/
+
+# Build artifacts
+build/
 dist/
+
+# Reference data — confidential / not redistributable
 reference/garmin-training-api/*.pdf
 reference/garmin-training-api/*.xlsx
+
+# Tooling caches and reports
+.coverage
+htmlcov/
+.hypothesis/
+.mutmut-cache
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+mutants/
+
+# Local editor / agent state
+.claude/

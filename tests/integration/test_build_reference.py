@@ -13,12 +13,18 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 PLATFORM_BUILD = {
-    "garmin_fit": ("scripts/build_reference/garmin_fit.py", "reference/garmin-fit-sdk/targets.yaml"),
+    "garmin_fit": (
+        "scripts/build_reference/garmin_fit.py",
+        "reference/garmin-fit-sdk/targets.yaml",
+    ),
     "strava": ("scripts/build_reference/strava.py", "reference/strava/targets.yaml"),
-    "apple_healthkit": ("scripts/build_reference/apple_healthkit.py", "reference/apple-healthkit/targets.yaml"),
+    "apple_healthkit": (
+        "scripts/build_reference/apple_healthkit.py",
+        "reference/apple-healthkit/targets.yaml",
+    ),
     "garmin_training_api": (
         "scripts/build_reference/garmin_training_api.py",
         "reference/garmin-training-api/targets.yaml",

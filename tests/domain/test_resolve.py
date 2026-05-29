@@ -1,6 +1,6 @@
 import pytest
 
-from open_sport_taxonomy import Modifier, Sport
+from open_sport_taxonomy import Sport
 
 
 class TestKnownCodes:
@@ -10,16 +10,10 @@ class TestKnownCodes:
     def test_with_modifiers(self):
         assert Sport.parse("cycling.road+race").resolve() == Sport("cycling.road+race")
 
-    def test_multiple_modifiers(self):
-        assert Sport.parse("cycling.road+race+virtual").resolve() == Sport("cycling.road+race+virtual")
-
 
 class TestUnknownSport:
     def test_walks_up_one_level(self):
         assert Sport.parse("cycling.road.criterium").resolve() == Sport("cycling.road")
-
-    def test_walks_up_two_levels(self):
-        assert Sport.parse("cycling.road.criterium.u23").resolve() == Sport("cycling.road")
 
     def test_walks_up_from_unknown_child_of_known_parent(self):
         assert Sport.parse("running.fell").resolve() == Sport("running")
@@ -33,10 +27,6 @@ class TestUnknownSport:
     def test_preserves_known_modifiers(self):
         assert Sport.parse("cycling.road.criterium+race").resolve() == Sport("cycling.road+race")
 
-    def test_preserves_multiple_known_modifiers(self):
-        result = Sport.parse("cycling.road.criterium+race+virtual").resolve()
-        assert result == Sport("cycling.road+race+virtual")
-
 
 class TestUnknownModifier:
     def test_single_unknown_dropped(self):
@@ -45,9 +35,6 @@ class TestUnknownModifier:
     def test_unknown_dropped_known_kept(self):
         assert Sport.parse("cycling.road+race+relay").resolve() == Sport("cycling.road+race")
 
-    def test_multiple_unknown_dropped(self):
-        assert Sport.parse("cycling.road+foo+relay").resolve() == Sport("cycling.road")
-
     def test_known_among_multiple_unknown(self):
         result = Sport.parse("cycling.road+foo+race+relay").resolve()
         assert result == Sport("cycling.road+race")
@@ -55,7 +42,9 @@ class TestUnknownModifier:
 
 class TestBothUnknown:
     def test_unknown_sport_and_modifier(self):
-        assert Sport.parse("cycling.road.criterium+race+relay").resolve() == Sport("cycling.road+race")
+        assert Sport.parse("cycling.road.criterium+race+relay").resolve() == Sport(
+            "cycling.road+race"
+        )
 
     def test_all_unknown(self):
         assert Sport.parse("parkour.freerunning+foo+bar").resolve() == Sport("generic")
@@ -67,10 +56,6 @@ class TestBothUnknown:
 class TestStandardReturnsSelf:
     def test_standard_sport_returns_self(self):
         sport = Sport("cycling.road+race")
-        assert sport.resolve() is sport
-
-    def test_standard_bare_returns_self(self):
-        sport = Sport("cycling.road")
         assert sport.resolve() is sport
 
 

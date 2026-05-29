@@ -253,7 +253,7 @@ https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/v0.1.0/schema.y
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). For local development, `make` is the entry point: `make test` runs lint and the full test suite (the safe default for CI), `make lint` runs static checks only, and `make help` lists every available target.
 
 ## License
 

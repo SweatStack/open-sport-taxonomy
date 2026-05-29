@@ -1,32 +1,22 @@
-import pytest
+"""Modifier enum domain-logic tests.
+
+Tests cover this library's data and API:
+  - Per-modifier properties (code, label, group) carry the right values.
+  - The :meth:`Modifier.in_group` classmethod returns the correct members.
+  - Schema-vs-code completeness: every modifier defined in schema.yaml
+    surfaces with the expected (code, label, group) triple.
+
+Stdlib :class:`enum.Enum` behavior (`Modifier("virtual") is Modifier.VIRTUAL`,
+iteration, value lookup) is not retested — those are Python language
+guarantees, not this library's contract.
+"""
 
 from open_sport_taxonomy import Modifier
-
-
-class TestEnumBehavior:
-    def test_lookup_by_value(self):
-        assert Modifier("virtual") is Modifier.VIRTUAL
-
-    def test_invalid_value_raises(self):
-        with pytest.raises(ValueError):
-            Modifier("unknown")
-
-    def test_iteration(self):
-        members = list(Modifier)
-        assert len(members) > 0
-        assert Modifier.VIRTUAL in members
-
-    def test_identity(self):
-        assert Modifier("race") is Modifier.RACE
 
 
 class TestProperties:
     def test_code(self):
         assert Modifier.VIRTUAL.code == "virtual"
-
-    def test_code_equals_value(self):
-        for m in Modifier:
-            assert m.code == m.value
 
     def test_label(self):
         assert Modifier.VIRTUAL.label == "virtual"
@@ -40,14 +30,6 @@ class TestProperties:
         assert Modifier.RACE.group == "purpose"
         assert Modifier.COMMUTE.group == "purpose"
         assert Modifier.TRAINING.group == "purpose"
-
-
-class TestStringInterop:
-    def test_equals_string(self):
-        assert Modifier.VIRTUAL == "virtual"
-
-    def test_fstring(self):
-        assert f"{Modifier.VIRTUAL}" == "virtual"
 
 
 class TestInGroup:
@@ -72,6 +54,7 @@ class TestInGroup:
 
 class TestCompleteness:
     def test_all_expected_modifiers_present(self):
+        """Schema-vs-code invariant: every documented modifier exists."""
         expected = {
             ("assisted", "assisted", None),
             ("commute", "commute", "purpose"),

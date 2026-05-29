@@ -2,6 +2,19 @@
 
 OpenSportTaxonomy is maintained by SweatStack. Contributions are welcome.
 
+## Developer quick reference
+
+The `Makefile` is the canonical entry point. Run `make` to see all targets.
+
+```bash
+make test     # lint then test — what CI runs
+make lint     # static checks only (ruff + mypy + schema + reference drift + generator)
+make fix      # auto-fix ruff lint + format issues
+make generate # regenerate auto-generated Python after schema/mapping edits
+```
+
+See [Test discipline](#test-discipline) below for the full workflow and rationale.
+
 ## Schema format
 
 The canonical schema is [`schema.yaml`](schema.yaml). It contains two flat lists:
@@ -97,6 +110,71 @@ When the upstream SDK adds new values:
 4. Run `uv run scripts/scaffold.py <platform>` to generate a skeleton mapping. Annotate where OST equivalents exist.
 5. Add the platform's runtime instance under `src/open_sport_taxonomy/platforms/`.
 6. Run `uv run scripts/lint.py` and the test suite.
+
+## Test discipline
+
+The test suite under `tests/` is organized into four directories:
+
+- `tests/domain/` — Sport, Modifier, parsing, resolution, matching, pydantic integration
+- `tests/algorithm/` — encode/decode code paths, the format-v3 loader/validator, GarminFitCode API
+- `tests/integration/` — round-trip safety net, reference-coverage invariants, build_reference idempotency, performance regression bounds
+- `tests/properties/` — property-based tests (Hypothesis) for the Sport class and platform encode/decode
+
+The suite earns its keep, not its size. Plan 017 trimmed it from 643 tests to ~268 example-based tests plus 11 property-based tests by removing redundancies. Future test additions are evaluated against these principles:
+
+1. **One test per claim.** Each test asserts a distinct logical property. If two tests fail together for the same root cause, one is redundant.
+2. **Test the algorithm, not the data.** Mapping YAML files are the canonical specification. Tests that assert specific data values (`assert garmin_fit.encode(Sport.CYCLING_ROAD) == GarminFitCode(2, 7)`) are tautologies. Test the *algorithms* with representative inputs.
+3. **Prefer build-time validation over runtime tests.** Properties enforceable in `scripts/generate.py` belong there. Runtime tests for the same property are defense-in-depth; ration them.
+4. **Properties over examples for pure functions.** For Sport parsing, encode/decode, hierarchy walks: reach for `tests/properties/` first. Hypothesis covers more space than parametrized hand-written cases.
+5. **Suite quality is measured, not asserted.** Coverage (`pytest-cov`), mutation score (`mutmut`), and strict typing (`mypy --strict`) are the falsifiable evidence. Use them.
+6. **Failure noise has a cost.** A 100-failure test pass communicates less than a 1-failure pass. Parametrization multiplies *coverage*, not *failure counts*.
+7. **Test names are spec.** `test_modifiers_dominate_discipline_in_encode_walk` reads like a contract clause. `test_cycling_road_virtual` reads like a YAML entry.
+
+### Running the suite
+
+The `Makefile` is the canonical entry point for every developer workflow. Run `make` (or `make help`) to see the full list of targets with descriptions.
+
+```bash
+make lint        # static checks: ruff, mypy, schema, reference drift, generator (~3s)
+make test-only   # pytest with coverage and benchmarks; skips lint (~8s)
+make test        # lint then test-only — the safe default for CI (~11s)
+make check       # alias for `test`; preferred CI entry point
+make format      # apply ruff formatter
+make fix         # auto-fix what ruff can (lint + format)
+make mutmut      # mutation testing baseline (~1m; periodic health check, not in CI)
+make generate    # regenerate auto-generated Python from schema + mappings
+make clean       # remove caches and build artifacts
+```
+
+**`make test` runs lint first by design.** The lint step is fast (~3s — ruff, mypy, schema, reference drift, and the generator's --check pass) and catches an entire class of issues that the test suite cannot. Defaulting to safety is the right call for CI and for pre-push checks.
+
+**Use `make test-only` for tight iteration loops.** When you're debugging a single failing test and don't want lint feedback on every cycle, `test-only` is the escape hatch.
+
+**Override pytest flags inline** with `PYTEST_FLAGS`:
+
+```bash
+make test-only PYTEST_FLAGS=-v                                    # verbose
+make test-only PYTEST_FLAGS="tests/algorithm/test_encode.py -v"   # one file
+make test-only PYTEST_FLAGS="-k test_modifiers_dominate -v"       # one test by name
+```
+
+Direct `uv run` invocations still work and are equivalent — the Makefile is a convenience layer, not a wrapper that changes behavior.
+
+### Quality baseline (as of this refactor)
+
+- Statement + branch coverage: ≥ 95% (enforced by `pytest-cov --cov-fail-under=95`)
+- `mypy --strict`: clean
+- `ruff check` and `ruff format --check`: clean
+- Mutation kill rate: 77.8% (42/54 mutants killed)
+
+The 12 surviving mutants are categorized:
+
+- **8 mutations of error-message string content.** Asserting exact error-message wording would make tests brittle without catching real bugs; we assert that the right exception type fires with a useful regex match, not that every character is identical. Accepted.
+- **2 mutations of type aliases** (`SportKey`, `CoarseningRule`). These are runtime no-ops; the `mypy --strict` check is the right tool, not pytest. Accepted.
+- **1 mutation in `decode`'s coarsening loop** (`continue` → `break`). Functionally equivalent given the current FIT mapping data: both code paths reach `fallback.decode = generic`. Would become a real gap if any platform adds non-generic fallbacks or a third coarsening rule; revisit at that time. Accepted with caveat.
+- **1 mutation of an unreachable error string** (`"Unknown coarsening rule kind"`). Format v3 defines only the `reset` rule kind, so this branch can't fire under any valid mapping. Tested for completeness via the loader's validation rules, but the runtime branch isn't reachable. Accepted.
+
+Periodic mutation runs (recommended quarterly) should not chase 80% by adding brittle tests. The kill rate is a tool for finding genuinely-weak tests, not a target to optimize.
 
 ## Versioning
 

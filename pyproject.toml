@@ -13,8 +13,161 @@ dependencies = []
 pydantic = ["pydantic>=2.0"]
 
 [dependency-groups]
-dev = ["pytest>=8.0", "pydantic>=2.0", "pyyaml>=6.0"]
+dev = [
+    "pytest>=8.0",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "hypothesis>=6.0",
+    "pytest-benchmark>=4.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.7.0",
+    "mypy>=1.10",
+    "mutmut>=2.5,<3.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.10.11,<0.11.0"]
 build-backend = "uv_build"
+
+# --------------------------------------------------------------------------
+# Testing
+# --------------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Coverage runs by default; thresholds enforced in CI.
+# Benchmarks under tests/integration/test_performance.py are excluded from
+# coverage collection (they would otherwise inflate counts) but still run
+# alongside the regular suite.
+addopts = [
+    "--cov=open_sport_taxonomy",
+    "--cov-report=term-missing",
+    "--cov-branch",
+    "--cov-fail-under=95",
+]
+
+[tool.coverage.run]
+source = ["src/open_sport_taxonomy"]
+branch = true
+omit = [
+    # Pydantic integration is conditionally imported and exercised by
+    # tests/domain/test_pydantic.py — coverage holes here would be a
+    # genuine concern, so this is included.
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+fail_under = 95
+show_missing = true
+skip_covered = false
+
+# --------------------------------------------------------------------------
+# Linting and formatting (ruff)
+# --------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [
+    "src/open_sport_taxonomy/_modifier.py",
+    "src/open_sport_taxonomy/_platforms.py",
+    "src/open_sport_taxonomy/_sport.py",
+    "src/open_sport_taxonomy/__init__.py",
+]
+# The generated files above are produced by scripts/generate.py and are
+# rewritten on every regeneration. They are excluded from ruff because:
+# (a) their style is the generator's responsibility, not the developer's,
+# (b) the generator emits intentionally repetitive code (dict literals,
+# class constants) that triggers SIM/RUF rules without adding value.
+# The generator itself is linted; tests around the generated module's
+# public API are linted; the generated file body is exempt.
+
+[tool.ruff.lint]
+# Curated rule set — chosen for value, not coverage. Each family:
+#   E   — pycodestyle errors (line length, indentation)
+#   F   — pyflakes (undefined names, unused imports — real bugs)
+#   B   — flake8-bugbear (mutable defaults, redundant assignments)
+#   I   — isort (deterministic import order)
+#   UP  — pyupgrade (modern Python idioms; we require 3.10+)
+#   SIM — flake8-simplify (clearer control flow)
+#   RUF — ruff-native checks (pyflakes-extended)
+select = ["E", "F", "B", "I", "UP", "SIM", "RUF"]
+ignore = [
+    # E501 (line length) — enforced by the formatter; disabling the lint
+    # rule avoids double-reporting.
+    "E501",
+    # RUF002 / RUF003 — ambiguous Unicode characters in docstrings and
+    # comments. The codebase deliberately uses `→` in algorithm pseudocode
+    # and `∅` for the empty set in OST hierarchy walks (see
+    # docs/translation.md). The ambiguity warning is well-intentioned but
+    # the alternative — ASCII-only docs — sacrifices readability of the
+    # spec for a non-issue (the strings are not security-sensitive).
+    "RUF002",
+    "RUF003",
+]
+
+# --------------------------------------------------------------------------
+# Type checking (mypy --strict)
+# --------------------------------------------------------------------------
+
+[tool.mypy]
+files = ["src/open_sport_taxonomy"]
+strict = true
+python_version = "3.10"
+# The generated modules use frozen dataclasses with __setattr__ hacks that
+# strict mypy struggles with; ignore the generated files since they are
+# tested via the runtime tests and not edited by hand.
+exclude = [
+    "src/open_sport_taxonomy/_modifier\\.py",
+    "src/open_sport_taxonomy/_platforms\\.py",
+    "src/open_sport_taxonomy/_sport\\.py",
+]
+
+# --------------------------------------------------------------------------
+# Mutation testing (mutmut) — periodic health check, not in CI
+# --------------------------------------------------------------------------
+# Run with:
+#   uv run mutmut run
+#   uv run mutmut results
+# Target ≥ 80% kill rate. Surviving mutants reviewed: add a test, mark
+# equivalent, or accept with documented rationale in CONTRIBUTING.md.
+
+# mutmut 2.x reads config from setup.cfg or via CLI flags; the
+# pyproject [tool.mutmut] block is ignored. The canonical invocation
+# is the one documented in CONTRIBUTING.md:
+#
+#   uv run mutmut run --paths-to-mutate=src/open_sport_taxonomy/_platform.py
+#
+# We mutate the hand-written runtime only. The generated _modifier.py,
+# _sport.py, and _platforms.py would produce vast numbers of mutants
+# in the generator's stylized output (literals in tables, repetitive
+# class constants) without testing meaningful logic. The runtime
+# algorithms in _platform.py are where mutation testing earns its keep.
+
+[[tool.mypy.overrides]]
+# pydantic.py imports pydantic conditionally; the runtime is fine but
+# strict mode needs the dep present to check it. Since pydantic is an
+# optional extra, treat the import as Any when checking.
+module = "open_sport_taxonomy.pydantic"
+ignore_missing_imports = false
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use `__import__("pytest")` for lazy imports, and may have
+# longer test names than production code conventions allow.
+"tests/**/*.py" = [
+    "B904",  # raise-from in tests is rarely useful
+]
+# test_loader.py imports scripts/generate.py via importlib + sys.modules.
+# E402 fires on the resulting top-level import below `sys.modules[...] = ...`.
+# The dynamic import is the point of the file (testing the validator
+# without depending on a package install).
+"tests/algorithm/test_loader.py" = ["E402"]
+# test_pydantic.py uses pytest.importorskip at module top to make the
+# whole file conditional on the optional `pydantic` dependency. All
+# subsequent imports are deliberate.
+"tests/domain/test_pydantic.py" = ["E402"]

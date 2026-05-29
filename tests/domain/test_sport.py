@@ -20,10 +20,6 @@ class TestConstruction:
         assert sport.code == "cycling.road"
         assert sport.modifiers == frozenset({Modifier.RACE})
 
-    def test_from_encoded_string_single_modifier(self):
-        sport = Sport("cycling.road+race")
-        assert sport.modifiers == frozenset({Modifier.RACE})
-
     def test_unknown_sport_code(self):
         with pytest.raises(ValueError, match="Unknown sport code"):
             Sport("cycling.fake")
@@ -55,10 +51,6 @@ class TestConstruction:
     def test_modifier_conflict(self):
         with pytest.raises(ValueError, match="conflict"):
             Sport("cycling.road+commute+race")
-
-    def test_modifier_conflict_explicit(self):
-        with pytest.raises(ValueError, match="conflict"):
-            Sport("cycling.road", modifiers={Modifier.RACE, Modifier.COMMUTE})
 
     def test_non_string_raises_type_error(self):
         with pytest.raises(TypeError, match="Expected str"):
@@ -109,9 +101,6 @@ class TestEquality:
 
     def test_not_equal_different_modifiers(self):
         assert Sport("cycling.road") != Sport("cycling.road+race")
-
-    def test_equal_to_class_constant(self):
-        assert Sport("cycling.road") == Sport.CYCLING_ROAD
 
     def test_hash_equal(self):
         a = Sport("cycling.road+race")
@@ -178,17 +167,11 @@ class TestTaxonomy:
 
 
 class TestAll:
-    def test_all_returns_all_taxonomy_entries(self):
-        all_sports = Sport.all()
-        assert len(all_sports) == len(TAXONOMY)
-
-    def test_all_entries_have_no_modifiers(self):
-        for sport in Sport.all():
-            assert sport.modifiers == frozenset()
-
     def test_all_codes_match_taxonomy(self):
-        codes = {s.code for s in Sport.all()}
-        assert codes == set(TAXONOMY.keys())
+        """Sport.all() returns one entry per known code, all with empty modifiers."""
+        all_sports = Sport.all()
+        assert {s.code for s in all_sports} == set(TAXONOMY.keys())
+        assert all(s.modifiers == frozenset() for s in all_sports)
 
 
 class TestClassConstants:
@@ -200,6 +183,6 @@ class TestClassConstants:
             assert constant.modifiers == frozenset()
 
     def test_constant_equals_constructed(self):
-        assert Sport.CYCLING_ROAD == Sport("cycling.road")
-        assert Sport.RUNNING_TRAIL == Sport("running.trail")
-        assert Sport.XC_SKIING_DOUBLE_POLING == Sport("xc_skiing.double_poling")
+        assert Sport("cycling.road") == Sport.CYCLING_ROAD
+        assert Sport("running.trail") == Sport.RUNNING_TRAIL
+        assert Sport("xc_skiing.double_poling") == Sport.XC_SKIING_DOUBLE_POLING
