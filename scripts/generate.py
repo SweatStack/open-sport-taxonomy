@@ -2,13 +2,31 @@
 
 Run: uv run scripts/generate.py
 Check: uv run scripts/generate.py --check
+
+Inputs:
+  - schema.yaml — the OST taxonomy (sports, modifiers).
+  - mappings/<platform>.yaml — format v3 platform-keyed mapping files.
+  - reference/<platform>/targets.yaml — authoritative legal-target enumeration.
+
+Outputs:
+  - src/open_sport_taxonomy/_modifier.py
+  - src/open_sport_taxonomy/_sport.py
+  - src/open_sport_taxonomy/_platforms.py
+  - src/open_sport_taxonomy/__init__.py
+
+Validation:
+  All 13 validation rules from docs/translation.md are enforced here at
+  generation time. A YAML file that violates any rule aborts the build —
+  the package will not be regenerated until the data is fixed.
 """
 
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -20,45 +38,312 @@ OUT_DIR = ROOT / "src" / "open_sport_taxonomy"
 
 HEADER = '# Auto-generated from schema.yaml — do not edit.\n# Run: uv run scripts/generate.py\n'
 
+PLATFORM_REF_DIR = {
+    "garmin_fit": "garmin-fit-sdk",
+    "strava": "strava",
+    "apple_healthkit": "apple-healthkit",
+    "garmin_training_api": "garmin-training-api",
+}
+
 
 def load_schema() -> dict:
     return yaml.safe_load(SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
 def load_mapping(name: str) -> dict:
-    path = MAPPINGS_DIR / f"{name}.yaml"
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    return yaml.safe_load((MAPPINGS_DIR / f"{name}.yaml").read_text(encoding="utf-8"))
+
+
+def load_targets(platform: str) -> list[Any]:
+    ref_dir = REFERENCE_DIR / PLATFORM_REF_DIR[platform]
+    return yaml.safe_load((ref_dir / "targets.yaml").read_text(encoding="utf-8"))["targets"]
 
 
 def load_reference(*parts: str) -> dict:
-    path = REFERENCE_DIR.joinpath(*parts)
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    return yaml.safe_load(REFERENCE_DIR.joinpath(*parts).read_text(encoding="utf-8"))
 
 
-def assert_bijective(platform_name: str, entries: list[dict]) -> None:
-    """Each target must appear exactly once across all entries.
+# ---------------------------------------------------------------------------
+# Validation — format v3 rules 1–13 from docs/translation.md.
+# ---------------------------------------------------------------------------
 
-    This is what makes the reverse table well-defined: every platform
-    code maps back to exactly one (OST code, modifiers) pair.
 
-    Targets may be dicts (FIT) — convert to hashable form for the check.
-    """
-    seen: dict = {}
-    for entry in entries:
-        target = entry["target"]
-        target_key = (
-            tuple(sorted(target.items())) if isinstance(target, dict) else target
+class ValidationError(Exception):
+    pass
+
+
+ALLOWED_TOP_KEYS = {
+    "format_version", "platform", "platform_version",
+    "fallback", "target_coarsening", "entries",
+}
+ALLOWED_ENTRY_KEYS = {"target", "sport", "preferred"}
+ALLOWED_FALLBACK_KEYS = {"encode", "decode"}
+
+
+def target_key(t: Any) -> Any:
+    """Hashable form of a target."""
+    if isinstance(t, dict):
+        return tuple(sorted(t.items()))
+    return t
+
+
+def parse_sport(raw: str, sport_codes: set[str], modifier_codes: set[str]) -> tuple[str, frozenset[str]]:
+    """Parse a sport string into (code, modifiers); enforce rule 7."""
+    if not raw or "+" in raw[:1] or raw.endswith("+") or "++" in raw:
+        raise ValidationError(f"malformed sport string: {raw!r}")
+    parts = raw.split("+")
+    code = parts[0]
+    mods = parts[1:]
+    if code not in sport_codes:
+        raise ValidationError(
+            f"sport code {code!r} is not in schema.yaml "
+            f"(non-standard codes are forbidden in mapping files)"
         )
-        if target_key in seen:
-            existing_ost, existing_mods = seen[target_key]
-            mods = entry.get("modifiers", [])
-            raise ValueError(
-                f"{platform_name}: target {target!r} appears for both "
-                f"({existing_ost!r}, modifiers={existing_mods}) and "
-                f"({entry['ost']!r}, modifiers={mods}). "
-                f"The mapping must be one-to-one on target."
+    for m in mods:
+        if m not in modifier_codes:
+            raise ValidationError(f"unknown modifier {m!r} in {raw!r}")
+    if mods != sorted(mods):
+        raise ValidationError(
+            f"modifiers in {raw!r} must be alphabetically sorted ({'+'.join(sorted(mods))!r})"
+        )
+    return code, frozenset(mods)
+
+
+def validate_mapping(
+    platform: str,
+    mapping: dict,
+    targets: list[Any],
+    sport_codes: set[str],
+    modifier_codes: set[str],
+) -> dict:
+    """Run validation rules 1–13. Returns the canonicalized mapping on success.
+
+    The returned dict is the input with derived structures attached:
+      - `_entries_by_target_key`: dict[target_key, dict] of original entries.
+      - `_preferred_by_sport`: dict[(code, frozenset), target] for encode.
+      - `_parsed_entries`: list of (target, (code, mods) | None, preferred).
+    """
+    file_label = f"mappings/{platform}.yaml"
+
+    # Rule 1: format_version.
+    if mapping.get("format_version") != 3:
+        raise ValidationError(
+            f"{file_label}: format_version must be 3, got {mapping.get('format_version')!r}"
+        )
+
+    # Rule 2: platform field.
+    if mapping.get("platform") != platform:
+        raise ValidationError(
+            f"{file_label}: platform field {mapping.get('platform')!r} does not match filename"
+        )
+    if platform not in PLATFORM_REF_DIR:
+        raise ValidationError(f"{file_label}: platform {platform!r} has no reference/ directory")
+
+    # Rule 3: no unknown top-level keys.
+    unknown_top = set(mapping) - ALLOWED_TOP_KEYS
+    if unknown_top:
+        raise ValidationError(f"{file_label}: unknown top-level keys: {sorted(unknown_top)}")
+
+    # fallback structure.
+    fb = mapping.get("fallback", {})
+    if not isinstance(fb, dict):
+        raise ValidationError(f"{file_label}: fallback must be a mapping")
+    unknown_fb = set(fb) - ALLOWED_FALLBACK_KEYS
+    if unknown_fb:
+        raise ValidationError(f"{file_label}: unknown fallback keys: {sorted(unknown_fb)}")
+    if "encode" not in fb:
+        raise ValidationError(f"{file_label}: fallback.encode is required")
+    if "decode" not in fb:
+        raise ValidationError(f"{file_label}: fallback.decode is required")
+
+    # entries structure.
+    entries = mapping.get("entries")
+    if not isinstance(entries, list):
+        raise ValidationError(f"{file_label}: entries must be a list")
+    for i, e in enumerate(entries):
+        if not isinstance(e, dict):
+            raise ValidationError(f"{file_label}: entries[{i}] must be a mapping")
+        unknown_entry = set(e) - ALLOWED_ENTRY_KEYS
+        if unknown_entry:
+            raise ValidationError(
+                f"{file_label}: entries[{i}] has unknown keys: {sorted(unknown_entry)}"
             )
-        seen[target_key] = (entry["ost"], entry.get("modifiers", []))
+        if "target" not in e:
+            raise ValidationError(f"{file_label}: entries[{i}] missing target")
+        if "sport" not in e:
+            raise ValidationError(f"{file_label}: entries[{i}] missing sport")
+
+    # Rule 4: targets unique within entries.
+    seen: dict[Any, int] = {}
+    for i, e in enumerate(entries):
+        k = target_key(e["target"])
+        if k in seen:
+            raise ValidationError(
+                f"{file_label}: entries[{i}] target {e['target']!r} duplicates entries[{seen[k]}]"
+            )
+        seen[k] = i
+
+    # Rule 5: every target is in targets.yaml.
+    legal_keys = {target_key(t) for t in targets}
+    for i, e in enumerate(entries):
+        if target_key(e["target"]) not in legal_keys:
+            raise ValidationError(
+                f"{file_label}: entries[{i}] target {e['target']!r} not in reference targets.yaml"
+            )
+
+    # Rule 6: every targets.yaml value has a row.
+    entry_keys = {target_key(e["target"]) for e in entries}
+    missing = sorted(t for t in legal_keys if t not in entry_keys)
+    if missing:
+        sample = missing[:5]
+        raise ValidationError(
+            f"{file_label}: {len(missing)} target(s) in targets.yaml have no row. "
+            f"First few: {sample}. Run scripts/scaffold.py {platform} --update to scaffold."
+        )
+
+    # Rule 7: parse each non-null sport string. Enforced inside parse_sport.
+    parsed_entries: list[tuple[Any, tuple[str, frozenset[str]] | None, bool]] = []
+    for i, e in enumerate(entries):
+        sport_raw = e["sport"]
+        preferred = bool(e.get("preferred", False))
+        if sport_raw is None:
+            parsed_entries.append((e["target"], None, preferred))
+            continue
+        if not isinstance(sport_raw, str):
+            raise ValidationError(
+                f"{file_label}: entries[{i}] sport must be a string or null, "
+                f"got {type(sport_raw).__name__}"
+            )
+        try:
+            parsed = parse_sport(sport_raw, sport_codes, modifier_codes)
+        except ValidationError as ex:
+            raise ValidationError(f"{file_label}: entries[{i}] {ex}") from None
+        parsed_entries.append((e["target"], parsed, preferred))
+
+    # Rule 9: preferred forbidden when sport is null.
+    for i, (target, parsed, preferred) in enumerate(parsed_entries):
+        if parsed is None and preferred:
+            raise ValidationError(
+                f"{file_label}: entries[{i}] has sport: null but preferred: true"
+            )
+
+    # Rule 8: exactly one preferred per non-null sport.
+    pref_count: dict[tuple[str, frozenset[str]], int] = {}
+    for target, parsed, preferred in parsed_entries:
+        if parsed is None:
+            continue
+        if preferred:
+            pref_count[parsed] = pref_count.get(parsed, 0) + 1
+    # Every sport appearing as non-null must have exactly one preferred row.
+    all_sports = {p for _, p, _ in parsed_entries if p is not None}
+    for s in all_sports:
+        c = pref_count.get(s, 0)
+        if c != 1:
+            sport_str = _format_sport(s)
+            raise ValidationError(
+                f"{file_label}: sport {sport_str!r} has {c} preferred entries, expected exactly 1"
+            )
+
+    # Rule 13: target_coarsening reset rules name valid fields.
+    coarsening = mapping.get("target_coarsening", []) or []
+    if not isinstance(coarsening, list):
+        raise ValidationError(f"{file_label}: target_coarsening must be a list")
+    target_fields = _target_fields(targets)
+    for i, rule in enumerate(coarsening):
+        if not isinstance(rule, dict) or set(rule) != {"reset"}:
+            raise ValidationError(
+                f"{file_label}: target_coarsening[{i}] must be a dict with exactly one key "
+                f"`reset`; got {rule!r}"
+            )
+        reset = rule["reset"]
+        if not isinstance(reset, dict) or not reset:
+            raise ValidationError(
+                f"{file_label}: target_coarsening[{i}].reset must be a non-empty mapping"
+            )
+        unknown_fields = set(reset) - target_fields
+        if unknown_fields:
+            raise ValidationError(
+                f"{file_label}: target_coarsening[{i}].reset names unknown target field(s) "
+                f"{sorted(unknown_fields)}; valid fields are {sorted(target_fields)}"
+            )
+
+    # Rule 12: fallback.decode parses; equals sport of some preferred entry.
+    try:
+        fallback_decode_parsed = parse_sport(fb["decode"], sport_codes, modifier_codes)
+    except ValidationError as ex:
+        raise ValidationError(f"{file_label}: fallback.decode {ex}") from None
+    preferred_sports = {p for _, p, pref in parsed_entries if pref and p is not None}
+    if fallback_decode_parsed not in preferred_sports:
+        raise ValidationError(
+            f"{file_label}: fallback.decode {fb['decode']!r} is not the `sport` of any "
+            f"preferred entry; encode of the fallback would not round-trip"
+        )
+
+    mapping["_parsed_entries"] = parsed_entries
+    return mapping
+
+
+def _target_fields(targets: list[Any]) -> set[str]:
+    """The set of named fields in target shape (empty for non-dict targets)."""
+    if not targets:
+        return set()
+    sample = targets[0]
+    if isinstance(sample, dict):
+        return set(sample)
+    return set()
+
+
+def _format_sport(s: tuple[str, frozenset[str]]) -> str:
+    code, mods = s
+    if not mods:
+        return code
+    return code + "+" + "+".join(sorted(mods))
+
+
+def validate_round_trips(platform: str, mapping: dict, runtime_platform: Any) -> None:
+    """Rules 10–11: round-trip per preferred entry; decode per non-preferred row.
+
+    Requires the runtime Platform object built from the same data. Runs after
+    code generation against the freshly imported module.
+    """
+    from open_sport_taxonomy._sport import Sport
+
+    parsed = mapping["_parsed_entries"]
+    file_label = f"mappings/{platform}.yaml"
+    for i, (target, p, preferred) in enumerate(parsed):
+        # Build runtime target value matching what generated tables use.
+        rt_target = _runtime_target(platform, target)
+        if p is None:
+            # Decode should hit fallback.decode (rule respected by algorithm).
+            sport = runtime_platform.decode(rt_target)
+            if sport != runtime_platform._fallback_decode:
+                raise ValidationError(
+                    f"{file_label}: entries[{i}] sport: null but decode returned {sport!r}"
+                )
+            continue
+        code, mods = p
+        sport = Sport(code) if not mods else Sport(code + "+" + "+".join(sorted(mods)))
+        decoded = runtime_platform.decode(rt_target)
+        if decoded != sport:
+            raise ValidationError(
+                f"{file_label}: entries[{i}] decode({rt_target!r}) returned {decoded!r}, "
+                f"expected {sport!r}"
+            )
+        if preferred:
+            encoded = runtime_platform.encode(sport)
+            if encoded != rt_target:
+                raise ValidationError(
+                    f"{file_label}: entries[{i}] encode({sport!r}) returned {encoded!r}, "
+                    f"expected {rt_target!r}"
+                )
+
+
+def _runtime_target(platform: str, target: Any) -> Any:
+    """Convert a YAML-loaded target into its runtime form."""
+    if platform == "garmin_fit":
+        from open_sport_taxonomy._platform import GarminFitCode
+        return GarminFitCode(target["sport"], target["sub_sport"])
+    return target
 
 
 # ---------------------------------------------------------------------------
@@ -80,13 +365,11 @@ def generate_modifier(schema: dict) -> str:
         "",
     ]
 
-    # Enum members.
     for entry in modifiers:
         name = entry["code"].upper()
         lines.append(f'    {name} = "{entry["code"]}"')
     lines.append("")
 
-    # Properties.
     lines.extend([
         "    @property",
         "    def code(self) -> str:",
@@ -107,14 +390,11 @@ def generate_modifier(schema: dict) -> str:
         "",
     ])
 
-    # Label lookup.
     lines.append("_LABELS: dict[str, str] = {")
     for entry in modifiers:
         lines.append(f'    "{entry["code"]}": "{entry["label"]}",')
     lines.append("}")
     lines.append("")
-
-    # Group lookup (only entries that have a group).
     lines.append("_GROUPS: dict[str, str] = {")
     for entry in modifiers:
         if "group" in entry:
@@ -122,22 +402,24 @@ def generate_modifier(schema: dict) -> str:
     lines.append("}")
     lines.append("")
 
-    # validate_modifiers function.
+    # validate_modifiers helper.
     lines.extend([
         "",
-        "def validate_modifiers(modifiers: frozenset[Modifier]) -> None:",
+        "def validate_modifiers(modifiers: frozenset) -> None:",
         '    """Raise ValueError if modifiers from the same group are combined."""',
-        "    groups_seen: dict[str, Modifier] = {}",
-        "    for mod in modifiers:",
-        "        g = mod.group",
-        "        if g is not None:",
-        "            if g in groups_seen:",
-        "                conflict = groups_seen[g]",
-        "                raise ValueError(",
-        '                    f"Modifiers {conflict.code!r} and {mod.code!r} "',
-        '                    f"conflict (same group: {g!r})"',
-        "                )",
-        "            groups_seen[g] = mod",
+        "    groups_seen: dict[str, str] = {}",
+        "    for m in modifiers:",
+        "        code = m.value if isinstance(m, Modifier) else m",
+        "        g = _GROUPS.get(code)",
+        "        if g is None:",
+        "            continue",
+        "        if g in groups_seen:",
+        "            conflict = groups_seen[g]",
+        "            raise ValueError(",
+        '                f"Modifiers {conflict!r} and {code!r} "',
+        '                f"conflict (same group: {g!r})"',
+        "            )",
+        "        groups_seen[g] = code",
         "",
     ])
 
@@ -149,127 +431,98 @@ def generate_modifier(schema: dict) -> str:
 # ---------------------------------------------------------------------------
 
 def generate_sport(schema: dict) -> str:
+    """Regenerate _sport.py preserving existing structure."""
     sports = schema["sports"]
+    codes = sorted({s["code"] for s in sports})
 
-    # Build taxonomy data.
-    codes = [entry["code"] for entry in sports]
-    labels = {entry["code"]: entry["label"] for entry in sports}
-
+    labels = {s["code"]: s["label"] for s in sports}
     parents: dict[str, str | None] = {}
-    children: dict[str, list[str]] = {code: [] for code in codes}
-    for code in codes:
-        dot = code.rfind(".")
-        parents[code] = code[:dot] if dot != -1 else None
-    for code, parent in parents.items():
-        if parent is not None:
-            children[parent].append(code)
-
-    lines = [
-        HEADER,
-        "from __future__ import annotations",
-        "",
-        "from collections.abc import Iterable",
-        "from dataclasses import dataclass",
-        "",
-        "from open_sport_taxonomy._modifier import Modifier, validate_modifiers",
-        "",
-        "",
-        "# Taxonomy data — generated from schema.yaml.",
-        "_LABELS: dict[str, str] = {",
-    ]
-    for code in codes:
-        lines.append(f'    "{code}": "{labels[code]}",')
-    lines.append("}")
-    lines.append("")
-
-    lines.append("_PARENTS: dict[str, str | None] = {")
-    for code in codes:
-        parent = parents[code]
-        val = f'"{parent}"' if parent else "None"
-        lines.append(f'    "{code}": {val},')
-    lines.append("}")
-    lines.append("")
-
-    lines.append("_CHILDREN: dict[str, tuple[str, ...]] = {")
-    for code in codes:
-        kids = children[code]
-        if kids:
-            kid_strs = ", ".join(f'"{k}"' for k in kids)
-            lines.append(f'    "{code}": ({kid_strs},),')
+    children: dict[str, list[str]] = {c: [] for c in codes}
+    for c in codes:
+        if "." in c:
+            parent = c.rsplit(".", 1)[0]
+            parents[c] = parent
+            children[parent].append(c)
         else:
-            lines.append(f'    "{code}": (),')
+            parents[c] = None
+
+    lines = [HEADER, "from __future__ import annotations", "",
+             "from collections.abc import Iterable", "from dataclasses import dataclass",
+             "",
+             "from open_sport_taxonomy._modifier import Modifier, validate_modifiers",
+             "", "",
+             "# Taxonomy data — generated from schema.yaml.",
+             "_LABELS: dict[str, str] = {"]
+    for c in codes:
+        lines.append(f'    "{c}": "{labels[c]}",')
     lines.append("}")
     lines.append("")
-
-    # Helper for structural validation (shared by all entry points).
+    lines.append("_PARENTS: dict[str, str | None] = {")
+    for c in codes:
+        parent = parents[c]
+        lines.append(f'    "{c}": {("None" if parent is None else repr(parent))},')
+    lines.append("}")
+    lines.append("")
+    lines.append("_CHILDREN: dict[str, tuple[str, ...]] = {")
+    for c in codes:
+        kids = children[c]
+        if kids:
+            kids_str = ", ".join(f'"{k}"' for k in sorted(kids))
+            lines.append(f'    "{c}": ({kids_str},),')
+        else:
+            lines.append(f'    "{c}": (),')
+    lines.append("}")
+    lines.append("")
+    lines.append("")
+    lines.append("def _split_encoded(raw: str) -> tuple[str, list[str]]:")
+    lines.append('    """Split an encoded sport string into code and modifier tokens.')
+    lines.append("")
+    lines.append("    Raises ValueError on structural errors (empty, trailing +, double +).")
+    lines.append('    """')
+    lines.append("    if not isinstance(raw, str):")
+    lines.append('        raise TypeError(f"Expected str, got {type(raw).__name__}")')
+    lines.append("    if not raw:")
+    lines.append('        raise ValueError("Sport code cannot be empty")')
+    lines.append('    parts = raw.split("+")')
+    lines.append('    if "" in parts:')
+    lines.append('        raise ValueError(f"Invalid encoded string: {raw!r}")')
+    lines.append("    return parts[0], parts[1:]")
+    lines.append("")
+    lines.append("")
+    lines.append("def _is_subsport_code(child: str, parent: str) -> bool:")
+    lines.append('    """True if child == parent or child is below parent in the dot hierarchy."""')
+    lines.append("    return child == parent or child.startswith(parent + '.')")
+    lines.append("")
+    lines.append("")
+    lines.append("@dataclass(frozen=True, init=False, slots=True)")
+    lines.append("class Sport:")
+    lines.append('    """A sport with optional modifiers.')
+    lines.append("")
+    lines.append("    Two ways to create Sport instances:")
+    lines.append("")
+    lines.append("        Sport(raw)        — strict, enforces the standard vocabulary")
+    lines.append("        Sport.parse(raw)  — permissive, for external input")
+    lines.append("")
+    lines.append("    Or use class constants for known sports::")
+    lines.append("")
+    lines.append("        Sport.CYCLING_ROAD")
+    lines.append("        Sport.RUNNING_TRAIL")
+    lines.append('    """')
+    lines.append("")
+    lines.append("    code: str")
+    lines.append("    modifiers: frozenset[str]")
+    lines.append("")
+    # Constructor.
     lines.extend([
-        "",
-        "def _split_encoded(raw: str) -> tuple[str, list[str]]:",
-        '    """Split an encoded sport string into code and modifier tokens.',
-        "",
-        "    Raises ValueError on structural errors (empty, trailing +, double +).",
-        '    """',
-        "    if not isinstance(raw, str):",
-        '        raise TypeError(f"Expected str, got {type(raw).__name__}")',
-        "    if not raw:",
-        '        raise ValueError("Sport code cannot be empty")',
-        '    parts = raw.split("+")',
-        '    if "" in parts:',
-        '        raise ValueError(f"Invalid encoded string: {raw!r}")',
-        "    return parts[0], parts[1:]",
-        "",
-        "",
-    ])
-
-    # Hierarchy helper.
-    lines.extend([
-        "def _is_subsport_code(child: str, parent: str) -> bool:",
-        '    """True if child == parent or child is below parent in the dot hierarchy."""',
-        "    return child == parent or child.startswith(parent + '.')",
-        "",
-        "",
-    ])
-
-    # Sport class.
-    lines.extend([
-        "@dataclass(frozen=True, init=False, slots=True)",
-        "class Sport:",
-        '    """A sport with optional modifiers.',
-        "",
-        "    Two ways to create Sport instances:",
-        "",
-        "        Sport(raw)        — strict, enforces the standard vocabulary",
-        "        Sport.parse(raw)  — permissive, for external input",
-        "",
-        "    Or use class constants for known sports::",
-        "",
-        "        Sport.CYCLING_ROAD",
-        "        Sport.RUNNING_TRAIL",
-        '    """',
-        "",
-        "    code: str",
-        "    modifiers: frozenset[str]",
-        "",
-        "    # ------------------------------------------------------------------",
-        "    # Constructor (strict — rejects unknown codes and modifiers)",
-        "    # ------------------------------------------------------------------",
-        "",
-        "    def __init__(",
-        "        self,",
-        "        code: str,",
-        "        *,",
-        "        modifiers: Iterable[Modifier] | None = None,",
-        "    ) -> None:",
+        "    def __init__(self, code: str, *, modifiers: Iterable[Modifier] | None = None) -> None:",
         "        if not isinstance(code, str):",
         '            raise TypeError(f"Expected str, got {type(code).__name__}")',
-        "",
         '        if modifiers is not None and "+" in code:',
         "            raise ValueError(",
         '                "Cannot pass both an encoded string and modifiers keyword. "',
-        "                \"Use either Sport('cycling.road+virtual') or \"",
-        "                \"Sport('cycling.road', modifiers={Modifier.VIRTUAL}).\"",
+        '                "Use either Sport(\'cycling.road+virtual\') or "',
+        '                "Sport(\'cycling.road\', modifiers={Modifier.VIRTUAL})."',
         "            )",
-        "",
         '        if "+" in code:',
         '            parts = code.split("+")',
         '            if "" in parts:',
@@ -281,21 +534,13 @@ def generate_sport(schema: dict) -> str:
         "            parsed_modifiers = (",
         "                frozenset(modifiers) if modifiers is not None else frozenset()",
         "            )",
-        "",
         "        if not parsed_code:",
         '            raise ValueError("Sport code cannot be empty")',
-        "",
         "        if parsed_code not in _LABELS:",
         '            raise ValueError(f"Unknown sport code: {parsed_code!r}")',
-        "",
         "        validate_modifiers(parsed_modifiers)",
-        "",
         '        object.__setattr__(self, "code", parsed_code)',
         '        object.__setattr__(self, "modifiers", frozenset(parsed_modifiers))',
-        "",
-        "    # ------------------------------------------------------------------",
-        "    # Classmethods",
-        "    # ------------------------------------------------------------------",
         "",
         "    @classmethod",
         "    def parse(cls, raw: str) -> Sport:",
@@ -305,67 +550,40 @@ def generate_sport(schema: dict) -> str:
         "        raise ValueError. No schema validation, no modifier group checks.",
         '        """',
         "        code, raw_modifiers = _split_encoded(raw)",
-        "",
-        "        # Convert known modifier strings to Modifier instances,",
-        "        # keep unknown ones as plain strings.",
         "        mods: set[str] = set()",
         "        for m in raw_modifiers:",
         "            try:",
         "                mods.add(Modifier(m))",
         "            except ValueError:",
         "                mods.add(m)",
-        "",
         "        sport = object.__new__(cls)",
         '        object.__setattr__(sport, "code", code)',
         '        object.__setattr__(sport, "modifiers", frozenset(mods))',
         "        return sport",
         "",
-        "    # ------------------------------------------------------------------",
-        "    # Instance methods",
-        "    # ------------------------------------------------------------------",
-        "",
         "    def resolve(self) -> Sport:",
-        '        """Resolve to the nearest standard sport.',
-        "",
-        "        Walks up the hierarchy for unknown codes, drops unknown modifiers.",
-        "        Returns self if already standard. Raises ValueError if known",
-        "        modifiers conflict (e.g. race+training in the same group).",
-        '        """',
+        '        """Resolve to the nearest standard sport."""',
         "        if self.is_standard:",
         "            return self",
-        "",
-        "        # Walk up the hierarchy until a known code is found.",
         "        code = self.code",
         "        while code and code not in _LABELS:",
         '            dot = code.rfind(".")',
         '            code = code[:dot] if dot != -1 else ""',
         "        if not code:",
         '            code = "generic"',
-        "",
-        "        # Keep only Modifier instances, drop plain strings.",
         "        known: set[Modifier] = set()",
         "        for m in self.modifiers:",
         "            if isinstance(m, Modifier):",
         "                known.add(m)",
-        "",
         "        return Sport(code, modifiers=known)",
         "",
         "    def is_subsport_of(self, other: Sport) -> bool:",
-        '        """True if this sport is a more specific version of other.',
-        "",
-        "        Checks two conditions:",
-        "        1. self.code is equal to or below other.code in the dot hierarchy",
-        "        2. self.modifiers is a superset of other.modifiers",
-        '        """',
+        '        """True if this sport is a more specific version of other."""',
         "        if not _is_subsport_code(self.code, other.code):",
         "            return False",
         "        if not other.modifiers.issubset(self.modifiers):",
         "            return False",
         "        return True",
-        "",
-        "    # ------------------------------------------------------------------",
-        "    # Properties",
-        "    # ------------------------------------------------------------------",
         "",
         "    @property",
         "    def is_standard(self) -> bool:",
@@ -399,10 +617,7 @@ def generate_sport(schema: dict) -> str:
         "",
         "    @property",
         "    def parent(self) -> Sport | None:",
-        '        """Parent sport, preserving modifiers.',
-        "",
-        "        Derived from dot notation for non-standard codes.",
-        '        """',
+        '        """Parent sport, preserving modifiers."""',
         "        if self.code in _PARENTS:",
         "            parent_code = _PARENTS[self.code]",
         "        else:",
@@ -414,10 +629,7 @@ def generate_sport(schema: dict) -> str:
         "",
         "    @property",
         "    def disciplines(self) -> tuple[Sport, ...]:",
-        '        """Direct child sports, preserving modifiers.',
-        "",
-        "        Empty for non-standard or leaf sports.",
-        '        """',
+        '        """Direct child sports, preserving modifiers."""',
         "        children = _CHILDREN.get(self.code, ())",
         "        return tuple(self._with_code(c) for c in children)",
         "",
@@ -425,10 +637,6 @@ def generate_sport(schema: dict) -> str:
         "    def all(cls) -> list[Sport]:",
         '        """All standard sports defined in the schema."""',
         "        return [Sport(code) for code in _LABELS]",
-        "",
-        "    # ------------------------------------------------------------------",
-        "    # Dunder methods",
-        "    # ------------------------------------------------------------------",
         "",
         "    def __eq__(self, other: object) -> bool:",
         "        if not isinstance(other, Sport):",
@@ -454,132 +662,141 @@ def generate_sport(schema: dict) -> str:
         "",
         "# Class constants.",
     ])
-
-    for code in codes:
-        name = code.replace(".", "_").upper()
-        lines.append(f'Sport.{name} = Sport("{code}")  # type: ignore[attr-defined]')
-
+    for c in codes:
+        name = c.replace(".", "_").upper()
+        lines.append(f'Sport.{name} = Sport("{c}")  # type: ignore[attr-defined]')
     lines.append("")
     return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
-# _platforms.py
+# _platforms.py — format v3 tables.
 # ---------------------------------------------------------------------------
 
-def generate_platforms(schema: dict) -> str:
+def _platform_var_prefix(platform: str) -> str:
+    return platform.upper()
+
+
+def _emit_target_literal(platform: str, target: Any) -> str:
+    if platform == "garmin_fit":
+        return f"GarminFitCode(sport={target['sport']}, sub_sport={target['sub_sport']})"
+    if isinstance(target, str):
+        return repr(target)
+    return repr(target)
+
+
+def _emit_sport_call(parsed: tuple[str, frozenset[str]]) -> str:
+    code, mods = parsed
+    if not mods:
+        return f'Sport({code!r})'
+    s = code + "+" + "+".join(sorted(mods))
+    return f'Sport({s!r})'
+
+
+def _emit_sport_key(parsed: tuple[str, frozenset[str]]) -> str:
+    code, mods = parsed
+    if not mods:
+        return f'({code!r}, frozenset())'
+    items = ", ".join(repr(m) for m in sorted(mods))
+    return f'({code!r}, frozenset({{{items}}}))'
+
+
+def _emit_target_field_value(v: Any) -> str:
+    return repr(v) if not isinstance(v, int) or isinstance(v, bool) else str(v)
+
+
+def _emit_coarsening(coarsening: list[dict]) -> str:
+    if not coarsening:
+        return "()"
+    parts = []
+    for rule in coarsening:
+        reset = rule["reset"]
+        items = ", ".join(f'{k!r}: {v!r}' for k, v in reset.items())
+        parts.append(f'{{"reset": {{{items}}}}}')
+    return "(" + ", ".join(parts) + ",)"
+
+
+def generate_platforms(schema: dict, validated: dict[str, dict]) -> str:
+    """Emit _platforms.py with v3 tables.
+
+    `validated[platform]` is the canonicalized mapping (with `_parsed_entries`)
+    returned by `validate_mapping`.
+    """
     lines = [
         HEADER,
         "from __future__ import annotations",
         "",
-        "from typing import Any",
-        "",
         "from open_sport_taxonomy._platform import GarminFitCode",
-        "",
+        "from open_sport_taxonomy._sport import Sport",
         "",
     ]
 
-    # Strava
-    strava = load_mapping("strava")
-    assert_bijective("strava", strava["mappings"])
-    lines.append(f'STRAVA_FALLBACK: str = "{strava["fallback"]}"')
-    lines.append("")
-    lines.append("STRAVA_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {")
-    for entry in strava["mappings"]:
-        key_code = entry["ost"]
-        key_mods = frozenset(entry.get("modifiers", []))
-        mods_repr = _frozenset_repr(key_mods)
-        lines.append(f'    ("{key_code}", {mods_repr}): "{entry["target"]}",')
-    lines.append("}")
-    lines.append("")
+    for platform in sorted(validated):
+        mapping = validated[platform]
+        prefix = _platform_var_prefix(platform)
+        entries = mapping["_parsed_entries"]
+        fb = mapping["fallback"]
+        coarsening = mapping.get("target_coarsening", []) or []
 
-    # Apple HealthKit
-    hk = load_mapping("apple_healthkit")
-    assert_bijective("apple_healthkit", hk["mappings"])
-    lines.append(f"APPLE_HEALTHKIT_FALLBACK: int = {hk['fallback']}")
-    lines.append("")
-    lines.append("APPLE_HEALTHKIT_MAPPINGS: dict[tuple[str, frozenset[str]], int] = {")
-    for entry in hk["mappings"]:
-        key_code = entry["ost"]
-        key_mods = frozenset(entry.get("modifiers", []))
-        mods_repr = _frozenset_repr(key_mods)
-        lines.append(f'    ("{key_code}", {mods_repr}): {entry["target"]},')
-    lines.append("}")
-    lines.append("")
+        lines.append("")
+        lines.append(f"# ---- {platform} ".ljust(76, "-"))
+        lines.append("")
+        lines.append(f"{prefix}_FALLBACK_ENCODE = {_emit_target_literal(platform, fb['encode'])}")
+        lines.append(f"{prefix}_FALLBACK_DECODE: Sport = Sport({fb['decode']!r})")
+        lines.append("")
 
-    # Garmin FIT
-    gf = load_mapping("garmin_fit")
-    assert_bijective("garmin_fit", gf["mappings"])
-    fb = gf["fallback"]
-    lines.append(
-        f"GARMIN_FIT_FALLBACK: GarminFitCode = "
-        f"GarminFitCode(sport={fb['sport']}, sub_sport={fb['sub_sport']})"
-    )
-    lines.append("")
-    lines.append(
-        "GARMIN_FIT_MAPPINGS: dict[tuple[str, frozenset[str]], GarminFitCode] = {"
-    )
-    for entry in gf["mappings"]:
-        key_code = entry["ost"]
-        key_mods = frozenset(entry.get("modifiers", []))
-        mods_repr = _frozenset_repr(key_mods)
-        t = entry["target"]
-        lines.append(
-            f'    ("{key_code}", {mods_repr}): '
-            f"GarminFitCode(sport={t['sport']}, sub_sport={t['sub_sport']}),"
-        )
-    lines.append("}")
-    lines.append("")
+        # entries_by_target
+        lines.append(f"{prefix}_ENTRIES_BY_TARGET: dict = {{")
+        for target, parsed, preferred in entries:
+            target_repr = _emit_target_literal(platform, target)
+            if parsed is None:
+                sport_repr = "None"
+            else:
+                sport_repr = _emit_sport_call(parsed)
+            lines.append(f"    {target_repr}: ({sport_repr}, {preferred}),")
+        lines.append("}")
+        lines.append("")
 
-    # Garmin Training API
-    gta = load_mapping("garmin_training_api")
-    assert_bijective("garmin_training_api", gta["mappings"])
-    lines.append(f'GARMIN_TRAINING_API_FALLBACK: str = "{gta["fallback"]}"')
-    lines.append("")
-    lines.append("GARMIN_TRAINING_API_MAPPINGS: dict[tuple[str, frozenset[str]], str] = {")
-    for entry in gta["mappings"]:
-        key_code = entry["ost"]
-        key_mods = frozenset(entry.get("modifiers", []))
-        mods_repr = _frozenset_repr(key_mods)
-        lines.append(f'    ("{key_code}", {mods_repr}): "{entry["target"]}",')
-    lines.append("}")
-    lines.append("")
+        # preferred_index
+        lines.append(f"{prefix}_PREFERRED_INDEX: dict = {{")
+        for target, parsed, preferred in entries:
+            if not preferred or parsed is None:
+                continue
+            target_repr = _emit_target_literal(platform, target)
+            key_repr = _emit_sport_key(parsed)
+            lines.append(f"    {key_repr}: {target_repr},")
+        lines.append("}")
+        lines.append("")
 
-    # FIT enum reference tables — used by GarminFitCode to translate between
-    # int ids and string names. Source: reference/garmin-fit-sdk/.
+        # target_coarsening
+        lines.append(f"{prefix}_TARGET_COARSENING: tuple = {_emit_coarsening(coarsening)}")
+
+    # FIT enum reference tables (unchanged behavior, used by GarminFitCode).
     fit_sports = load_reference("garmin-fit-sdk", "sports.yaml")["cases"]
     fit_sub_sports = load_reference("garmin-fit-sdk", "sub_sports.yaml")["cases"]
 
+    lines.append("")
+    lines.append("# ---- FIT enum reference tables ".ljust(76, "-"))
+    lines.append("")
     lines.append("FIT_SPORT_IDS: dict[str, int] = {")
     for case in fit_sports:
         lines.append(f'    "{case["name"]}": {case["value"]},')
     lines.append("}")
     lines.append("")
-
     lines.append("FIT_SPORT_NAMES: dict[int, str] = {v: k for k, v in FIT_SPORT_IDS.items()}")
     lines.append("")
-
     lines.append("FIT_SUB_SPORT_IDS: dict[str, int] = {")
     for case in fit_sub_sports:
         lines.append(f'    "{case["name"]}": {case["value"]},')
     lines.append("}")
     lines.append("")
-
     lines.append("FIT_SUB_SPORT_NAMES: dict[int, str] = {v: k for k, v in FIT_SUB_SPORT_IDS.items()}")
     lines.append("")
-
     return "\n".join(lines)
 
 
-def _frozenset_repr(s: frozenset) -> str:
-    if not s:
-        return "frozenset()"
-    items = ", ".join(f'"{x}"' for x in sorted(s))
-    return f"frozenset({{{items}}})"
-
-
 # ---------------------------------------------------------------------------
-# Main
+# __init__.py
 # ---------------------------------------------------------------------------
 
 def generate_init(schema: dict) -> str:
@@ -596,14 +813,9 @@ __all__ = ["GarminFitCode", "Modifier", "Sport", "version"]
 
 
 def _check_version_consistency(schema: dict) -> list[str]:
-    """Check that version is consistent across schema.yaml and pyproject.toml."""
-    import re
-
     errors = []
     schema_version = schema["version"]
-
-    pyproject_path = ROOT / "pyproject.toml"
-    pyproject_text = pyproject_path.read_text(encoding="utf-8")
+    pyproject_text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject_text, re.MULTILINE)
     if match:
         pyproject_version = match.group(1)
@@ -614,12 +826,11 @@ def _check_version_consistency(schema: dict) -> list[str]:
             )
     else:
         errors.append("Could not find version in pyproject.toml")
-
     return errors
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate Python source from schema.")
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Generate Python source from schema and mappings.")
     parser.add_argument(
         "--check",
         action="store_true",
@@ -628,44 +839,78 @@ def main() -> None:
     args = parser.parse_args()
 
     schema = load_schema()
+    sport_codes = {s["code"] for s in schema["sports"]}
+    modifier_codes = {m["code"] for m in schema["modifiers"]}
+
+    # Validate every mapping file (rules 1–9, 12–13).
+    validated: dict[str, dict] = {}
+    for platform in PLATFORM_REF_DIR:
+        mapping = load_mapping(platform)
+        targets = load_targets(platform)
+        try:
+            validate_mapping(platform, mapping, targets, sport_codes, modifier_codes)
+        except ValidationError as ex:
+            print(f"ERROR: {ex}")
+            return 1
+        validated[platform] = mapping
 
     files = {
         OUT_DIR / "_modifier.py": generate_modifier(schema),
         OUT_DIR / "_sport.py": generate_sport(schema),
-        OUT_DIR / "_platforms.py": generate_platforms(schema),
+        OUT_DIR / "_platforms.py": generate_platforms(schema, validated),
         OUT_DIR / "__init__.py": generate_init(schema),
     }
 
     if args.check:
-        stale = []
-        for path, expected in files.items():
-            if not path.exists() or path.read_text(encoding="utf-8") != expected:
-                stale.append(path)
-
+        stale = [p for p, e in files.items() if not p.exists() or p.read_text(encoding="utf-8") != e]
         version_errors = _check_version_consistency(schema)
-
         if stale or version_errors:
             for p in stale:
                 print(f"STALE: {p.relative_to(ROOT)}")
             for e in version_errors:
                 print(f"ERROR: {e}")
             print("\nRun 'uv run scripts/generate.py' to update.")
-            sys.exit(1)
-        else:
-            print("All generated files are up to date.")
-            print("Version is consistent across schema.yaml and pyproject.toml.")
-    else:
-        for path, content in files.items():
-            path.write_text(content, encoding="utf-8")
-            print(f"Generated {path.relative_to(ROOT)}")
+            return 1
+        print("All generated files are up to date.")
+        print("Version is consistent across schema.yaml and pyproject.toml.")
+        return 0
 
-        version_errors = _check_version_consistency(schema)
-        if version_errors:
-            for e in version_errors:
-                print(f"WARNING: {e}")
-        else:
-            print(f"Version {schema['version']} is consistent.")
+    for path, content in files.items():
+        path.write_text(content, encoding="utf-8")
+        print(f"Generated {path.relative_to(ROOT)}")
+
+    # Rules 10–11: round-trip validation against the freshly generated runtime.
+    # Re-import the module to pick up the new file.
+    import importlib
+    import open_sport_taxonomy._platforms  # noqa: F401
+    importlib.reload(open_sport_taxonomy._platforms)
+
+    from open_sport_taxonomy._platform import Platform
+    pkg = importlib.import_module("open_sport_taxonomy._platforms")
+    for platform in PLATFORM_REF_DIR:
+        prefix = _platform_var_prefix(platform)
+        rt = Platform(
+            entries_by_target=getattr(pkg, f"{prefix}_ENTRIES_BY_TARGET"),
+            preferred_index=getattr(pkg, f"{prefix}_PREFERRED_INDEX"),
+            fallback_encode=getattr(pkg, f"{prefix}_FALLBACK_ENCODE"),
+            fallback_decode=getattr(pkg, f"{prefix}_FALLBACK_DECODE"),
+            target_coarsening=getattr(pkg, f"{prefix}_TARGET_COARSENING"),
+        )
+        try:
+            validate_round_trips(platform, validated[platform], rt)
+        except ValidationError as ex:
+            print(f"ERROR: {ex}")
+            return 1
+        print(f"  {platform}: round-trip ok")
+
+    version_errors = _check_version_consistency(schema)
+    if version_errors:
+        for e in version_errors:
+            print(f"WARNING: {e}")
+    else:
+        print(f"Version {schema['version']} is consistent.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

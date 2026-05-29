@@ -1,35 +1,23 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
-
 from open_sport_taxonomy._platform import GarminFitCode, Platform
-from open_sport_taxonomy._platforms import GARMIN_FIT_FALLBACK, GARMIN_FIT_MAPPINGS
+from open_sport_taxonomy._platforms import (
+    GARMIN_FIT_ENTRIES_BY_TARGET,
+    GARMIN_FIT_FALLBACK_DECODE,
+    GARMIN_FIT_FALLBACK_ENCODE,
+    GARMIN_FIT_PREFERRED_INDEX,
+    GARMIN_FIT_TARGET_COARSENING,
+)
 from open_sport_taxonomy._sport import Sport
 
 
-def _reduce(code: GarminFitCode) -> Iterator[GarminFitCode]:
-    """Yield progressively coarser FIT codes for fallback lookup.
-
-    FIT carries discipline detail in ``sub_sport``; when the exact pair
-    is unknown, the natural coarsening is to keep ``sport`` and reset
-    ``sub_sport`` to ``0`` (the FIT ``generic`` sub_sport).
-    """
-    yield code
-    if code.sub_sport_id != 0:
-        yield GarminFitCode(code.sport_id, 0)
-
-
 class _GarminFitPlatform(Platform):
-    """Garmin FIT platform — ``decode`` takes ``(sport, sub_sport)`` directly.
+    """Garmin FIT — ``decode`` accepts ``(sport, sub_sport)`` directly.
 
     Users hold ``sport`` and ``sub_sport`` as separate values when reading
-    a FIT file, so the natural call shape is ``decode(2, 7)``. The
-    underlying ``Platform.decode`` operates on a ``GarminFitCode`` target;
-    this override builds one from the user's primitives.
-
-    Both arguments accept ``None`` — useful when a FIT parser returns
-    ``None`` for a field that wasn't present in the session message.
-    ``None`` is treated as ``0`` (the FIT ``generic`` enum value).
+    a FIT file, so the natural call shape is ``decode(2, 7)``. ``None``
+    in either position is treated as the FIT ``generic`` value (``0``)
+    — useful when a FIT parser returns ``None`` for an absent field.
     """
 
     def decode(  # type: ignore[override]
@@ -45,7 +33,9 @@ class _GarminFitPlatform(Platform):
 
 
 garmin_fit = _GarminFitPlatform(
-    GARMIN_FIT_MAPPINGS,
-    GARMIN_FIT_FALLBACK,
-    reducer=_reduce,
+    entries_by_target=GARMIN_FIT_ENTRIES_BY_TARGET,
+    preferred_index=GARMIN_FIT_PREFERRED_INDEX,
+    fallback_encode=GARMIN_FIT_FALLBACK_ENCODE,
+    fallback_decode=GARMIN_FIT_FALLBACK_DECODE,
+    target_coarsening=GARMIN_FIT_TARGET_COARSENING,
 )

@@ -63,16 +63,18 @@ _GROUPS: dict[str, str] = {
 }
 
 
-def validate_modifiers(modifiers: frozenset[Modifier]) -> None:
+def validate_modifiers(modifiers: frozenset) -> None:
     """Raise ValueError if modifiers from the same group are combined."""
-    groups_seen: dict[str, Modifier] = {}
-    for mod in modifiers:
-        g = mod.group
-        if g is not None:
-            if g in groups_seen:
-                conflict = groups_seen[g]
-                raise ValueError(
-                    f"Modifiers {conflict.code!r} and {mod.code!r} "
-                    f"conflict (same group: {g!r})"
-                )
-            groups_seen[g] = mod
+    groups_seen: dict[str, str] = {}
+    for m in modifiers:
+        code = m.value if isinstance(m, Modifier) else m
+        g = _GROUPS.get(code)
+        if g is None:
+            continue
+        if g in groups_seen:
+            conflict = groups_seen[g]
+            raise ValueError(
+                f"Modifiers {conflict!r} and {code!r} "
+                f"conflict (same group: {g!r})"
+            )
+        groups_seen[g] = code

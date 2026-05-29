@@ -1,68 +1,199 @@
-# OpenSportTaxonomy — Strava mapping
+# OpenSportTaxonomy — strava mapping (format v3).
 #
-# Bidirectional. Every target appears exactly once: the mapping is a
-# bijection. Reverse lookup is derived automatically; encode and decode
-# share this data. See docs/translation.md for the algorithm.
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
 
+format_version: 3
 platform: strava
 platform_version: "v3 API, 2024"
-fallback: Workout
 
-mappings:
+fallback:
+  encode: Workout
+  decode: generic
 
-  - ost: cycling
-    target: Ride
+entries:
 
-  - ost: cycling.gravel
-    target: GravelRide
+  - target: AlpineSki
+    sport: null
 
-  - ost: cycling.mountain
-    target: MountainBikeRide
+  - target: BackcountrySki
+    sport: null
 
-  - ost: cycling.mountain
-    modifiers: [assisted]
-    target: EMountainBikeRide
+  - target: Badminton
+    sport: null
 
-  - ost: cycling.road
-    modifiers: [assisted]
-    target: EBikeRide
+  - target: Basketball
+    sport: null
 
-  - ost: cycling.road
-    modifiers: [virtual]
-    target: VirtualRide
+  - target: Canoeing
+    sport: null
 
-  - ost: generic
-    target: Workout
+  - target: Cricket
+    sport: null
 
-  - ost: rowing
-    target: Rowing
+  - target: Crossfit
+    sport: null
 
-  - ost: rowing
-    modifiers: [virtual]
-    target: VirtualRow
+  - target: Dance
+    sport: null
 
-  - ost: running
-    target: Run
+  - target: EBikeRide
+    sport: cycling.road+assisted
+    preferred: true
 
-  - ost: running.road
-    modifiers: [virtual]
-    target: VirtualRun
+  - target: EMountainBikeRide
+    sport: cycling.mountain+assisted
+    preferred: true
 
-  - ost: running.trail
-    target: TrailRun
+  - target: Elliptical
+    sport: null
 
-  - ost: swimming
-    target: Swim
+  - target: Golf
+    sport: null
 
-  - ost: walking
-    target: Walk
+  - target: GravelRide
+    sport: cycling.gravel
+    preferred: true
 
-  - ost: walking.hiking
-    target: Hike
+  - target: Handcycle
+    sport: null
 
-  - ost: xc_skiing
-    target: NordicSki
+  - target: HighIntensityIntervalTraining
+    sport: null
 
-  - ost: xc_skiing
-    modifiers: [roller]
-    target: RollerSki
+  - target: Hike
+    sport: walking.hiking
+    preferred: true
+
+  - target: IceSkate
+    sport: null
+
+  - target: InlineSkate
+    sport: null
+
+  - target: Kayaking
+    sport: null
+
+  - target: Kitesurf
+    sport: null
+
+  - target: MountainBikeRide
+    sport: cycling.mountain
+    preferred: true
+
+  - target: NordicSki
+    sport: xc_skiing
+    preferred: true
+
+  - target: Padel
+    sport: null
+
+  - target: PhysicalTherapy
+    sport: null
+
+  - target: Pickleball
+    sport: null
+
+  - target: Pilates
+    sport: null
+
+  - target: Racquetball
+    sport: null
+
+  - target: Ride
+    sport: cycling
+    preferred: true
+
+  - target: RockClimbing
+    sport: null
+
+  - target: RollerSki
+    sport: xc_skiing+roller
+    preferred: true
+
+  - target: Rowing
+    sport: rowing
+    preferred: true
+
+  - target: Run
+    sport: running
+    preferred: true
+
+  - target: Sail
+    sport: null
+
+  - target: Skateboard
+    sport: null
+
+  - target: Snowboard
+    sport: null
+
+  - target: Snowshoe
+    sport: null
+
+  - target: Soccer
+    sport: null
+
+  - target: Squash
+    sport: null
+
+  - target: StairStepper
+    sport: null
+
+  - target: StandUpPaddling
+    sport: null
+
+  - target: Surfing
+    sport: null
+
+  - target: Swim
+    sport: swimming
+    preferred: true
+
+  - target: TableTennis
+    sport: null
+
+  - target: Tennis
+    sport: null
+
+  - target: TrailRun
+    sport: running.trail
+    preferred: true
+
+  - target: Velomobile
+    sport: null
+
+  - target: VirtualRide
+    sport: cycling.road+virtual
+    preferred: true
+
+  - target: VirtualRow
+    sport: rowing+virtual
+    preferred: true
+
+  - target: VirtualRun
+    sport: running.road+virtual
+    preferred: true
+
+  - target: Volleyball
+    sport: null
+
+  - target: Walk
+    sport: walking
+    preferred: true
+
+  - target: WeightTraining
+    sport: null
+
+  - target: Wheelchair
+    sport: null
+
+  - target: Windsurf
+    sport: null
+
+  - target: Workout
+    sport: generic
+    preferred: true
+
+  - target: Yoga
+    sport: null

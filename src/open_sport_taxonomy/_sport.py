@@ -37,27 +37,27 @@ _LABELS: dict[str, str] = {
 
 _PARENTS: dict[str, str | None] = {
     "cycling": None,
-    "cycling.cyclocross": "cycling",
-    "cycling.gravel": "cycling",
-    "cycling.mountain": "cycling",
-    "cycling.road": "cycling",
-    "cycling.time_trial": "cycling",
-    "cycling.track": "cycling",
+    "cycling.cyclocross": 'cycling',
+    "cycling.gravel": 'cycling',
+    "cycling.mountain": 'cycling',
+    "cycling.road": 'cycling',
+    "cycling.time_trial": 'cycling',
+    "cycling.track": 'cycling',
     "generic": None,
     "rowing": None,
     "running": None,
-    "running.road": "running",
-    "running.track": "running",
-    "running.trail": "running",
+    "running.road": 'running',
+    "running.track": 'running',
+    "running.trail": 'running',
     "swimming": None,
-    "swimming.open_water": "swimming",
-    "swimming.pool": "swimming",
+    "swimming.open_water": 'swimming',
+    "swimming.pool": 'swimming',
     "walking": None,
-    "walking.hiking": "walking",
+    "walking.hiking": 'walking',
     "xc_skiing": None,
-    "xc_skiing.classic": "xc_skiing",
-    "xc_skiing.double_poling": "xc_skiing",
-    "xc_skiing.skate": "xc_skiing",
+    "xc_skiing.classic": 'xc_skiing',
+    "xc_skiing.double_poling": 'xc_skiing',
+    "xc_skiing.skate": 'xc_skiing',
 }
 
 _CHILDREN: dict[str, tuple[str, ...]] = {
@@ -124,26 +124,15 @@ class Sport:
     code: str
     modifiers: frozenset[str]
 
-    # ------------------------------------------------------------------
-    # Constructor (strict — rejects unknown codes and modifiers)
-    # ------------------------------------------------------------------
-
-    def __init__(
-        self,
-        code: str,
-        *,
-        modifiers: Iterable[Modifier] | None = None,
-    ) -> None:
+    def __init__(self, code: str, *, modifiers: Iterable[Modifier] | None = None) -> None:
         if not isinstance(code, str):
             raise TypeError(f"Expected str, got {type(code).__name__}")
-
         if modifiers is not None and "+" in code:
             raise ValueError(
                 "Cannot pass both an encoded string and modifiers keyword. "
                 "Use either Sport('cycling.road+virtual') or "
                 "Sport('cycling.road', modifiers={Modifier.VIRTUAL})."
             )
-
         if "+" in code:
             parts = code.split("+")
             if "" in parts:
@@ -155,21 +144,13 @@ class Sport:
             parsed_modifiers = (
                 frozenset(modifiers) if modifiers is not None else frozenset()
             )
-
         if not parsed_code:
             raise ValueError("Sport code cannot be empty")
-
         if parsed_code not in _LABELS:
             raise ValueError(f"Unknown sport code: {parsed_code!r}")
-
         validate_modifiers(parsed_modifiers)
-
         object.__setattr__(self, "code", parsed_code)
         object.__setattr__(self, "modifiers", frozenset(parsed_modifiers))
-
-    # ------------------------------------------------------------------
-    # Classmethods
-    # ------------------------------------------------------------------
 
     @classmethod
     def parse(cls, raw: str) -> Sport:
@@ -179,67 +160,40 @@ class Sport:
         raise ValueError. No schema validation, no modifier group checks.
         """
         code, raw_modifiers = _split_encoded(raw)
-
-        # Convert known modifier strings to Modifier instances,
-        # keep unknown ones as plain strings.
         mods: set[str] = set()
         for m in raw_modifiers:
             try:
                 mods.add(Modifier(m))
             except ValueError:
                 mods.add(m)
-
         sport = object.__new__(cls)
         object.__setattr__(sport, "code", code)
         object.__setattr__(sport, "modifiers", frozenset(mods))
         return sport
 
-    # ------------------------------------------------------------------
-    # Instance methods
-    # ------------------------------------------------------------------
-
     def resolve(self) -> Sport:
-        """Resolve to the nearest standard sport.
-
-        Walks up the hierarchy for unknown codes, drops unknown modifiers.
-        Returns self if already standard. Raises ValueError if known
-        modifiers conflict (e.g. race+training in the same group).
-        """
+        """Resolve to the nearest standard sport."""
         if self.is_standard:
             return self
-
-        # Walk up the hierarchy until a known code is found.
         code = self.code
         while code and code not in _LABELS:
             dot = code.rfind(".")
             code = code[:dot] if dot != -1 else ""
         if not code:
             code = "generic"
-
-        # Keep only Modifier instances, drop plain strings.
         known: set[Modifier] = set()
         for m in self.modifiers:
             if isinstance(m, Modifier):
                 known.add(m)
-
         return Sport(code, modifiers=known)
 
     def is_subsport_of(self, other: Sport) -> bool:
-        """True if this sport is a more specific version of other.
-
-        Checks two conditions:
-        1. self.code is equal to or below other.code in the dot hierarchy
-        2. self.modifiers is a superset of other.modifiers
-        """
+        """True if this sport is a more specific version of other."""
         if not _is_subsport_code(self.code, other.code):
             return False
         if not other.modifiers.issubset(self.modifiers):
             return False
         return True
-
-    # ------------------------------------------------------------------
-    # Properties
-    # ------------------------------------------------------------------
 
     @property
     def is_standard(self) -> bool:
@@ -273,10 +227,7 @@ class Sport:
 
     @property
     def parent(self) -> Sport | None:
-        """Parent sport, preserving modifiers.
-
-        Derived from dot notation for non-standard codes.
-        """
+        """Parent sport, preserving modifiers."""
         if self.code in _PARENTS:
             parent_code = _PARENTS[self.code]
         else:
@@ -288,10 +239,7 @@ class Sport:
 
     @property
     def disciplines(self) -> tuple[Sport, ...]:
-        """Direct child sports, preserving modifiers.
-
-        Empty for non-standard or leaf sports.
-        """
+        """Direct child sports, preserving modifiers."""
         children = _CHILDREN.get(self.code, ())
         return tuple(self._with_code(c) for c in children)
 
@@ -299,10 +247,6 @@ class Sport:
     def all(cls) -> list[Sport]:
         """All standard sports defined in the schema."""
         return [Sport(code) for code in _LABELS]
-
-    # ------------------------------------------------------------------
-    # Dunder methods
-    # ------------------------------------------------------------------
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Sport):

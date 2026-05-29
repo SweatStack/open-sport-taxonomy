@@ -117,8 +117,8 @@ class TestRoundTrip:
 class TestGarminFitCode:
     def test_attribute_access(self):
         code = garmin_fit.encode(Sport.CYCLING_ROAD)
-        assert code.sport_id == 2
-        assert code.sub_sport_id == 7
+        assert code.sport == 2
+        assert code.sub_sport == 7
         assert code.sport_name == "cycling"
         assert code.sub_sport_name == "road"
 
@@ -141,7 +141,7 @@ class TestGarminFitCode:
     def test_unknown_int_accepted(self):
         # Forward-compat: unknown ids may be future SDK additions.
         code = GarminFitCode(999, 0)
-        assert code.sport_id == 999
+        assert code.sport == 999
         assert code.sport_name is None
 
     def test_type(self):

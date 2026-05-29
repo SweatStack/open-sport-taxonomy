@@ -1,72 +1,471 @@
-# OpenSportTaxonomy — Garmin FIT mapping
+# OpenSportTaxonomy — garmin_fit mapping (format v3).
 #
-# Bidirectional. Every target appears exactly once: the mapping is a
-# bijection. Reverse lookup is derived automatically; encode and decode
-# share this data. See docs/translation.md for the algorithm.
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
 
+format_version: 3
 platform: garmin_fit
 platform_version: "FIT SDK 21.133"
-fallback: { sport: 0, sub_sport: 0 }  # generic
 
-mappings:
+fallback:
+  encode: { sport:   0, sub_sport:   0 }
+  decode: generic
 
-  - ost: cycling
-    target: { sport: 2, sub_sport: 0 }    # cycling / generic
+target_coarsening:
+  - reset: { sub_sport: 0 }
+  - reset: { sport: 0, sub_sport: 0 }
 
-  - ost: cycling.cyclocross
-    target: { sport: 2, sub_sport: 11 }   # cycling / cyclocross
+entries:
 
-  - ost: cycling.gravel
-    target: { sport: 2, sub_sport: 46 }   # cycling / gravel_cycling
+  - target: { sport:   0, sub_sport:   0 }  # generic / generic
+    sport: generic
+    preferred: true
 
-  - ost: cycling.mountain
-    target: { sport: 2, sub_sport: 8 }    # cycling / mountain
+  - target: { sport:   1, sub_sport:   0 }  # running / generic
+    sport: running
+    preferred: true
 
-  - ost: cycling.road
-    target: { sport: 2, sub_sport: 7 }    # cycling / road
+  - target: { sport:   1, sub_sport:   1 }  # running / treadmill
+    sport: running+stationary
+    preferred: true
 
-  - ost: cycling.track
-    target: { sport: 2, sub_sport: 13 }   # cycling / track_cycling
+  - target: { sport:   1, sub_sport:   2 }  # running / street
+    sport: running.road
+    preferred: true
 
-  - ost: generic
-    target: { sport: 0, sub_sport: 0 }    # generic / generic
+  - target: { sport:   1, sub_sport:   3 }  # running / trail
+    sport: running.trail
+    preferred: true
 
-  - ost: rowing
-    target: { sport: 15, sub_sport: 0 }   # rowing / generic
+  - target: { sport:   1, sub_sport:   4 }  # running / track
+    sport: running.track
+    preferred: true
 
-  - ost: running
-    target: { sport: 1, sub_sport: 0 }    # running / generic
+  - target: { sport:   1, sub_sport:  45 }  # running / indoor_running
+    sport: null
 
-  - ost: running.road
-    target: { sport: 1, sub_sport: 2 }    # running / street
+  - target: { sport:   2, sub_sport:   0 }  # cycling / generic
+    sport: cycling
+    preferred: true
 
-  - ost: running.track
-    target: { sport: 1, sub_sport: 4 }    # running / track
+  - target: { sport:   2, sub_sport:   5 }  # cycling / spin
+    sport: cycling+stationary
 
-  - ost: running.trail
-    target: { sport: 1, sub_sport: 3 }    # running / trail
+  - target: { sport:   2, sub_sport:   6 }  # cycling / indoor_cycling
+    sport: cycling+stationary
+    preferred: true
 
-  - ost: swimming
-    target: { sport: 5, sub_sport: 0 }    # swimming / generic
+  - target: { sport:   2, sub_sport:   7 }  # cycling / road
+    sport: cycling.road
+    preferred: true
 
-  - ost: swimming.open_water
-    target: { sport: 5, sub_sport: 18 }   # swimming / open_water
+  - target: { sport:   2, sub_sport:   8 }  # cycling / mountain
+    sport: cycling.mountain
+    preferred: true
 
-  - ost: swimming.pool
-    target: { sport: 5, sub_sport: 17 }   # swimming / lap_swimming
+  - target: { sport:   2, sub_sport:   9 }  # cycling / downhill
+    sport: null
 
-  - ost: walking
-    target: { sport: 11, sub_sport: 0 }   # walking / generic
+  - target: { sport:   2, sub_sport:  10 }  # cycling / recumbent
+    sport: null
 
-  - ost: walking.hiking
-    target: { sport: 17, sub_sport: 0 }   # hiking / generic
+  - target: { sport:   2, sub_sport:  11 }  # cycling / cyclocross
+    sport: cycling.cyclocross
+    preferred: true
 
-  - ost: xc_skiing
-    target: { sport: 12, sub_sport: 0 }   # cross_country_skiing / generic
+  - target: { sport:   2, sub_sport:  12 }  # cycling / hand_cycling
+    sport: null
 
-  - ost: xc_skiing
-    modifiers: [roller]
-    target: { sport: 30, sub_sport: 0 }   # inline_skating / generic
+  - target: { sport:   2, sub_sport:  13 }  # cycling / track_cycling
+    sport: cycling.track
+    preferred: true
 
-  - ost: xc_skiing.skate
-    target: { sport: 12, sub_sport: 42 }  # cross_country_skiing / skate_skiing
+  - target: { sport:   2, sub_sport:  29 }  # cycling / bmx
+    sport: null
+
+  - target: { sport:   2, sub_sport:  46 }  # cycling / gravel_cycling
+    sport: cycling.gravel
+    preferred: true
+
+  - target: { sport:   2, sub_sport:  47 }  # cycling / e_bike_mountain
+    sport: null
+
+  - target: { sport:   2, sub_sport:  48 }  # cycling / commuting
+    sport: null
+
+  - target: { sport:   2, sub_sport:  49 }  # cycling / mixed_surface
+    sport: null
+
+  - target: { sport:   3, sub_sport:   0 }  # transition / generic
+    sport: null
+
+  - target: { sport:   3, sub_sport:  32 }  # transition / bike_to_run_transition
+    sport: null
+
+  - target: { sport:   3, sub_sport:  33 }  # transition / run_to_bike_transition
+    sport: null
+
+  - target: { sport:   3, sub_sport:  34 }  # transition / swim_to_bike_transition
+    sport: null
+
+  - target: { sport:   4, sub_sport:   0 }  # fitness_equipment / generic
+    sport: null
+
+  - target: { sport:   4, sub_sport:   1 }  # fitness_equipment / treadmill
+    sport: running+stationary
+
+  - target: { sport:   4, sub_sport:   6 }  # fitness_equipment / indoor_cycling
+    sport: cycling+stationary
+
+  - target: { sport:   4, sub_sport:  14 }  # fitness_equipment / indoor_rowing
+    sport: rowing+stationary
+    preferred: true
+
+  - target: { sport:   4, sub_sport:  15 }  # fitness_equipment / elliptical
+    sport: null
+
+  - target: { sport:   4, sub_sport:  16 }  # fitness_equipment / stair_climbing
+    sport: null
+
+  - target: { sport:   4, sub_sport:  25 }  # fitness_equipment / indoor_skiing
+    sport: null
+
+  - target: { sport:   4, sub_sport:  27 }  # fitness_equipment / indoor_walking
+    sport: walking+stationary
+
+  - target: { sport:   4, sub_sport:  44 }  # fitness_equipment / pilates
+    sport: null
+
+  - target: { sport:   5, sub_sport:   0 }  # swimming / generic
+    sport: swimming
+    preferred: true
+
+  - target: { sport:   5, sub_sport:  17 }  # swimming / lap_swimming
+    sport: swimming.pool
+    preferred: true
+
+  - target: { sport:   5, sub_sport:  18 }  # swimming / open_water
+    sport: swimming.open_water
+    preferred: true
+
+  - target: { sport:   6, sub_sport:   0 }  # basketball / generic
+    sport: null
+
+  - target: { sport:   7, sub_sport:   0 }  # soccer / generic
+    sport: null
+
+  - target: { sport:   8, sub_sport:   0 }  # tennis / generic
+    sport: null
+
+  - target: { sport:   8, sub_sport:  21 }  # tennis / warm_up
+    sport: null
+
+  - target: { sport:   8, sub_sport:  22 }  # tennis / match
+    sport: null
+
+  - target: { sport:   8, sub_sport:  23 }  # tennis / exercise
+    sport: null
+
+  - target: { sport:   9, sub_sport:   0 }  # american_football / generic
+    sport: null
+
+  - target: { sport:  10, sub_sport:   0 }  # training / generic
+    sport: null
+
+  - target: { sport:  10, sub_sport:  19 }  # training / flexibility_training
+    sport: null
+
+  - target: { sport:  10, sub_sport:  20 }  # training / strength_training
+    sport: null
+
+  - target: { sport:  10, sub_sport:  26 }  # training / cardio_training
+    sport: null
+
+  - target: { sport:  10, sub_sport:  43 }  # training / yoga
+    sport: null
+
+  - target: { sport:  11, sub_sport:   0 }  # walking / generic
+    sport: walking
+    preferred: true
+
+  - target: { sport:  11, sub_sport:  27 }  # walking / indoor_walking
+    sport: walking+stationary
+    preferred: true
+
+  - target: { sport:  11, sub_sport:  30 }  # walking / casual_walking
+    sport: null
+
+  - target: { sport:  11, sub_sport:  31 }  # walking / speed_walking
+    sport: null
+
+  - target: { sport:  12, sub_sport:   0 }  # cross_country_skiing / generic
+    sport: xc_skiing
+    preferred: true
+
+  - target: { sport:  12, sub_sport:  42 }  # cross_country_skiing / skate_skiing
+    sport: xc_skiing.skate
+    preferred: true
+
+  - target: { sport:  13, sub_sport:   0 }  # alpine_skiing / generic
+    sport: null
+
+  - target: { sport:  13, sub_sport:  37 }  # alpine_skiing / backcountry
+    sport: null
+
+  - target: { sport:  13, sub_sport:  38 }  # alpine_skiing / resort
+    sport: null
+
+  - target: { sport:  14, sub_sport:   0 }  # snowboarding / generic
+    sport: null
+
+  - target: { sport:  14, sub_sport:  37 }  # snowboarding / backcountry
+    sport: null
+
+  - target: { sport:  14, sub_sport:  38 }  # snowboarding / resort
+    sport: null
+
+  - target: { sport:  15, sub_sport:   0 }  # rowing / generic
+    sport: rowing
+    preferred: true
+
+  - target: { sport:  16, sub_sport:   0 }  # mountaineering / generic
+    sport: null
+
+  - target: { sport:  17, sub_sport:   0 }  # hiking / generic
+    sport: walking.hiking
+    preferred: true
+
+  - target: { sport:  18, sub_sport:   0 }  # multisport / generic
+    sport: null
+
+  - target: { sport:  19, sub_sport:   0 }  # paddling / generic
+    sport: null
+
+  - target: { sport:  20, sub_sport:   0 }  # flying / generic
+    sport: null
+
+  - target: { sport:  20, sub_sport:  39 }  # flying / rc_drone
+    sport: null
+
+  - target: { sport:  20, sub_sport:  40 }  # flying / wingsuit
+    sport: null
+
+  - target: { sport:  20, sub_sport: 110 }  # flying / fly_canopy
+    sport: null
+
+  - target: { sport:  20, sub_sport: 111 }  # flying / fly_paraglide
+    sport: null
+
+  - target: { sport:  20, sub_sport: 112 }  # flying / fly_paramotor
+    sport: null
+
+  - target: { sport:  20, sub_sport: 113 }  # flying / fly_pressurized
+    sport: null
+
+  - target: { sport:  20, sub_sport: 114 }  # flying / fly_navigate
+    sport: null
+
+  - target: { sport:  20, sub_sport: 115 }  # flying / fly_timer
+    sport: null
+
+  - target: { sport:  20, sub_sport: 116 }  # flying / fly_altimeter
+    sport: null
+
+  - target: { sport:  20, sub_sport: 117 }  # flying / fly_wx
+    sport: null
+
+  - target: { sport:  20, sub_sport: 118 }  # flying / fly_vfr
+    sport: null
+
+  - target: { sport:  20, sub_sport: 119 }  # flying / fly_ifr
+    sport: null
+
+  - target: { sport:  21, sub_sport:   0 }  # e_biking / generic
+    sport: null
+
+  - target: { sport:  21, sub_sport:  28 }  # e_biking / e_bike_fitness
+    sport: null
+
+  - target: { sport:  22, sub_sport:   0 }  # motorcycling / generic
+    sport: null
+
+  - target: { sport:  22, sub_sport:  35 }  # motorcycling / atv
+    sport: null
+
+  - target: { sport:  22, sub_sport:  36 }  # motorcycling / motocross
+    sport: null
+
+  - target: { sport:  23, sub_sport:   0 }  # boating / generic
+    sport: null
+
+  - target: { sport:  24, sub_sport:   0 }  # driving / generic
+    sport: null
+
+  - target: { sport:  25, sub_sport:   0 }  # golf / generic
+    sport: null
+
+  - target: { sport:  26, sub_sport:   0 }  # hang_gliding / generic
+    sport: null
+
+  - target: { sport:  27, sub_sport:   0 }  # horseback_riding / generic
+    sport: null
+
+  - target: { sport:  28, sub_sport:   0 }  # hunting / generic
+    sport: null
+
+  - target: { sport:  29, sub_sport:   0 }  # fishing / generic
+    sport: null
+
+  - target: { sport:  30, sub_sport:   0 }  # inline_skating / generic
+    sport: xc_skiing+roller
+    preferred: true
+
+  - target: { sport:  31, sub_sport:   0 }  # rock_climbing / generic
+    sport: null
+
+  - target: { sport:  32, sub_sport:   0 }  # sailing / generic
+    sport: null
+
+  - target: { sport:  32, sub_sport:  65 }  # sailing / sail_race
+    sport: null
+
+  - target: { sport:  33, sub_sport:   0 }  # ice_skating / generic
+    sport: null
+
+  - target: { sport:  34, sub_sport:   0 }  # sky_diving / generic
+    sport: null
+
+  - target: { sport:  35, sub_sport:   0 }  # snowshoeing / generic
+    sport: null
+
+  - target: { sport:  36, sub_sport:   0 }  # snowmobiling / generic
+    sport: null
+
+  - target: { sport:  37, sub_sport:   0 }  # stand_up_paddleboarding / generic
+    sport: null
+
+  - target: { sport:  38, sub_sport:   0 }  # surfing / generic
+    sport: null
+
+  - target: { sport:  39, sub_sport:   0 }  # wakeboarding / generic
+    sport: null
+
+  - target: { sport:  40, sub_sport:   0 }  # water_skiing / generic
+    sport: null
+
+  - target: { sport:  41, sub_sport:   0 }  # kayaking / generic
+    sport: null
+
+  - target: { sport:  41, sub_sport:  41 }  # kayaking / whitewater
+    sport: null
+
+  - target: { sport:  42, sub_sport:   0 }  # rafting / generic
+    sport: null
+
+  - target: { sport:  42, sub_sport:  41 }  # rafting / whitewater
+    sport: null
+
+  - target: { sport:  43, sub_sport:   0 }  # windsurfing / generic
+    sport: null
+
+  - target: { sport:  44, sub_sport:   0 }  # kitesurfing / generic
+    sport: null
+
+  - target: { sport:  45, sub_sport:   0 }  # tactical / generic
+    sport: null
+
+  - target: { sport:  46, sub_sport:   0 }  # jumpmaster / generic
+    sport: null
+
+  - target: { sport:  47, sub_sport:   0 }  # boxing / generic
+    sport: null
+
+  - target: { sport:  48, sub_sport:   0 }  # floor_climbing / generic
+    sport: null
+
+  - target: { sport:  49, sub_sport:   0 }  # baseball / generic
+    sport: null
+
+  - target: { sport:  53, sub_sport:   0 }  # diving / generic
+    sport: null
+
+  - target: { sport:  53, sub_sport:  53 }  # diving / single_gas_diving
+    sport: null
+
+  - target: { sport:  53, sub_sport:  54 }  # diving / multi_gas_diving
+    sport: null
+
+  - target: { sport:  53, sub_sport:  55 }  # diving / gauge_diving
+    sport: null
+
+  - target: { sport:  53, sub_sport:  56 }  # diving / apnea_diving
+    sport: null
+
+  - target: { sport:  53, sub_sport:  57 }  # diving / apnea_hunting
+    sport: null
+
+  - target: { sport:  62, sub_sport:   0 }  # hiit / generic
+    sport: null
+
+  - target: { sport:  62, sub_sport:  73 }  # hiit / amrap
+    sport: null
+
+  - target: { sport:  62, sub_sport:  74 }  # hiit / emom
+    sport: null
+
+  - target: { sport:  62, sub_sport:  75 }  # hiit / tabata
+    sport: null
+
+  - target: { sport:  64, sub_sport:   0 }  # racket / generic
+    sport: null
+
+  - target: { sport:  64, sub_sport:  84 }  # racket / pickleball
+    sport: null
+
+  - target: { sport:  64, sub_sport:  85 }  # racket / padel
+    sport: null
+
+  - target: { sport:  65, sub_sport:   0 }  # wheelchair_push_walk / generic
+    sport: null
+
+  - target: { sport:  66, sub_sport:   0 }  # wheelchair_push_run / generic
+    sport: null
+
+  - target: { sport:  67, sub_sport:   0 }  # meditation / generic
+    sport: null
+
+  - target: { sport:  69, sub_sport:   0 }  # disc_golf / generic
+    sport: null
+
+  - target: { sport:  71, sub_sport:   0 }  # cricket / generic
+    sport: null
+
+  - target: { sport:  72, sub_sport:   0 }  # rugby / generic
+    sport: null
+
+  - target: { sport:  73, sub_sport:   0 }  # hockey / generic
+    sport: null
+
+  - target: { sport:  74, sub_sport:   0 }  # lacrosse / generic
+    sport: null
+
+  - target: { sport:  75, sub_sport:   0 }  # volleyball / generic
+    sport: null
+
+  - target: { sport:  76, sub_sport:   0 }  # water_tubing / generic
+    sport: null
+
+  - target: { sport:  77, sub_sport:   0 }  # wakesurfing / generic
+    sport: null
+
+  - target: { sport:  80, sub_sport:   0 }  # mixed_martial_arts / generic
+    sport: null
+
+  - target: { sport:  82, sub_sport:   0 }  # snorkeling / generic
+    sport: null
+
+  - target: { sport:  83, sub_sport:   0 }  # dance / generic
+    sport: null
+
+  - target: { sport:  84, sub_sport:   0 }  # jump_rope / generic
+    sport: null

@@ -3,19 +3,37 @@
 # dependencies = ["pyyaml"]
 # ///
 
-"""Lint and format schema.yaml.
+"""Lint schema.yaml and mappings/<platform>.yaml.
+
+The mapping lint defers to scripts/generate.py — running generate.py
+with --check validates the v3 mapping files against all 13 rules in
+docs/translation.md and confirms the generated Python is up to date.
+This script wraps that plus schema.yaml's own ordering/orphan checks.
 
 Usage:
     uv run scripts/lint.py          # check only, exit 1 if issues found
-    uv run scripts/lint.py --fix    # fix ordering in place
+    uv run scripts/lint.py --fix    # auto-fix what can be fixed (schema sort order)
+
+Run in CI to catch:
+  - schema.yaml ordering or orphan issues.
+  - mapping files violating any format v3 rule.
+  - generated Python out of sync with YAML inputs.
+  - build_reference scripts out of sync with reference/*/targets.yaml.
 """
 
+import subprocess
 import sys
 from pathlib import Path
 
 import yaml
 
-SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schema.yaml"
+ROOT = Path(__file__).resolve().parent.parent
+SCHEMA_PATH = ROOT / "schema.yaml"
+
+
+# --------------------------------------------------------------------------
+# schema.yaml lint — unchanged from v1.
+# --------------------------------------------------------------------------
 
 
 def load_schema():
@@ -23,7 +41,6 @@ def load_schema():
 
 
 def check_orphans(entries):
-    """Check that every child code has a parent entry."""
     codes = {e["code"] for e in entries}
     errors = []
     for code in sorted(codes):
@@ -36,26 +53,19 @@ def check_orphans(entries):
 
 
 def check_order(entries, section):
-    """Check that entries are sorted alphabetically by code."""
     codes = [e["code"] for e in entries]
     expected = sorted(codes)
     errors = []
-    for i, (actual, exp) in enumerate(zip(codes, expected)):
-        if actual != exp:
-            errors.append(f"{section}: {actual!r} should come after {exp!r}")
-            break
     if codes != expected:
         errors.append(f"{section}: not sorted alphabetically")
     return errors
 
 
 def sort_entries(entries):
-    """Return entries sorted alphabetically by code, preserving all fields."""
     return sorted(entries, key=lambda e: e["code"])
 
 
 def write_schema(schema):
-    """Write schema.yaml preserving the structure."""
     lines = [
         "# OpenSportTaxonomy — https://github.com/sweatstack/open-sport-taxonomy",
         "",
@@ -67,7 +77,6 @@ def write_schema(schema):
         lines.append("")
         lines.append(f"  - code: {entry['code']}")
         lines.append(f"    label: {entry['label']}")
-
     lines.append("")
     lines.append("modifiers:")
     for entry in schema["modifiers"]:
@@ -76,15 +85,12 @@ def write_schema(schema):
         if "group" in entry:
             lines.append(f"    group: {entry['group']}")
         lines.append(f"    label: {entry['label']}")
-
     lines.append("")
     SCHEMA_PATH.write_text("\n".join(lines))
 
 
-def main():
-    fix = "--fix" in sys.argv
+def lint_schema(fix: bool) -> int:
     schema = load_schema()
-
     sports = schema.get("sports", [])
     modifiers = schema.get("modifiers", [])
 
@@ -101,20 +107,94 @@ def main():
         schema["sports"] = sort_entries(sports)
         schema["modifiers"] = sort_entries(modifiers)
         write_schema(schema)
-        # Re-check for orphans (sorting doesn't fix those)
         remaining = check_orphans(schema["sports"])
         if remaining:
             for e in remaining:
-                print(f"error: {e}")
-            print("fixed: sort order")
-            print(f"{len(remaining)} error(s) remaining (fix manually)")
+                print(f"schema.yaml error: {e}")
+            print(f"schema.yaml: fixed sort order; {len(remaining)} error(s) remain")
             return 1
-        print("fixed: schema.yaml")
+        print("schema.yaml: fixed")
         return 0
 
     for e in errors:
-        print(f"error: {e}")
+        print(f"schema.yaml error: {e}")
     return 1
+
+
+# --------------------------------------------------------------------------
+# Mapping + generated-code lint via scripts/generate.py --check.
+# --------------------------------------------------------------------------
+
+
+def lint_mappings() -> int:
+    """Mapping validation is implemented in generate.py (validation rules 1–13).
+
+    `generate.py --check` runs the same validator used during code generation
+    and confirms the generated Python is in sync. Any v3 violation in a
+    mapping file (unknown keys, missing rows, round-trip break, etc.) fails
+    here.
+    """
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "generate.py"), "--check"],
+        capture_output=True,
+        text=True,
+    )
+    sys.stdout.write(result.stdout)
+    sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+# --------------------------------------------------------------------------
+# build_reference idempotency.
+# --------------------------------------------------------------------------
+
+BUILD_SCRIPTS = [
+    ("scripts/build_reference/garmin_fit.py", "reference/garmin-fit-sdk/targets.yaml"),
+    ("scripts/build_reference/strava.py", "reference/strava/targets.yaml"),
+    ("scripts/build_reference/apple_healthkit.py", "reference/apple-healthkit/targets.yaml"),
+    ("scripts/build_reference/garmin_training_api.py", "reference/garmin-training-api/targets.yaml"),
+]
+
+
+def lint_reference_drift() -> int:
+    """Each build_reference script must reproduce its targets.yaml byte-for-byte."""
+    errors = []
+    for script, target in BUILD_SCRIPTS:
+        target_path = ROOT / target
+        before = target_path.read_text(encoding="utf-8") if target_path.exists() else ""
+        subprocess.run(
+            [sys.executable, str(ROOT / script)],
+            check=True,
+            capture_output=True,
+            cwd=str(ROOT),
+        )
+        after = target_path.read_text(encoding="utf-8")
+        if before != after:
+            errors.append(
+                f"{target}: changed when running {script}. "
+                f"Reference data is out of sync — commit the regenerated file."
+            )
+    if errors:
+        for e in errors:
+            print(f"reference drift error: {e}")
+        return 1
+    print("reference targets.yaml: ok")
+    return 0
+
+
+# --------------------------------------------------------------------------
+# Main
+# --------------------------------------------------------------------------
+
+
+def main():
+    fix = "--fix" in sys.argv
+
+    rc = 0
+    rc |= lint_schema(fix)
+    rc |= lint_reference_drift()
+    rc |= lint_mappings()
+    return rc
 
 
 if __name__ == "__main__":

@@ -1,78 +1,225 @@
-# Platform translation
+# Platform translation — format v3
 
-OpenSportTaxonomy translates between OST sports and platform-native codes in both directions. This document specifies the algorithms so any language can produce identical behavior from the YAML mapping files alone.
+This document is the normative specification for OpenSportTaxonomy mapping files. A conforming implementation in any language must produce identical behavior from the YAML data alone.
 
-## Data model
+## Concepts
 
-A **mapping** is a YAML file under `mappings/` with two sections:
+A **mapping file** translates between OST sport strings and a single platform's native sport identifiers. One file per platform, under `mappings/<platform>.yaml`.
 
-- `fallback` — the platform code to return when no entry matches.
-- `mappings` — a list of entries, each with:
-  - `ost` — an OST sport code (e.g. `cycling.road`)
-  - `modifiers` (optional) — a list of OST modifier codes (e.g. `[virtual]`)
-  - `target` — the platform-native code
+- **OST sport string** — the canonical OST identifier, of the form `code` or `code+modifier[+modifier...]` (e.g. `cycling.road`, `cycling+stationary`). Modifiers are sorted alphabetically.
+- **Target** — the platform's native sport identifier. Shape is platform-specific: FIT uses `{sport, sub_sport}` integer pairs; Strava uses strings; HealthKit uses integers; Garmin Training API uses strings.
+- **Entry** — one row in the mapping file: a `target` paired with the `sport` it decodes to (or `null` for "no OST equivalent").
+- **Preferred entry** — the unique entry per non-null `sport` that is used for encoding.
 
-Every mapping is a **bijection**: each `target` value appears in at most one entry across all entries in the file. Implementations should assert this at load time. The reverse table is `{entry.target → (entry.ost, entry.modifiers)}`.
+The mapping file is keyed by the **finite** side (platform targets). OST sport strings, which have an unbounded combinatorial space, appear as annotations on platform values. This direction is intentional: it makes coverage structurally enforceable — every value in the platform's reference enum must appear as a row.
 
-## Encode (`Sport → target`)
+## Reference data contract
 
-Inputs: a `Sport` with `code` (string) and `modifiers` (set of strings).
+Each platform's `reference/<platform>/targets.yaml` is the authoritative enumeration of legal target values. It is consumed by the loader (validation rules 5–6), the linter, and the scaffolder.
 
-1. Look up `(sport.code, sport.modifiers)` in the forward table. Hit → return the target.
-2. If `sport.modifiers` is non-empty, look up `(sport.code, ∅)`. Hit → return.
-3. For each ancestor of `sport.code` in the dot-notation hierarchy, from nearest to furthest:
-   a. If `sport.modifiers` is non-empty, look up `(ancestor, sport.modifiers)`. Hit → return.
-   b. Look up `(ancestor, ∅)`. Hit → return.
-4. Return the platform's `fallback`.
+How `targets.yaml` is produced is platform-specific: a per-platform build script under `scripts/build_reference/<platform>.py` derives it from the platform's upstream source data (FIT's `sports.yaml × sub_sports.yaml` filtered by `associated_sports`; Strava's `sport_types.yaml`; etc.). The runtime never invokes these scripts — they run at commit time. CI runs them and asserts `git diff --exit-code` to catch reference drift.
 
-The ancestor sequence of `cycling.road` is `cycling`. The ancestor sequence of `generic` is empty.
+## File structure
 
-## Decode (`target → Sport`)
+```yaml
+format_version: 3
+platform: <platform_id>
+platform_version: <version string of the bundled platform spec>
 
-Inputs: a platform code (the same shape as the `target` field).
+fallback:
+  encode: <target value returned when no encode candidate matches>
+  decode: <OST sport string returned when no decode candidate matches>
 
-1. Look up `target` in the reverse table. Hit → return `Sport(code, modifiers)`.
-2. If the platform defines a **reducer**, iterate it. For each coarser candidate (other than `target` itself), look up the reverse table. Hit → return.
-3. Return `Sport("generic")`.
+target_coarsening:                          # optional
+  - <rule>
+  - <rule>
 
-A reducer is a function `target → iterator[target]` that yields progressively less-specific platform codes. It is platform-specific and optional.
-
-## Reducers, per platform
-
-Only Garmin FIT defines a reducer in this release:
-
-> Given `(sport_id, sub_sport_id)`, yield `(sport_id, sub_sport_id)`, then — if `sub_sport_id != 0` — `(sport_id, 0)`.
-
-Strava, Apple HealthKit, and Garmin Training API have no reducer. Their decode is exact-match-or-fallback.
-
-## Round-trip invariant
-
-For every entry `(ost, modifiers, target)` in a mapping:
-
-```
-encode(Sport(ost, modifiers)) == target
-decode(target) == Sport(ost, modifiers)
+entries:
+  - target: <platform value>
+    sport: <OST sport string> | null
+    preferred: <bool>                       # optional, default false
 ```
 
-This is the load-bearing test that justifies the bijection requirement. Implementations should test it exhaustively over the mapping data.
+Rows in `entries` are sorted lexicographically by `target` so the file scans side-by-side with `reference/<platform>/targets.yaml`.
 
-Note: not all `Sport` values round-trip — only those that appear as `(ost, modifiers)` in a mapping entry. For instance, `Sport("cycling.cyclocross")` encodes to Strava `"Ride"` via the parent-walk, but `decode("Ride")` returns `Sport("cycling")` (which is what's actually stored as Strava). This is correct lossy collapse, not a bug.
+### Field reference
 
-## Input validation for Garmin FIT
+| Field | Required | Meaning |
+|---|---|---|
+| `format_version` | yes | Integer. Must equal `3`. |
+| `platform` | yes | Platform identifier; must match the directory name under `reference/`. |
+| `platform_version` | yes | Version string of the bundled platform spec (informational; not parsed). |
+| `fallback.encode` | yes | Platform value returned when no encode candidate matches. |
+| `fallback.decode` | yes | OST sport string returned when no decode candidate matches. |
+| `target_coarsening` | optional | List of rewrite rules used when decoding targets not present in `entries` (forward-compat with newer platform versions). |
+| `entries` | yes | List of rows; one row per legal target in `reference/<platform>/targets.yaml`. |
+| `entries[].target` | yes | Platform-specific value. Shape is fixed per platform. |
+| `entries[].sport` | yes | OST sport string, or `null` if no OST equivalent exists. |
+| `entries[].preferred` | optional | If `true`, this row is the encode target for its `sport`. Default `false`. Forbidden when `sport: null`. |
 
-FIT exposes sport and sub_sport as both integer enum values and string names (the FIT SDK profile defines them; see `reference/garmin-fit-sdk/`). The Python reference implementation accepts either.
+## Target coarsening
 
-- **Names** are validated against the SDK enum tables. Unknown names raise an error — they are almost always typos.
-- **Ints** are accepted as-is. Unknown ids may be future SDK additions; forward-compat matters more than typo detection in this case.
+`target_coarsening` rules are consulted **only** when decoding a target that does not appear in `entries`. Because validation rule 6 requires every value in the bundled `targets.yaml` to have a row, coarsening only fires for forward-compat (a target value from a newer platform version than the bundled snapshot).
 
-Other platforms accept their natural primitive (`str` or `int`) without name-table validation. Reference enum tables for those platforms may be added in the future and would enable the same typo guard.
+### Semantics
 
-## Why a bijection?
+Each rule independently produces one candidate target by rewriting the original input. Rules apply in declaration order:
 
-A many-to-one forward mapping (the same target reached by multiple `(ost, modifiers)` pairs) makes the reverse direction ambiguous: which OST should `decode(target)` return? Rather than annotate the YAML with a "canonical" flag, we delete forward-redundant entries — entries whose target the encode parent-walk would reach anyway. After deletion, the bijection is self-evident in the data and the reverse map is just `{v: k for k, v in mappings}`.
+1. For each rule, compute `candidate = apply(rule, input_target)`.
+2. If `candidate == input_target` (the rule was a no-op for this input), skip it.
+3. Otherwise look up `candidate` in `entries`. If found, return its `sport` (or `fallback.decode` if `sport: null`).
+4. If no rule produces a hit, return `fallback.decode`.
 
-The deletion rule:
+**Rules do not chain.** Rule N is applied to the original input target, not to rule N−1's output. This keeps each rule's effect locally inspectable.
 
-> If, after preserving its modifiers, walking up from `entry.ost` reaches an entry with the same `target`, delete `entry`.
+### Rule kinds
 
-Applied mechanically. The bijection assertion at construction time catches any mistake.
+The only rule kind defined in format v3 is `reset`:
+
+```yaml
+target_coarsening:
+  - reset: { sub_sport: 0 }                    # set sub_sport to 0
+  - reset: { sport: 0, sub_sport: 0 }          # set both fields
+```
+
+`reset` sets the listed fields to the values declared inline. Fields not named in the rule pass through unchanged. Every field named in a `reset` rule must exist in the platform's target shape (validation rule 13).
+
+Future rule kinds require a `format_version` bump.
+
+## Validation rules (load-time, strict)
+
+A loader rejects a mapping file if any of these hold. Validation is fail-fast: the library refuses to operate on a partially valid file.
+
+1. `format_version == 3`.
+2. `platform` matches a directory under `reference/`.
+3. No unknown top-level or per-entry keys.
+4. Every `target` in `entries` is unique.
+5. Every `target` in `entries` is a member of `reference/<platform>/targets.yaml`.
+6. Every member of `reference/<platform>/targets.yaml` has exactly one matching `target` row in `entries`. *(The rule that makes coverage oversights impossible.)*
+7. Every non-null `sport` parses as a valid sport string per `schema.yaml`. The sport code must be standard (present in `schema.yaml`); non-standard codes are forbidden in mapping files. Modifiers must be alphabetically sorted in the canonical form.
+8. For each non-null `sport` value appearing in `entries`, exactly one entry has `preferred: true`.
+9. `preferred: true` is forbidden on rows where `sport: null`.
+10. Round-trip on preferred entries: for every preferred entry, `decode(target) == sport` AND `encode(sport) == target`.
+11. Decode of non-preferred synonym rows: for every entry with `preferred: false` (and non-null `sport`), `decode(target) == sport`.
+12. `fallback.decode` parses as a valid sport string AND equals the `sport` of some preferred entry in `entries` (so the fallback round-trips through encode).
+13. Every field named in a `reset` rule exists in the platform's target shape.
+
+## Algorithms
+
+### Decode `target → sport`
+
+```
+decode(target):
+  entry = entries_by_target.get(target)
+  if entry is not None:
+    return entry.sport if entry.sport is not None else fallback.decode
+
+  for rule in target_coarsening:
+    candidate = apply(rule, target)
+    if candidate == target:                         # no-op for this input
+      continue
+    entry = entries_by_target.get(candidate)
+    if entry is not None:
+      return entry.sport if entry.sport is not None else fallback.decode
+
+  return fallback.decode
+```
+
+A direct lookup against the platform-keyed table, with `target_coarsening` providing forward-compatible fallback for values newer than the bundled snapshot. An entry with `sport: null` short-circuits to `fallback.decode` — the row's author asserted "no OST equivalent" and that assertion is respected.
+
+### Encode `sport → target`
+
+```
+encode(sport):
+  for candidate in ost_hierarchy_walk(sport):
+    entry = preferred_index.get(candidate)
+    if entry is not None:
+      return entry.target
+  return fallback.encode
+
+ost_hierarchy_walk(sport):
+  # Candidate enumeration. Modifiers dominate discipline depth.
+  yield (sport.code, sport.modifiers)               # exact
+  for ancestor in strict_ancestors(sport.code):     # nearest first
+    yield (ancestor, sport.modifiers)
+  if sport.modifiers:
+    yield (sport.code, ∅)
+    for ancestor in strict_ancestors(sport.code):
+      yield (ancestor, ∅)
+```
+
+`preferred_index` is built at load time by selecting rows with `preferred == true` and inverting them: `(sport.code, frozenset(sport.modifiers)) → target`.
+
+`strict_ancestors(code)` yields the dot-notation ancestors of `code`, nearest first: `strict_ancestors("cycling.road.crit") = ["cycling.road", "cycling"]`. The root code (e.g. `cycling`) has no strict ancestors.
+
+#### Why modifiers dominate
+
+Modifiers like `stationary`, `virtual`, `assisted` describe measurement circumstances that materially change activity interpretation (indoor vs outdoor, electric vs human-powered). Discipline depth is a finer-grained categorization *within* the same circumstances. The hierarchy walk preserves the more semantically important axis: dropping `+stationary` to keep `.road` would render an indoor trainer ride as a 40 km outdoor route — a worse error than dropping `.road` to keep `+stationary` (correctly indoor, less specific discipline).
+
+This is a deliberate change from format v1, which let discipline depth dominate.
+
+### Why the asymmetry is correct
+
+Decode's domain is finite (the platform enum, capped by `targets.yaml`). A lookup is the natural shape. One indexed read; optional forward-compat coarsening.
+
+Encode's domain is unbounded (any OST sport code × any subset of modifiers). A hierarchical search is the natural shape. Multiple candidates ordered by priority.
+
+The two algorithms have different shapes because the data has different shapes. Earlier drafts pursued symmetric algorithms; this was a contortion that obscured the underlying structure.
+
+## Worked examples
+
+### Decode (FIT)
+
+| Input target | Output sport | Path |
+|---|---|---|
+| `(2, 6)` indoor_cycling | `cycling+stationary` | Direct lookup; preferred row |
+| `(2, 5)` spin | `cycling+stationary` | Direct lookup; non-preferred row |
+| `(4, 6)` fitness_equipment/indoor_cycling | `cycling+stationary` | Direct lookup; non-preferred row |
+| `(1, 1)` running/treadmill | `running+stationary` | Direct lookup; preferred row |
+| `(4, 15)` elliptical | `generic` | Row exists with `sport: null` → `fallback.decode` |
+| `(2, 99)` future SDK addition | `cycling` | Not in entries; `reset: {sub_sport: 0}` yields `(2, 0)`; that row's `sport: cycling` |
+| `(99, 99)` future SDK addition | `generic` | First rule yields `(99, 0)` (miss); second rule yields `(0, 0)` → `generic` |
+
+### Encode (FIT)
+
+| Input sport | Output target | Path |
+|---|---|---|
+| `cycling+stationary` | `(2, 6)` | Exact match in `preferred_index` |
+| `cycling.road+stationary` | `(2, 6)` | Exact miss; walk up tree keeping modifiers; `(cycling, {stationary})` hits |
+| `cycling.road+race+stationary` | `(2, 6)` | Same; modifiers preserved while OST tree walks up |
+| `cycling.cyclocross` | `(2, 11)` | Exact match |
+| `cycling.unknown_discipline` | `(2, 0)` | Walk up to `cycling` (unknown codes have no recorded ancestors in `schema.yaml`, but dot-notation ancestors are computed mechanically) |
+| `paragliding` (not in schema) | `(0, 0)` | No preferred entry at any walk step; `fallback.encode` |
+
+## Round-trip properties
+
+For each preferred entry `(sport, target)`:
+
+```
+encode(sport) == target
+decode(target) == sport
+```
+
+For each non-preferred entry `(sport, target_synonym)`:
+
+```
+decode(target_synonym) == sport     # one-way: synonyms decode to their canonical sport
+encode(sport) != target_synonym     # encode prefers the canonical row's target
+```
+
+For `fallback.decode`:
+
+```
+fallback.decode parses to a valid Sport
+encode(fallback.decode) is the target of some preferred entry
+```
+
+These properties are enforced by validation rules 10–12 at load time.
+
+## Notes for implementers
+
+- The loader builds two indexes from `entries`: `entries_by_target` (all rows, used by decode) and `preferred_index` (only `preferred: true` rows, inverted, used by encode).
+- `sport.modifiers` is a `frozenset`; index keys must use frozenset to be hashable.
+- Sport string canonicalization (sorting modifiers) happens at parse time. Index keys are built from canonical forms.
+- `apply(rule, target)` is a small dispatch table on rule kind. Only `reset` exists in v3; adding a kind requires a `format_version` bump.
+- `entries_by_target` is keyed by the target value's canonical form; for FIT this is the tuple `(sport_id, sub_sport_id)`. The YAML's `{ sport: 2, sub_sport: 6 }` deserializes to that tuple.

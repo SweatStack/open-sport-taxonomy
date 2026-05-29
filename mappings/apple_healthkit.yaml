@@ -1,39 +1,275 @@
-# OpenSportTaxonomy — Apple HealthKit mapping
+# OpenSportTaxonomy — apple_healthkit mapping (format v3).
 #
-# Bidirectional. Every target appears exactly once: the mapping is a
-# bijection. Reverse lookup is derived automatically; encode and decode
-# share this data. See docs/translation.md for the algorithm.
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
 
+format_version: 3
 platform: apple_healthkit
 platform_version: "iOS 18"
-fallback: 3000  # other
 
-mappings:
+fallback:
+  encode: 3000
+  decode: generic
 
-  - ost: cycling
-    target: 13  # cycling
+entries:
 
-  - ost: generic
-    target: 3000  # other
+  - target:    1  # americanFootball
+    sport: null
 
-  - ost: rowing
-    target: 35  # rowing
+  - target:    2  # archery
+    sport: null
 
-  - ost: running
-    target: 37  # running
+  - target:    3  # australianFootball
+    sport: null
 
-  - ost: swimming
-    target: 46  # swimming
+  - target:    4  # badminton
+    sport: null
 
-  - ost: walking
-    target: 52  # walking
+  - target:    5  # baseball
+    sport: null
 
-  - ost: walking.hiking
-    target: 24  # hiking
+  - target:    6  # basketball
+    sport: null
 
-  - ost: xc_skiing
-    target: 60  # crossCountrySkiing
+  - target:    7  # bowling
+    sport: null
 
-  - ost: xc_skiing
-    modifiers: [roller]
-    target: 30  # inlineSkate
+  - target:    8  # boxing
+    sport: null
+
+  - target:    9  # climbing
+    sport: null
+
+  - target:   10  # cricket
+    sport: null
+
+  - target:   11  # crossTraining
+    sport: null
+
+  - target:   12  # curling
+    sport: null
+
+  - target:   13  # cycling
+    sport: cycling
+    preferred: true
+
+  - target:   14  # dance
+    sport: null
+
+  - target:   15  # danceInspiredTraining
+    sport: null
+
+  - target:   16  # elliptical
+    sport: null
+
+  - target:   17  # equestrianSports
+    sport: null
+
+  - target:   18  # fencing
+    sport: null
+
+  - target:   19  # fishing
+    sport: null
+
+  - target:   20  # functionalStrengthTraining
+    sport: null
+
+  - target:   21  # golf
+    sport: null
+
+  - target:   22  # gymnastics
+    sport: null
+
+  - target:   23  # handball
+    sport: null
+
+  - target:   24  # hiking
+    sport: walking.hiking
+    preferred: true
+
+  - target:   25  # hockey
+    sport: null
+
+  - target:   26  # hunting
+    sport: null
+
+  - target:   27  # lacrosse
+    sport: null
+
+  - target:   28  # martialArts
+    sport: null
+
+  - target:   29  # mindAndBody
+    sport: null
+
+  - target:   30  # mixedMetabolicCardioTraining
+    sport: xc_skiing+roller
+    preferred: true
+
+  - target:   31  # paddleSports
+    sport: null
+
+  - target:   32  # play
+    sport: null
+
+  - target:   33  # preparationAndRecovery
+    sport: null
+
+  - target:   34  # racquetball
+    sport: null
+
+  - target:   35  # rowing
+    sport: rowing
+    preferred: true
+
+  - target:   36  # rugby
+    sport: null
+
+  - target:   37  # running
+    sport: running
+    preferred: true
+
+  - target:   38  # sailing
+    sport: null
+
+  - target:   39  # skatingSports
+    sport: null
+
+  - target:   40  # snowSports
+    sport: null
+
+  - target:   41  # soccer
+    sport: null
+
+  - target:   42  # softball
+    sport: null
+
+  - target:   43  # squash
+    sport: null
+
+  - target:   44  # stairClimbing
+    sport: null
+
+  - target:   45  # surfingSports
+    sport: null
+
+  - target:   46  # swimming
+    sport: swimming
+    preferred: true
+
+  - target:   47  # tableTennis
+    sport: null
+
+  - target:   48  # tennis
+    sport: null
+
+  - target:   49  # trackAndField
+    sport: null
+
+  - target:   50  # traditionalStrengthTraining
+    sport: null
+
+  - target:   51  # volleyball
+    sport: null
+
+  - target:   52  # walking
+    sport: walking
+    preferred: true
+
+  - target:   53  # waterFitness
+    sport: null
+
+  - target:   54  # waterPolo
+    sport: null
+
+  - target:   55  # waterSports
+    sport: null
+
+  - target:   56  # wrestling
+    sport: null
+
+  - target:   57  # yoga
+    sport: null
+
+  - target:   58  # barre
+    sport: null
+
+  - target:   59  # coreTraining
+    sport: null
+
+  - target:   60  # crossCountrySkiing
+    sport: xc_skiing
+    preferred: true
+
+  - target:   61  # downhillSkiing
+    sport: null
+
+  - target:   62  # flexibility
+    sport: null
+
+  - target:   63  # highIntensityIntervalTraining
+    sport: null
+
+  - target:   64  # jumpRope
+    sport: null
+
+  - target:   65  # kickboxing
+    sport: null
+
+  - target:   66  # pilates
+    sport: null
+
+  - target:   67  # snowboarding
+    sport: null
+
+  - target:   68  # stairs
+    sport: null
+
+  - target:   69  # stepTraining
+    sport: null
+
+  - target:   70  # wheelchairWalkPace
+    sport: null
+
+  - target:   71  # wheelchairRunPace
+    sport: null
+
+  - target:   72  # taiChi
+    sport: null
+
+  - target:   73  # mixedCardio
+    sport: null
+
+  - target:   74  # handCycling
+    sport: null
+
+  - target:   75  # discSports
+    sport: null
+
+  - target:   76  # fitnessGaming
+    sport: null
+
+  - target:   77  # cardioDance
+    sport: null
+
+  - target:   78  # socialDance
+    sport: null
+
+  - target:   79  # pickleball
+    sport: null
+
+  - target:   80  # cooldown
+    sport: null
+
+  - target:   82  # swimBikeRun
+    sport: null
+
+  - target:   83  # transition
+    sport: null
+
+  - target:   84  # underwaterDiving
+    sport: null
+
+  - target: 3000  # other
+    sport: generic
+    preferred: true

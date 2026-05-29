@@ -208,7 +208,7 @@ garmin_fit.decode(2)                   # sub_sport omitted → generic
 garmin_fit.decode(2, None)             # None → generic (e.g. from a FIT parser)
 ```
 
-Translation is lossy by design — see [`docs/translation.md`](docs/translation.md) for the encode/decode algorithm and the bijection invariant that makes both directions well-defined.
+Translation is lossy by design — see [`docs/translation.md`](docs/translation.md) for the format v3 specification, the encode/decode algorithms, and the structural-coverage rules that make both directions well-defined.
 
 ### Pydantic integration
 

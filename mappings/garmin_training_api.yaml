@@ -1,23 +1,45 @@
-# OpenSportTaxonomy — Garmin Training API V2 mapping
+# OpenSportTaxonomy — garmin_training_api mapping (format v3).
 #
-# Bidirectional. Every target appears exactly once: the mapping is a
-# bijection. Reverse lookup is derived automatically; encode and decode
-# share this data. See docs/translation.md for the algorithm.
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
 
+format_version: 3
 platform: garmin_training_api
 platform_version: "V2 1.0 (2025-05-26)"
-fallback: GENERIC
 
-mappings:
+fallback:
+  encode: GENERIC
+  decode: generic
 
-  - ost: cycling
-    target: CYCLING
+entries:
 
-  - ost: generic
-    target: GENERIC
+  - target: CARDIO_TRAINING
+    sport: null
 
-  - ost: running
-    target: RUNNING
+  - target: CYCLING
+    sport: cycling
+    preferred: true
 
-  - ost: swimming
-    target: LAP_SWIMMING
+  - target: GENERIC
+    sport: generic
+    preferred: true
+
+  - target: LAP_SWIMMING
+    sport: swimming
+    preferred: true
+
+  - target: MULTI_SPORT
+    sport: null
+
+  - target: PILATES
+    sport: null
+
+  - target: RUNNING
+    sport: running
+    preferred: true
+
+  - target: STRENGTH_TRAINING
+    sport: null
+
+  - target: YOGA
+    sport: null

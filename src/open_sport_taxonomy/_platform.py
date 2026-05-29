@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, NamedTuple
+from collections.abc import Iterator
+from typing import Any, Callable, Mapping, NamedTuple
 
 from open_sport_taxonomy._modifier import Modifier
 from open_sport_taxonomy._sport import Sport
@@ -12,8 +13,8 @@ from open_sport_taxonomy._sport import Sport
 
 
 class _GarminFitCodeBase(NamedTuple):
-    sport_id: int
-    sub_sport_id: int
+    sport: int
+    sub_sport: int
 
 
 class GarminFitCode(_GarminFitCodeBase):
@@ -25,8 +26,10 @@ class GarminFitCode(_GarminFitCodeBase):
         GarminFitCode("cycling", "road")
         GarminFitCode(sport=2, sub_sport="road")
 
-    Storage is always ``(sport_id, sub_sport_id)`` so equality, hashing,
-    and unpacking are well-defined across construction forms.
+    Storage is always ``(sport, sub_sport)`` (integer ids) so equality,
+    hashing, and unpacking are well-defined across construction forms.
+    Field names match the YAML ``target: {sport, sub_sport}`` shape used
+    in mapping files and ``target_coarsening`` rules.
 
     Names are validated at construction against the FIT enum tables
     shipped in ``reference/garmin-fit-sdk/``. Unknown names raise
@@ -49,16 +52,16 @@ class GarminFitCode(_GarminFitCodeBase):
     def sport_name(self) -> str | None:
         """The FIT sport enum name, or ``None`` if this id is not in the SDK tables."""
         from open_sport_taxonomy._platforms import FIT_SPORT_NAMES
-        return FIT_SPORT_NAMES.get(self.sport_id)
+        return FIT_SPORT_NAMES.get(self.sport)
 
     @property
     def sub_sport_name(self) -> str | None:
         """The FIT sub_sport enum name, or ``None`` if this id is not in the SDK tables."""
         from open_sport_taxonomy._platforms import FIT_SUB_SPORT_NAMES
-        return FIT_SUB_SPORT_NAMES.get(self.sub_sport_id)
+        return FIT_SUB_SPORT_NAMES.get(self.sub_sport)
 
     def __repr__(self) -> str:
-        return f"GarminFitCode(sport={self.sport_id}, sub_sport={self.sub_sport_id})"
+        return f"GarminFitCode(sport={self.sport}, sub_sport={self.sub_sport})"
 
 
 def _resolve_fit_value(value: int | str, field: str) -> int:
@@ -68,9 +71,7 @@ def _resolve_fit_value(value: int | str, field: str) -> int:
     if isinstance(value, int):
         return value
     if isinstance(value, str):
-        # Lazy import: avoids a circular import during _platforms module init
-        # (where GarminFitCode is constructed with int args to define
-        # GARMIN_FIT_FALLBACK and the forward mappings).
+        # Lazy import: avoids a circular import during _platforms module init.
         from open_sport_taxonomy._platforms import FIT_SPORT_IDS, FIT_SUB_SPORT_IDS
         table = FIT_SPORT_IDS if field == "sport" else FIT_SUB_SPORT_IDS
         if value not in table:
@@ -84,114 +85,150 @@ def _resolve_fit_value(value: int | str, field: str) -> int:
 # ---------------------------------------------------------------------------
 # Platform — bidirectional translator between OST sports and platform codes.
 # ---------------------------------------------------------------------------
+#
+# See docs/translation.md for the format v3 specification and the
+# normative algorithm definitions. The runtime here implements them
+# directly from data assembled at generation time by scripts/generate.py.
+
+
+SportKey = tuple[str, frozenset[str]]
+CoarseningRule = Mapping[str, Any]
 
 
 class Platform:
     """Bidirectional translator between OST sports and a platform's codes.
 
-    Built from a forward mapping ``(code, modifiers) -> target``. The
-    reverse mapping is derived at construction time and the source is
-    asserted to be one-to-one on ``target`` — i.e. a true bijection.
+    Built from two data views over the same mapping table:
 
-    See ``docs/translation.md`` for the algorithm specification.
+    - ``entries_by_target`` maps every legal platform target to a
+      ``(Sport | None, preferred)`` tuple. Used by ``decode``.
+    - ``preferred_index`` maps every preferred entry's ``(sport_code,
+      modifiers)`` pair to its target. Used by ``encode``.
+
+    Both views are derived from ``mappings/<platform>.yaml`` by
+    ``scripts/generate.py``; the runtime does not parse YAML.
     """
 
     def __init__(
         self,
-        mappings: dict[tuple[str, frozenset[str]], Any],
-        fallback: Any,
         *,
-        reducer: Callable[[Any], Iterable[Any]] | None = None,
+        entries_by_target: Mapping[Any, tuple[Sport | None, bool]],
+        preferred_index: Mapping[SportKey, Any],
+        fallback_encode: Any,
+        fallback_decode: Sport,
+        target_coarsening: tuple[CoarseningRule, ...] = (),
     ) -> None:
-        self._mappings = mappings
-        self._fallback = fallback
-        self._reducer = reducer
-
-        # Build reverse table and assert bijection. Any duplicate target
-        # is a YAML bug that must be fixed at the source; we do not pick
-        # a winner silently.
-        reverse: dict[Any, tuple[str, frozenset[str]]] = {}
-        for (code, mods), target in mappings.items():
-            if target in reverse:
-                existing_code, existing_mods = reverse[target]
-                raise ValueError(
-                    f"Mapping is not bijective: target {target!r} appears for "
-                    f"both ({existing_code!r}, {set(existing_mods) or '∅'}) and "
-                    f"({code!r}, {set(mods) or '∅'}). "
-                    f"Every target must map back to exactly one (code, modifiers) pair."
-                )
-            reverse[target] = (code, mods)
-        self._reverse = reverse
+        self._entries_by_target = entries_by_target
+        self._preferred_index = preferred_index
+        self._fallback_encode = fallback_encode
+        self._fallback_decode = fallback_decode
+        self._target_coarsening = target_coarsening
 
     # ------------------------------------------------------------------
     # Forward: Sport → target
     # ------------------------------------------------------------------
 
     def encode(self, sport: Sport) -> Any:
-        """Encode an OST sport to the platform's native code.
+        """Encode an OST sport to the platform's native target.
 
-        Walks ``sport`` and its ancestors in the OST hierarchy, preferring
-        an exact ``(code, modifiers)`` match before falling back to
-        ``(code, ∅)``. Modifiers are preserved one ancestor at a time.
-        Returns the platform fallback if nothing matches.
+        Walks the OST hierarchy with **modifiers dominating discipline
+        depth**: tries the exact ``(code, modifiers)`` pair first, then
+        each ancestor with modifiers preserved, then drops modifiers
+        and walks again. Returns ``fallback_encode`` if no candidate
+        matches a preferred entry. See docs/translation.md §"Encode".
         """
-        mod_codes = frozenset(
-            m.value if hasattr(m, "value") else m for m in sport.modifiers
-        )
-
-        # 1. Exact match at the current level.
-        key = (sport.code, mod_codes)
-        if key in self._mappings:
-            return self._mappings[key]
-
-        # 2. Same code, drop modifiers.
-        if mod_codes:
-            key = (sport.code, frozenset())
-            if key in self._mappings:
-                return self._mappings[key]
-
-        # 3. Walk up the hierarchy, trying with-modifiers then without
-        #    at each level.
-        parent = sport.parent
-        while parent is not None:
-            if mod_codes:
-                key = (parent.code, mod_codes)
-                if key in self._mappings:
-                    return self._mappings[key]
-            key = (parent.code, frozenset())
-            if key in self._mappings:
-                return self._mappings[key]
-            parent = parent.parent
-
-        # 4. Fallback.
-        return self._fallback
+        if not isinstance(sport, Sport):
+            raise TypeError(
+                f"encode() requires a Sport, got {type(sport).__name__}. "
+                f"Construct one with Sport(...) for known sports or "
+                f"Sport.parse(...) for external input."
+            )
+        for candidate in _ost_hierarchy_walk(sport):
+            target = self._preferred_index.get(candidate)
+            if target is not None:
+                return target
+        return self._fallback_encode
 
     # ------------------------------------------------------------------
     # Reverse: target → Sport
     # ------------------------------------------------------------------
 
     def decode(self, target: Any) -> Sport:
-        """Decode a platform code into the nearest OST sport.
+        """Decode a platform target into the corresponding OST sport.
 
-        Looks ``target`` up in the reverse table. On a miss, iterates the
-        platform's reducer (if any) and tries each coarser key in turn.
-        Returns ``Sport.GENERIC`` if nothing matches.
+        A direct lookup in ``entries_by_target``. Targets absent from
+        the table (a value newer than the bundled reference snapshot)
+        are routed through ``target_coarsening`` for forward-compat.
+        ``sport: null`` entries short-circuit to ``fallback_decode``.
+        See docs/translation.md §"Decode".
         """
-        hit = self._reverse.get(target)
-        if hit is not None:
-            return _sport_from_reverse(hit)
+        entry = self._entries_by_target.get(target)
+        if entry is not None:
+            sport, _preferred = entry
+            return sport if sport is not None else self._fallback_decode
 
-        if self._reducer is not None:
-            for candidate in self._reducer(target):
-                if candidate == target:
-                    continue  # already tried above
-                hit = self._reverse.get(candidate)
-                if hit is not None:
-                    return _sport_from_reverse(hit)
+        for rule in self._target_coarsening:
+            candidate = _apply_coarsening_rule(rule, target)
+            if candidate == target:
+                continue  # rule was a no-op for this input
+            entry = self._entries_by_target.get(candidate)
+            if entry is not None:
+                sport, _preferred = entry
+                return sport if sport is not None else self._fallback_decode
 
-        return Sport.GENERIC
+        return self._fallback_decode
 
 
-def _sport_from_reverse(entry: tuple[str, frozenset[str]]) -> Sport:
-    code, mods = entry
-    return Sport(code, modifiers={Modifier(m) for m in mods})
+# ---------------------------------------------------------------------------
+# Algorithm helpers — pure functions, data-driven per docs/translation.md.
+# ---------------------------------------------------------------------------
+
+
+def _ost_hierarchy_walk(sport: Sport) -> Iterator[SportKey]:
+    """Enumerate encode candidates per the modifiers-dominate ordering.
+
+    The walk yields:
+
+    1. ``(sport.code, sport.modifiers)`` — exact.
+    2. Each strict ancestor of ``sport.code`` with the original modifiers.
+    3. If modifiers are non-empty, repeat steps 1–2 with the empty
+       modifier set.
+    """
+    mods = frozenset(
+        m.value if isinstance(m, Modifier) else m for m in sport.modifiers
+    )
+
+    # Step 1–2: exact and ancestors-with-modifiers.
+    yield (sport.code, mods)
+    ancestor = sport.parent
+    while ancestor is not None:
+        yield (ancestor.code, mods)
+        ancestor = ancestor.parent
+
+    # Step 3: drop modifiers and walk again (only if modifiers existed).
+    if mods:
+        yield (sport.code, frozenset())
+        ancestor = sport.parent
+        while ancestor is not None:
+            yield (ancestor.code, frozenset())
+            ancestor = ancestor.parent
+
+
+def _apply_coarsening_rule(rule: CoarseningRule, target: Any) -> Any:
+    """Apply one coarsening rule to a target, returning the new target.
+
+    Only the `reset` rule kind is defined in format v3. A rule whose
+    output equals the input is a no-op for that input; the caller
+    skips no-ops.
+    """
+    if "reset" in rule:
+        values = rule["reset"]
+        # NamedTuple targets support _replace; other shapes don't carry
+        # named fields and thus can't be coarsened by `reset`.
+        if hasattr(target, "_replace"):
+            return target._replace(**values)
+        raise TypeError(
+            f"`reset` coarsening rule requires a NamedTuple target, "
+            f"got {type(target).__name__}"
+        )
+    raise ValueError(f"Unknown coarsening rule kind: {rule!r}")

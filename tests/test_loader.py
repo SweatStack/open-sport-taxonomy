@@ -1,0 +1,214 @@
+"""Loader/validator tests for format v3 (rules 1–13 in docs/translation.md).
+
+The validator lives in scripts/generate.py — these tests construct
+synthetic mappings and assert the validator rejects each kind of
+violation. Run via:
+
+    uv run python -m pytest tests/test_loader.py
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def _load_generate_module():
+    """Import scripts/generate.py as a module (it has no __init__.py)."""
+    spec = importlib.util.spec_from_file_location(
+        "generate", ROOT / "scripts" / "generate.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["generate"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+generate = _load_generate_module()
+SPORT_CODES = {
+    "cycling", "cycling.road", "cycling.cyclocross", "generic", "running",
+    "running.road", "rowing", "swimming", "walking",
+}
+MODIFIER_CODES = {"stationary", "virtual", "race", "assisted", "commute"}
+
+
+def _minimal_valid_mapping(extras=None):
+    """The smallest valid format-v3 mapping for testing."""
+    base = {
+        "format_version": 3,
+        "platform": "garmin_fit",
+        "platform_version": "test",
+        "fallback": {
+            "encode": {"sport": 0, "sub_sport": 0},
+            "decode": "generic",
+        },
+        "target_coarsening": [{"reset": {"sub_sport": 0}}],
+        "entries": [
+            {
+                "target": {"sport": 0, "sub_sport": 0},
+                "sport": "generic",
+                "preferred": True,
+            },
+            {
+                "target": {"sport": 2, "sub_sport": 0},
+                "sport": "cycling",
+                "preferred": True,
+            },
+        ],
+    }
+    if extras:
+        base.update(extras)
+    return base
+
+
+def _minimal_targets():
+    return [
+        {"sport": 0, "sub_sport": 0},
+        {"sport": 2, "sub_sport": 0},
+    ]
+
+
+def _validate(mapping, targets=None, platform="garmin_fit"):
+    return generate.validate_mapping(
+        platform,
+        mapping,
+        targets or _minimal_targets(),
+        SPORT_CODES,
+        MODIFIER_CODES,
+    )
+
+
+class TestRule1FormatVersion:
+    def test_correct_version_passes(self):
+        _validate(_minimal_valid_mapping())
+
+    def test_wrong_version_rejected(self):
+        m = _minimal_valid_mapping({"format_version": 2})
+        with pytest.raises(generate.ValidationError, match="format_version"):
+            _validate(m)
+
+
+class TestRule3UnknownKeys:
+    def test_top_level_unknown_rejected(self):
+        m = _minimal_valid_mapping({"unknown_key": "x"})
+        with pytest.raises(generate.ValidationError, match="unknown_key"):
+            _validate(m)
+
+    def test_entry_unknown_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"][0]["unknown"] = "x"
+        with pytest.raises(generate.ValidationError, match="unknown"):
+            _validate(m)
+
+
+class TestRule4UniqueTargets:
+    def test_duplicate_target_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"].append({
+            "target": {"sport": 0, "sub_sport": 0},  # duplicates entry[0]
+            "sport": "cycling",
+            "preferred": False,
+        })
+        with pytest.raises(generate.ValidationError, match="duplicate"):
+            _validate(m)
+
+
+class TestRule5LegalTargets:
+    def test_unknown_target_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"].append({
+            "target": {"sport": 99, "sub_sport": 99},
+            "sport": None,
+        })
+        with pytest.raises(generate.ValidationError, match="not in reference"):
+            _validate(m)
+
+
+class TestRule6Coverage:
+    def test_missing_target_rejected(self):
+        m = _minimal_valid_mapping()
+        # Drop entry[1] so target (2, 0) becomes uncovered.
+        m["entries"].pop()
+        with pytest.raises(generate.ValidationError, match="target.*no row"):
+            _validate(m)
+
+
+class TestRule7SportString:
+    def test_non_standard_code_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"][0]["sport"] = "paragliding"
+        with pytest.raises(generate.ValidationError, match="not in schema"):
+            _validate(m)
+
+    def test_unknown_modifier_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"][1]["sport"] = "cycling+xyz"
+        with pytest.raises(generate.ValidationError, match="unknown modifier"):
+            _validate(m)
+
+    def test_unsorted_modifiers_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"][1]["sport"] = "cycling+virtual+race"  # should be race+virtual
+        with pytest.raises(generate.ValidationError, match="alphabetically sorted"):
+            _validate(m)
+
+
+class TestRule8OnePreferredPerSport:
+    def test_two_preferred_same_sport_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"].append({
+            "target": {"sport": 0, "sub_sport": 0},
+            "sport": "cycling",
+            "preferred": True,  # second preferred for cycling
+        })
+        # First trigger: duplicate target. Skip — adjust to a new target.
+        targets = _minimal_targets() + [{"sport": 2, "sub_sport": 7}]
+        m["entries"][-1]["target"] = {"sport": 2, "sub_sport": 7}
+        with pytest.raises(generate.ValidationError, match="preferred entries"):
+            _validate(m, targets=targets)
+
+    def test_zero_preferred_for_annotated_sport_rejected(self):
+        m = _minimal_valid_mapping()
+        m["entries"][1]["preferred"] = False  # cycling now has no preferred row
+        with pytest.raises(generate.ValidationError, match="preferred entries"):
+            _validate(m)
+
+
+class TestRule9NullCannotBePreferred:
+    def test_null_sport_with_preferred_rejected(self):
+        m = _minimal_valid_mapping()
+        targets = _minimal_targets() + [{"sport": 2, "sub_sport": 7}]
+        m["entries"].append({
+            "target": {"sport": 2, "sub_sport": 7},
+            "sport": None,
+            "preferred": True,
+        })
+        with pytest.raises(generate.ValidationError, match="null.*preferred"):
+            _validate(m, targets=targets)
+
+
+class TestRule12FallbackDecodeRoundTrips:
+    def test_fallback_not_in_preferred_rejected(self):
+        m = _minimal_valid_mapping()
+        m["fallback"]["decode"] = "running"  # no preferred entry for running
+        with pytest.raises(generate.ValidationError, match="not the `sport`"):
+            _validate(m)
+
+
+class TestRule13CoarseningFields:
+    def test_unknown_reset_field_rejected(self):
+        m = _minimal_valid_mapping()
+        m["target_coarsening"] = [{"reset": {"unknown_field": 0}}]
+        with pytest.raises(generate.ValidationError, match="unknown target field"):
+            _validate(m)
+
+    def test_non_reset_rule_kind_rejected(self):
+        m = _minimal_valid_mapping()
+        m["target_coarsening"] = [{"unknown_rule": {}}]
+        with pytest.raises(generate.ValidationError, match="reset"):
+            _validate(m)
