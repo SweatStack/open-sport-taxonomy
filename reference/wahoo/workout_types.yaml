@@ -1,0 +1,256 @@
+# Wahoo Cloud API — workout_type_id enumeration.
+#
+# Source of truth, hand-transcribed from the HTML docs at
+# https://cloud-api.wahooligan.com/#data-types (Wahoo publishes no
+# machine-readable enum). `family` and `location` are fixed attributes of each
+# type, kept here for human review and mapping audit only — only `value`
+# (workout_type_id) is used as the mapping target.
+#
+# Pin `platform_version` in mappings/wahoo.yaml to the changelog date at the
+# bottom of the docs page. See README.md.
+
+cases:
+  - value: 0
+    name: BIKING
+    family: BIKING
+    location: OUTDOOR
+  - value: 1
+    name: RUNNING
+    family: RUNNING
+    location: OUTDOOR
+  - value: 2
+    name: FE
+    family: N/A
+    location: INDOOR
+  - value: 3
+    name: RUNNING_TRACK
+    family: RUNNING
+    location: OUTDOOR
+  - value: 4
+    name: RUNNING_TRAIL
+    family: RUNNING
+    location: OUTDOOR
+  - value: 5
+    name: RUNNING_TREADMILL
+    family: RUNNING
+    location: INDOOR
+  - value: 6
+    name: WALKING
+    family: WALKING
+    location: OUTDOOR
+  - value: 7
+    name: WALKING_SPEED
+    family: WALKING
+    location: OUTDOOR
+  - value: 8
+    name: WALKING_NORDIC
+    family: WALKING
+    location: OUTDOOR
+  - value: 9
+    name: HIKING
+    family: WALKING
+    location: OUTDOOR
+  - value: 10
+    name: MOUNTAINEERING
+    family: WALKING
+    location: OUTDOOR
+  - value: 11
+    name: BIKING_CYCLECROSS
+    family: BIKING
+    location: OUTDOOR
+  - value: 12
+    name: BIKING_INDOOR
+    family: BIKING
+    location: INDOOR
+  - value: 13
+    name: BIKING_MOUNTAIN
+    family: BIKING
+    location: OUTDOOR
+  - value: 14
+    name: BIKING_RECUMBENT
+    family: BIKING
+    location: OUTDOOR
+  - value: 15
+    name: BIKING_ROAD
+    family: BIKING
+    location: OUTDOOR
+  - value: 16
+    name: BIKING_TRACK
+    family: BIKING
+    location: OUTDOOR
+  - value: 17
+    name: BIKING_MOTOCYCLING
+    family: BIKING
+    location: OUTDOOR
+  - value: 18
+    name: FE_GENERAL
+    family: N/A
+    location: INDOOR
+  - value: 19
+    name: FE_TREADMILL
+    family: RUNNING
+    location: INDOOR
+  - value: 20
+    name: FE_ELLIPTICAL
+    family: N/A
+    location: INDOOR
+  - value: 21
+    name: FE_BIKE
+    family: BIKING
+    location: INDOOR
+  - value: 22
+    name: FE_ROWER
+    family: N/A
+    location: INDOOR
+  - value: 23
+    name: FE_CLIMBER
+    family: N/A
+    location: INDOOR
+  - value: 25
+    name: SWIMMING_LAP
+    family: SWIMMING
+    location: INDOOR
+  - value: 26
+    name: SWIMMING_OPEN_WATER
+    family: SWIMMING
+    location: OUTDOOR
+  - value: 27
+    name: SNOWBOARDING
+    family: SNOW_SPORTS
+    location: OUTDOOR
+  - value: 28
+    name: SKIING
+    family: SNOW_SPORTS
+    location: OUTDOOR
+  - value: 29
+    name: SKIING_DOWNHILL
+    family: SNOW_SPORTS
+    location: OUTDOOR
+  - value: 30
+    name: SKIINGCROSS_COUNTRY
+    family: SNOW_SPORTS
+    location: OUTDOOR
+  - value: 31
+    name: SKATING
+    family: SKATING
+    location: OUTDOOR
+  - value: 32
+    name: SKATING_ICE
+    family: SKATING
+    location: OUTDOOR
+  - value: 33
+    name: SKATING_INLINE
+    family: SKATING
+    location: OUTDOOR
+  - value: 34
+    name: LONG_BOARDING
+    family: SKATING
+    location: OUTDOOR
+  - value: 35
+    name: SAILING
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 36
+    name: WINDSURFING
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 37
+    name: CANOEING
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 38
+    name: KAYAKING
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 39
+    name: ROWING
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 40
+    name: KITEBOARDING
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 41
+    name: STAND_UP_PADDLE_BOARD
+    family: WATER_SPORTS
+    location: OUTDOOR
+  - value: 42
+    name: WORKOUT
+    family: GYM
+    location: INDOOR
+  - value: 43
+    name: CARDIO_CLASS
+    family: GYM
+    location: INDOOR
+  - value: 44
+    name: STAIR_CLIMBER
+    family: GYM
+    location: INDOOR
+  - value: 45
+    name: WHEELCHAIR
+    family: OTHER
+    location: OUTDOOR
+  - value: 46
+    name: GOLFING
+    family: OTHER
+    location: OUTDOOR
+  - value: 47
+    name: OTHER
+    family: OTHER
+    location: OUTDOOR
+  - value: 49
+    name: BIKING_INDOOR_CYCLING_CLASS
+    family: BIKING
+    location: INDOOR
+  - value: 56
+    name: WALKING_TREADMILL
+    family: WALKING
+    location: INDOOR
+  - value: 61
+    name: BIKING_INDOOR_TRAINER
+    family: BIKING
+    location: INDOOR
+  - value: 62
+    name: MULTISPORT
+    family: N/A
+    location: OUTDOOR
+  - value: 63
+    name: TRANSITION
+    family: N/A
+    location: OUTDOOR
+  - value: 64
+    name: EBIKING
+    family: BIKING
+    location: OUTDOOR
+  - value: 65
+    name: TICKR_OFFLINE
+    family: OTHER
+    location: INDOOR
+  - value: 66
+    name: YOGA
+    family: GYM
+    location: INDOOR
+  - value: 67
+    name: RUNNING_RACE
+    family: RUNNING
+    location: OUTDOOR
+  - value: 68
+    name: BIKING_INDOOR_VIRTUAL
+    family: BIKING
+    location: INDOOR
+  - value: 69
+    name: MENTAL_STRENGTH
+    family: OTHER
+    location: INDOOR
+  - value: 70
+    name: HANDCYCLING
+    family: BIKING
+    location: OUTDOOR
+  - value: 71
+    name: RUNNING_INDOOR_VIRTUAL
+    family: RUNNING
+    location: INDOOR
+  - value: 255
+    name: UNKNOWN
+    family: UNKNOWN
+    location: UNKNOWN

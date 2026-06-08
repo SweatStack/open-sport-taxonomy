@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.6.0] - 2026-06-08
+
+### Added
+
+- **Wahoo Cloud API mapping** (`mappings/wahoo.yaml`, `reference/wahoo/`). Translates the Wahoo `workout_type_id` integer enumeration (61 legal targets) to and from OST. Indoor/virtual/e-assist/race workout types map to OST sport-with-modifier entries (e.g. `BIKING_INDOOR_VIRTUAL` ↔ `cycling+stationary+virtual`, `EBIKING` ↔ `cycling+assisted`, `RUNNING_RACE` ↔ `running+race`); sports OST does not model (snow, water, skating, golf, etc.) decode via the `generic` fallback. The source enum is hand-curated in `reference/wahoo/workout_types.yaml` (Wahoo publishes no machine-readable enum), and `platform_version` tracks the docs changelog date. See [`reference/wahoo/README.md`](reference/wahoo/README.md).
+
+### Fixed
+
+- `schema.yaml` version was left at `0.4.0` when 0.5.0 was released, causing `generate.py`'s version-consistency check to fail `make lint`. Aligned `schema.yaml` with `pyproject.toml`.
+
+
 ## [0.5.0] - 2026-05-29
 
 ### Added

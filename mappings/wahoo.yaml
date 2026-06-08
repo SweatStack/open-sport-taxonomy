@@ -1,0 +1,220 @@
+# OpenSportTaxonomy — wahoo mapping (format v3).
+#
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
+
+format_version: 3
+platform: wahoo
+platform_version: "Cloud API (changelog 2025-10-06)"
+
+fallback:
+  encode:   47
+  decode: generic
+
+entries:
+
+  - target:    0  # BIKING (BIKING/OUTDOOR)
+    sport: cycling
+    preferred: true
+
+  - target:    1  # RUNNING (RUNNING/OUTDOOR)
+    sport: running
+    preferred: true
+
+  - target:    2  # FE (N/A/INDOOR)
+    sport: generic
+
+  - target:    3  # RUNNING_TRACK (RUNNING/OUTDOOR)
+    sport: running.track
+    preferred: true
+
+  - target:    4  # RUNNING_TRAIL (RUNNING/OUTDOOR)
+    sport: running.trail
+    preferred: true
+
+  - target:    5  # RUNNING_TREADMILL (RUNNING/INDOOR)
+    sport: running+stationary
+    preferred: true
+
+  - target:    6  # WALKING (WALKING/OUTDOOR)
+    sport: walking
+    preferred: true
+
+  - target:    7  # WALKING_SPEED (WALKING/OUTDOOR)
+    sport: walking
+
+  - target:    8  # WALKING_NORDIC (WALKING/OUTDOOR)
+    sport: walking
+
+  - target:    9  # HIKING (WALKING/OUTDOOR)
+    sport: walking.hiking
+    preferred: true
+
+  - target:   10  # MOUNTAINEERING (WALKING/OUTDOOR)
+    sport: null
+
+  - target:   11  # BIKING_CYCLECROSS (BIKING/OUTDOOR)
+    sport: cycling.cyclocross
+    preferred: true
+
+  - target:   12  # BIKING_INDOOR (BIKING/INDOOR)
+    sport: cycling+stationary
+    preferred: true
+
+  - target:   13  # BIKING_MOUNTAIN (BIKING/OUTDOOR)
+    sport: cycling.mountain
+    preferred: true
+
+  - target:   14  # BIKING_RECUMBENT (BIKING/OUTDOOR)
+    sport: cycling
+
+  - target:   15  # BIKING_ROAD (BIKING/OUTDOOR)
+    sport: cycling.road
+    preferred: true
+
+  - target:   16  # BIKING_TRACK (BIKING/OUTDOOR)
+    sport: cycling.track
+    preferred: true
+
+  - target:   17  # BIKING_MOTOCYCLING (BIKING/OUTDOOR)
+    sport: null
+
+  - target:   18  # FE_GENERAL (N/A/INDOOR)
+    sport: generic
+
+  - target:   19  # FE_TREADMILL (RUNNING/INDOOR)
+    sport: running+stationary
+
+  - target:   20  # FE_ELLIPTICAL (N/A/INDOOR)
+    sport: generic
+
+  - target:   21  # FE_BIKE (BIKING/INDOOR)
+    sport: cycling+stationary
+
+  - target:   22  # FE_ROWER (N/A/INDOOR)
+    sport: rowing+stationary
+    preferred: true
+
+  - target:   23  # FE_CLIMBER (N/A/INDOOR)
+    sport: generic
+
+  - target:   25  # SWIMMING_LAP (SWIMMING/INDOOR)
+    sport: swimming.pool
+    preferred: true
+
+  - target:   26  # SWIMMING_OPEN_WATER (SWIMMING/OUTDOOR)
+    sport: swimming.open_water
+    preferred: true
+
+  - target:   27  # SNOWBOARDING (SNOW_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   28  # SKIING (SNOW_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   29  # SKIING_DOWNHILL (SNOW_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   30  # SKIINGCROSS_COUNTRY (SNOW_SPORTS/OUTDOOR)
+    sport: xc_skiing
+    preferred: true
+
+  - target:   31  # SKATING (SKATING/OUTDOOR)
+    sport: null
+
+  - target:   32  # SKATING_ICE (SKATING/OUTDOOR)
+    sport: null
+
+  - target:   33  # SKATING_INLINE (SKATING/OUTDOOR)
+    sport: null
+
+  - target:   34  # LONG_BOARDING (SKATING/OUTDOOR)
+    sport: null
+
+  - target:   35  # SAILING (WATER_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   36  # WINDSURFING (WATER_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   37  # CANOEING (WATER_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   38  # KAYAKING (WATER_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   39  # ROWING (WATER_SPORTS/OUTDOOR)
+    sport: rowing
+    preferred: true
+
+  - target:   40  # KITEBOARDING (WATER_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   41  # STAND_UP_PADDLE_BOARD (WATER_SPORTS/OUTDOOR)
+    sport: null
+
+  - target:   42  # WORKOUT (GYM/INDOOR)
+    sport: generic
+
+  - target:   43  # CARDIO_CLASS (GYM/INDOOR)
+    sport: generic
+
+  - target:   44  # STAIR_CLIMBER (GYM/INDOOR)
+    sport: generic
+
+  - target:   45  # WHEELCHAIR (OTHER/OUTDOOR)
+    sport: null
+
+  - target:   46  # GOLFING (OTHER/OUTDOOR)
+    sport: null
+
+  - target:   47  # OTHER (OTHER/OUTDOOR)
+    sport: generic
+    preferred: true
+
+  - target:   49  # BIKING_INDOOR_CYCLING_CLASS (BIKING/INDOOR)
+    sport: cycling+stationary
+
+  - target:   56  # WALKING_TREADMILL (WALKING/INDOOR)
+    sport: walking+stationary
+    preferred: true
+
+  - target:   61  # BIKING_INDOOR_TRAINER (BIKING/INDOOR)
+    sport: cycling+stationary
+
+  - target:   62  # MULTISPORT (N/A/OUTDOOR)
+    sport: null
+
+  - target:   63  # TRANSITION (N/A/OUTDOOR)
+    sport: null
+
+  - target:   64  # EBIKING (BIKING/OUTDOOR)
+    sport: cycling+assisted
+    preferred: true
+
+  - target:   65  # TICKR_OFFLINE (OTHER/INDOOR)
+    sport: generic
+
+  - target:   66  # YOGA (GYM/INDOOR)
+    sport: null
+
+  - target:   67  # RUNNING_RACE (RUNNING/OUTDOOR)
+    sport: running+race
+    preferred: true
+
+  - target:   68  # BIKING_INDOOR_VIRTUAL (BIKING/INDOOR)
+    sport: cycling+stationary+virtual
+    preferred: true
+
+  - target:   69  # MENTAL_STRENGTH (OTHER/INDOOR)
+    sport: null
+
+  - target:   70  # HANDCYCLING (BIKING/OUTDOOR)
+    sport: cycling
+
+  - target:   71  # RUNNING_INDOOR_VIRTUAL (RUNNING/INDOOR)
+    sport: running+stationary+virtual
+    preferred: true
+
+  - target:  255  # UNKNOWN (UNKNOWN/UNKNOWN)
+    sport: generic

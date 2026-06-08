@@ -7,7 +7,7 @@ against the runtime built from the same data.
 
 What lives here is a hand-curated set of *representative* cases per
 platform that exercise the encode and decode code paths once each.
-Six cases per platform × four platforms = 24 tests. If an algorithm
+Six cases per platform × five platforms = 30 tests. If an algorithm
 change breaks any of these, the failure points at one code path, not
 292 data points.
 
@@ -36,6 +36,7 @@ from open_sport_taxonomy.platforms import (
     garmin_fit,
     garmin_training_api,
     strava,
+    wahoo,
 )
 
 # --------------------------------------------------------------------------
@@ -193,3 +194,38 @@ class TestGarminTrainingApiRoundTrip:
 
     def test_unmapped_decode_falls_to_fallback(self):
         assert garmin_training_api.decode("NOT_A_REAL_TYPE") == Sport("generic")
+
+
+# --------------------------------------------------------------------------
+# Wahoo — flat int targets (workout_type_id), no target_coarsening.
+# --------------------------------------------------------------------------
+
+
+class TestWahooRoundTrip:
+    def test_preferred_round_trip(self):
+        sport = Sport("cycling.road")
+        assert wahoo.encode(sport) == 15
+        assert wahoo.decode(15) == sport
+
+    def test_synonym_decode_to_canonical(self):
+        # BIKING_INDOOR_CYCLING_CLASS (49) and BIKING_INDOOR_TRAINER (61)
+        # both decode to cycling+stationary; only BIKING_INDOOR (12) is preferred.
+        canonical = Sport("cycling+stationary")
+        assert wahoo.decode(49) == canonical
+        assert wahoo.decode(61) == canonical
+
+    def test_null_sport_decodes_to_fallback(self):
+        # SKIING (28) is sport: null — OST has no alpine skiing code.
+        assert wahoo.decode(28) == Sport("generic")
+
+    def test_parent_walk_encode(self):
+        # cycling.gravel has no Wahoo type; walks up the OST tree to cycling -> 0.
+        assert wahoo.encode(Sport("cycling.gravel")) == 0
+
+    def test_modifier_drop_encode(self):
+        # cycling.road+commute has no entry; drops +commute -> cycling.road (15).
+        assert wahoo.encode(Sport("cycling.road+commute")) == 15
+
+    def test_unmapped_decode_falls_to_fallback(self):
+        # A workout_type_id not in the bundled targets.yaml -> fallback.decode.
+        assert wahoo.decode(99999) == Sport("generic")

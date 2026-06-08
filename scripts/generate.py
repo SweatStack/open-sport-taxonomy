@@ -43,6 +43,7 @@ PLATFORM_REF_DIR = {
     "strava": "strava",
     "apple_healthkit": "apple-healthkit",
     "garmin_training_api": "garmin-training-api",
+    "wahoo": "wahoo",
 }
 
 

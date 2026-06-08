@@ -405,6 +405,103 @@ STRAVA_PREFERRED_INDEX: dict = {
 
 STRAVA_TARGET_COARSENING: tuple = ()
 
+# ---- wahoo ---------------------------------------------------------------
+
+WAHOO_FALLBACK_ENCODE = 47
+WAHOO_FALLBACK_DECODE: Sport = Sport('generic')
+
+WAHOO_ENTRIES_BY_TARGET: dict = {
+    0: (Sport('cycling'), True),
+    1: (Sport('running'), True),
+    2: (Sport('generic'), False),
+    3: (Sport('running.track'), True),
+    4: (Sport('running.trail'), True),
+    5: (Sport('running+stationary'), True),
+    6: (Sport('walking'), True),
+    7: (Sport('walking'), False),
+    8: (Sport('walking'), False),
+    9: (Sport('walking.hiking'), True),
+    10: (None, False),
+    11: (Sport('cycling.cyclocross'), True),
+    12: (Sport('cycling+stationary'), True),
+    13: (Sport('cycling.mountain'), True),
+    14: (Sport('cycling'), False),
+    15: (Sport('cycling.road'), True),
+    16: (Sport('cycling.track'), True),
+    17: (None, False),
+    18: (Sport('generic'), False),
+    19: (Sport('running+stationary'), False),
+    20: (Sport('generic'), False),
+    21: (Sport('cycling+stationary'), False),
+    22: (Sport('rowing+stationary'), True),
+    23: (Sport('generic'), False),
+    25: (Sport('swimming.pool'), True),
+    26: (Sport('swimming.open_water'), True),
+    27: (None, False),
+    28: (None, False),
+    29: (None, False),
+    30: (Sport('xc_skiing'), True),
+    31: (None, False),
+    32: (None, False),
+    33: (None, False),
+    34: (None, False),
+    35: (None, False),
+    36: (None, False),
+    37: (None, False),
+    38: (None, False),
+    39: (Sport('rowing'), True),
+    40: (None, False),
+    41: (None, False),
+    42: (Sport('generic'), False),
+    43: (Sport('generic'), False),
+    44: (Sport('generic'), False),
+    45: (None, False),
+    46: (None, False),
+    47: (Sport('generic'), True),
+    49: (Sport('cycling+stationary'), False),
+    56: (Sport('walking+stationary'), True),
+    61: (Sport('cycling+stationary'), False),
+    62: (None, False),
+    63: (None, False),
+    64: (Sport('cycling+assisted'), True),
+    65: (Sport('generic'), False),
+    66: (None, False),
+    67: (Sport('running+race'), True),
+    68: (Sport('cycling+stationary+virtual'), True),
+    69: (None, False),
+    70: (Sport('cycling'), False),
+    71: (Sport('running+stationary+virtual'), True),
+    255: (Sport('generic'), False),
+}
+
+WAHOO_PREFERRED_INDEX: dict = {
+    ('cycling', frozenset()): 0,
+    ('running', frozenset()): 1,
+    ('running.track', frozenset()): 3,
+    ('running.trail', frozenset()): 4,
+    ('running', frozenset({'stationary'})): 5,
+    ('walking', frozenset()): 6,
+    ('walking.hiking', frozenset()): 9,
+    ('cycling.cyclocross', frozenset()): 11,
+    ('cycling', frozenset({'stationary'})): 12,
+    ('cycling.mountain', frozenset()): 13,
+    ('cycling.road', frozenset()): 15,
+    ('cycling.track', frozenset()): 16,
+    ('rowing', frozenset({'stationary'})): 22,
+    ('swimming.pool', frozenset()): 25,
+    ('swimming.open_water', frozenset()): 26,
+    ('xc_skiing', frozenset()): 30,
+    ('rowing', frozenset()): 39,
+    ('generic', frozenset()): 47,
+    ('walking', frozenset({'stationary'})): 56,
+    ('cycling', frozenset({'assisted'})): 64,
+    ('running', frozenset({'race'})): 67,
+    ('cycling', frozenset({'stationary', 'virtual'})): 68,
+    ('running', frozenset({'stationary', 'virtual'})): 71,
+}
+
+WAHOO_TARGET_COARSENING: tuple = ()
+
 # ---- FIT enum reference tables -------------------------------------------
 
 FIT_SPORT_IDS: dict[str, int] = {

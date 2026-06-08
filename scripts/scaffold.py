@@ -43,6 +43,7 @@ PLATFORM_REF_DIR = {
     "strava": "strava",
     "apple_healthkit": "apple-healthkit",
     "garmin_training_api": "garmin-training-api",
+    "wahoo": "wahoo",
 }
 
 
@@ -200,6 +201,12 @@ def main() -> int:
             "fallback_decode": "generic",
             "target_coarsening": [],
         },
+        "wahoo": {
+            "platform_version": "Cloud API (changelog 2025-10-06)",
+            "fallback_encode": 47,
+            "fallback_decode": "generic",
+            "target_coarsening": [],
+        },
     }
     defaults = defaults_by_platform[args.platform]
 
@@ -231,6 +238,8 @@ def main() -> int:
         comments = _fit_comments(targets)
     elif args.platform == "apple_healthkit":
         comments = _healthkit_comments(targets)
+    elif args.platform == "wahoo":
+        comments = _wahoo_comments(targets)
 
     text = render_file(
         args.platform,
@@ -269,6 +278,19 @@ def _healthkit_comments(targets: list[Any]) -> dict[Any, str]:
     comments: dict[Any, str] = {}
     for t in targets:
         comments[target_key(t)] = names.get(t, "?")
+    return comments
+
+
+def _wahoo_comments(targets: list[Any]) -> dict[Any, str]:
+    """Annotate Wahoo targets with `NAME (FAMILY/LOCATION)`."""
+    src_path = REFERENCE_DIR / "wahoo" / "workout_types.yaml"
+    cases = yaml.safe_load(src_path.read_text())["cases"]
+    meta = {c["value"]: (c["name"], c["family"], c["location"]) for c in cases}
+
+    comments: dict[Any, str] = {}
+    for t in targets:
+        name, family, location = meta.get(t, ("?", "?", "?"))
+        comments[target_key(t)] = f"{name} ({family}/{location})"
     return comments
 
 
