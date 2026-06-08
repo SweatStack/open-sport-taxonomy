@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.7.0] - 2026-06-08
+
+### Added
+
+- **Polar AccessLink API mapping** (`mappings/polar.yaml`, `reference/polar/`). Translates Polar's `detailed_sport_info` string enumeration (175 legal targets) to and from OST. Indoor/treadmill/roller/e-bike values map to OST sport-with-modifier entries (e.g. `INDOOR_CYCLING`/`SPINNING` ↔ `cycling+stationary`, `ROLLER_SKIING_FREESTYLE` ↔ `xc_skiing.skate+roller`, `E_BIKE` ↔ `cycling+assisted`) — frequently finer than Polar's own FIT export, which sends several of these to FIT `GENERIC`. Polar's broad taxonomy (ball sports, martial arts, dance, motorsports, water sports, etc.) decodes via the `generic` fallback. The full AccessLink OpenAPI spec is stored at `reference/polar/swagger.yaml` for provenance; the sport enumeration is hand-curated in `reference/polar/detailed_sport_info.yaml` (the swagger does not enumerate it). See [`reference/polar/README.md`](reference/polar/README.md).
+
 ## [0.6.0] - 2026-06-08
 
 ### Added

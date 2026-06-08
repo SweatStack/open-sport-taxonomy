@@ -1,0 +1,362 @@
+# Polar AccessLink — detailed_sport_info enumeration.
+#
+# Source of truth, hand-transcribed from the HTML appendix at
+# https://www.polar.com/accesslink-api/#detailed-sport-info-values-in-exercise-entity
+# (the swagger declares detailed-sport-info as a bare string and does not
+# enumerate these values). `flow_label` is the human-readable "Sport in Polar
+# Flow" name, kept for review and mapping comments. Only `value` is the target.
+#
+# See README.md. Pin platform_version in mappings/polar.yaml to the AccessLink
+# API version + fetch date.
+
+cases:
+  - value: AEROBICS
+    flow_label: Aerobics
+  - value: AGILITY
+    flow_label: Dog agility
+  - value: AMERICAN_FOOTBALL
+    flow_label: Football
+  - value: AQUATICS
+    flow_label: Aqua fitness
+  - value: BACKCOUNTRY_SKIING
+    flow_label: Backcountry skiing
+  - value: BADMINTON
+    flow_label: Badminton
+  - value: BALLET_DANCING
+    flow_label: Ballet
+  - value: BALLROOM_DANCING
+    flow_label: Ballroom
+  - value: BASEBALL
+    flow_label: Baseball
+  - value: BASKETBALL
+    flow_label: Basketball
+  - value: BEACH_TENNIS
+    flow_label: Beach tennis
+  - value: BEACH_VOLLEYBALL
+    flow_label: Beach volley
+  - value: BIATHLON
+    flow_label: Biathlon
+  - value: BODY_AND_MIND
+    flow_label: Body&Mind
+  - value: BOOTCAMP
+    flow_label: Bootcamp
+  - value: BOXING
+    flow_label: Boxing
+  - value: CALISTHENICS
+    flow_label: Calisthenics
+  - value: CIRCUIT_TRAINING
+    flow_label: Circuit training
+  - value: CORE
+    flow_label: Core
+  - value: CRICKET
+    flow_label: Cricket
+  - value: CROSS_TRAINER
+    flow_label: Cross-trainer
+  - value: CROSS_COUNTRY_RUNNING
+    flow_label: Cross-country running
+  - value: CROSS-COUNTRY_SKIING
+    flow_label: Skiing
+  - value: CYCLING
+    flow_label: Cycling
+  - value: CLIMBING
+    flow_label: Climbing
+  - value: CURLING
+    flow_label: Curling
+  - value: DANCING
+    flow_label: Dancing
+  - value: DOWNHILL_SKIING
+    flow_label: Downhill skiing
+  - value: DUATHLON
+    flow_label: Duathlon
+  - value: DUATHLON_CYCLING
+    flow_label: Cycling
+  - value: DUATHLON_RUNNING
+    flow_label: Running
+  - value: E_BIKE
+    flow_label: Electric biking
+  - value: ESPORTS
+    flow_label: Esports
+  - value: FIELD_HOCKEY
+    flow_label: Field hockey
+  - value: FINNISH_BASEBALL
+    flow_label: Finnish baseball
+  - value: FITNESS_BOXING
+    flow_label: Fitness boxing
+  - value: FITNESS_DANCING
+    flow_label: Fitness dancing
+  - value: FITNESS_MARTIAL_ARTS
+    flow_label: Fitness martial arts
+  - value: FITNESS_RACING
+    flow_label: Fitness Racing
+  - value: FITNESS_STEP
+    flow_label: Step workout
+  - value: FLOORBALL
+    flow_label: Floorball
+  - value: FREE_MULTISPORT
+    flow_label: Multisport
+  - value: FRISBEEGOLF
+    flow_label: Disc golf
+  - value: FUNCTIONAL_TRAINING
+    flow_label: Functional training
+  - value: FUTSAL
+    flow_label: Futsal
+  - value: GOLF
+    flow_label: Golf
+  - value: GRAVEL
+    flow_label: Gravel cycling
+  - value: GROUP_EXERCISE
+    flow_label: Group exercise
+  - value: GYMNASTICK
+    flow_label: Gymnastics
+  - value: HANDBALL
+    flow_label: Handball
+  - value: HIIT
+    flow_label: High-intensity interval training
+  - value: HIKING
+    flow_label: Hiking
+  - value: ICE_HOCKEY
+    flow_label: Ice hockey
+  - value: ICE_SKATING
+    flow_label: Ice skating
+  - value: INDOOR_CYCLING
+    flow_label: Indoor cycling
+  - value: INDOOR_ROWING
+    flow_label: Indoor rowing
+  - value: INLINE_SKATING
+    flow_label: Inline skating
+  - value: JAZZ_DANCING
+    flow_label: Jazz
+  - value: JOGGING
+    flow_label: Jogging
+  - value: JUDO_MARTIAL_ARTS
+    flow_label: Judo
+  - value: JUMP_ROPE
+    flow_label: Rope skipping
+  - value: KETTLEBELL
+    flow_label: Kettlebell
+  - value: KICKBIKE
+    flow_label: Kickbiking
+  - value: KICKBOXING_MARTIAL_ARTS
+    flow_label: Kickboxing
+  - value: LATIN_DANCING
+    flow_label: Latin
+  - value: LES_MILLS_BARRE
+    flow_label: LES MILLS BARRE
+  - value: LES_MILLS_BODYATTACK
+    flow_label: LES MILLS BODYATTACK
+  - value: LES_MILLS_BODYBALANCE
+    flow_label: LES MILLS BODYBALANCE
+  - value: LES_MILLS_BODYCOMBAT
+    flow_label: LES MILLS BODYCOMBAT
+  - value: LES_MILLS_BODYJAM
+    flow_label: LES MILLS BODYJAM
+  - value: LES_MILLS_BODYPUMP
+    flow_label: LES MILLS BODYPUMP
+  - value: LES_MILLS_BODYSTEP
+    flow_label: LES MILLS BODYSTEP
+  - value: LES_MILLS_CXWORKS
+    flow_label: LES MILLS CXWORX
+  - value: LES_MILLS_GRIT_ATHLETIC
+    flow_label: LES MILLS GRIT Athletic
+  - value: LES_MILLS_GRIT_CARDIO
+    flow_label: LES MILLS GRIT Cardio
+  - value: LES_MILLS_GRIT_STRENGTH
+    flow_label: LES MILLS GRIT Strength
+  - value: LES_MILLS_RPM
+    flow_label: LES MILLS RPM
+  - value: LES_MILLS_SHBAM
+    flow_label: LES MILLS SH'BAM
+  - value: LES_MILLS_SPRINT
+    flow_label: LES MILLS SPRINT
+  - value: LES_MILLS_TONE
+    flow_label: LES MILLS TONE
+  - value: LES_MILLS_TRIP
+    flow_label: LES MILLS TRIP
+  - value: MOBILITY_DYNAMIC
+    flow_label: Mobility (dynamic)
+  - value: MOBILITY_STATIC
+    flow_label: Mobility (static)
+  - value: MODERN_DANCING
+    flow_label: Modern
+  - value: MOTORSPORTS_CAR_RACING
+    flow_label: Car racing
+  - value: MOTORSPORTS_ENDURO
+    flow_label: Enduro
+  - value: MOTORSPORTS_HARD_ENDURO
+    flow_label: Hard Enduro
+  - value: MOTORSPORTS_MOTOCROSS
+    flow_label: Motocross
+  - value: MOTORSPORTS_ROADRACING
+    flow_label: Road racing
+  - value: MOTORSPORTS_SNOCROSS
+    flow_label: Snocross
+  - value: MOUNTAIN_BIKING
+    flow_label: Mountain biking
+  - value: NORDIC_WALKING
+    flow_label: Nordic walking
+  - value: OBSTACLE_COURSE_RACING
+    flow_label: Obstacle course racing
+  - value: OFFROADDUATHLON
+    flow_label: Off-road duathlon
+  - value: OFFROADDUATHLON_CYCLING
+    flow_label: Mountain biking
+  - value: OFFROADDUATHLON_RUNNING
+    flow_label: Trail running
+  - value: OFFROADTRIATHLON
+    flow_label: Off-road triathlon
+  - value: OFFROADTRIATHLON_CYCLING
+    flow_label: Mountain biking
+  - value: OFFROADTRIATHLON_RUNNING
+    flow_label: Trail running
+  - value: OFFROADTRIATHLON_SWIMMING
+    flow_label: Open water swimming
+  - value: OPEN_WATER_SWIMMING
+    flow_label: Open water swimming
+  - value: ORIENTEERING
+    flow_label: Orienteering
+  - value: ORIENTEERING_MTB
+    flow_label: Mountain bike orienteering
+  - value: ORIENTEERING_SKI
+    flow_label: Ski orienteering
+  - value: OTHER_INDOOR
+    flow_label: Other indoor
+  - value: OTHER_OUTDOOR
+    flow_label: Other outdoor
+  - value: PADEL
+    flow_label: Padel racing
+  - value: PARASPORTS_HAND_CYCLING
+    flow_label: Handcycling
+  - value: PARASPORTS_SLED_HOCKEY
+    flow_label: Sled hockey
+  - value: PARASPORTS_WATER_SKIING
+    flow_label: Adaptive water skiing
+  - value: PARASPORTS_WHEELCHAIR
+    flow_label: Wheelchair racing
+  - value: PARASPORTS_WHEELCHAIR_BASKETBALL
+    flow_label: Wheelchair basketball
+  - value: PARASPORTS_WHEELCHAIR_TENNIS
+    flow_label: Wheelchair tennis
+  - value: PICKLEBALL
+    flow_label: Pickleball
+  - value: PILATES
+    flow_label: Pilates
+  - value: POOL_SWIMMING
+    flow_label: Pool swimming
+  - value: RIDING
+    flow_label: Riding
+  - value: RINGETTE
+    flow_label: Ringette
+  - value: ROAD_BIKING
+    flow_label: Road cycling
+  - value: ROAD_RUNNING
+    flow_label: Road running
+  - value: ROLLER_BLADING
+    flow_label: Roller skating
+  - value: ROLLER_SKIING_CLASSIC
+    flow_label: Classic roller skiing
+  - value: ROLLER_SKIING_FREESTYLE
+    flow_label: Freestyle roller skiing
+  - value: ROWING
+    flow_label: Rowing
+  - value: RUGBY
+    flow_label: Rugby
+  - value: RUCKING
+    flow_label: Rucking
+  - value: RUNNING
+    flow_label: Running
+  - value: SHOW_DANCING
+    flow_label: Show
+  - value: SHOOTING_SPORT_INDOOR
+    flow_label: Shooting (indoor)
+  - value: SHOOTING_SPORT_OUTDOOR
+    flow_label: Shooting (outdoor)
+  - value: SKATEBOARDING
+    flow_label: Skateboarding
+  - value: SKATING
+    flow_label: Skating
+  - value: SKIERG
+    flow_label: Ski machine
+  - value: SNOWBOARDING
+    flow_label: Snowboarding
+  - value: SNOWSHOE_TREKKING
+    flow_label: Snowshoe trekking
+  - value: SOCCER
+    flow_label: Soccer
+  - value: SPINNING
+    flow_label: Spinning
+  - value: SUP
+    flow_label: SUP
+  - value: SQUASH
+    flow_label: Squash
+  - value: STAIR_WORKOUT
+    flow_label: Stair workout
+  - value: STREET_DANCING
+    flow_label: Street
+  - value: STRENGTH_TRAINING
+    flow_label: Strength training
+  - value: STRETCHING
+    flow_label: Stretching
+  - value: SWIMMING
+    flow_label: Swimming
+  - value: TABLE_TENNIS
+    flow_label: Table tennis
+  - value: TAEKWONDO_MARTIAL_ARTS
+    flow_label: Taekwondo
+  - value: TELEMARK_SKIING
+    flow_label: Telemark skiing
+  - value: TENNIS
+    flow_label: Tennis
+  - value: TRACK_AND_FIELD_RUNNING
+    flow_label: Track&field running
+  - value: TRAIL_RUNNING
+    flow_label: Trail running
+  - value: TREADMILL_RUNNING
+    flow_label: Treadmill running
+  - value: TRIATHLON
+    flow_label: Triathlon
+  - value: TRIATHLON_CYCLING
+    flow_label: Cycling
+  - value: TRIATHLON_RUNNING
+    flow_label: Running
+  - value: TRIATHLON_SWIMMING
+    flow_label: Open water swimming
+  - value: TROTTING
+    flow_label: Trotting
+  - value: ULTIMATE
+    flow_label: Ultimate
+  - value: ULTRARUNNING_RUNNING
+    flow_label: Ultra running
+  - value: VERTICALSPORTS_WALLCLIMBING
+    flow_label: Climbing (indoor)
+  - value: VERTICALSPORTS_OUTCLIMBING
+    flow_label: Climbing (outdoor)
+  - value: VOLLEYBALL
+    flow_label: Volleyball
+  - value: WALKING
+    flow_label: Walking
+  - value: WATER_EXERCISE
+    flow_label: Water sports
+  - value: WATER_RUNNING
+    flow_label: Water running
+  - value: WATERSPORTS_CANOEING
+    flow_label: Canoeing
+  - value: WATERSPORTS_KAYAKING
+    flow_label: Kayaking
+  - value: WATERSPORTS_KITESURFING
+    flow_label: Kitesurfing
+  - value: WATERSPORTS_SAILING
+    flow_label: Sailing
+  - value: WATERSPORTS_SURFING
+    flow_label: Surfing
+  - value: WATERSPORTS_WAKEBOARDING
+    flow_label: Wakeboarding
+  - value: WATERSPORTS_WATERSKI
+    flow_label: Water skiing
+  - value: WATERSPORTS_WINDSURFING
+    flow_label: Windsurfing
+  - value: XC_SKIING_CLASSIC
+    flow_label: Classic XC skiing
+  - value: XC_SKIING_FREESTYLE
+    flow_label: Freestyle XC skiing
+  - value: YOGA
+    flow_label: Yoga

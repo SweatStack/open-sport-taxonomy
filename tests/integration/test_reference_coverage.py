@@ -6,7 +6,7 @@ tests are a defense-in-depth check that catches the case where the
 generated ``_platforms.py`` is somehow stale or hand-edited (someone
 bypassed the generator).
 
-Each test iterates over all five platforms internally and surfaces the
+Each test iterates over all six platforms internally and surfaces the
 offending platform name in its failure message — one test per invariant,
 not per platform.
 """
@@ -27,6 +27,7 @@ PLATFORMS = {
     "apple_healthkit": "apple-healthkit",
     "garmin_training_api": "garmin-training-api",
     "wahoo": "wahoo",
+    "polar": "polar",
 }
 
 

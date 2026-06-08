@@ -44,6 +44,7 @@ PLATFORM_REF_DIR = {
     "apple_healthkit": "apple-healthkit",
     "garmin_training_api": "garmin-training-api",
     "wahoo": "wahoo",
+    "polar": "polar",
 }
 
 
@@ -207,6 +208,12 @@ def main() -> int:
             "fallback_decode": "generic",
             "target_coarsening": [],
         },
+        "polar": {
+            "platform_version": "AccessLink API v3 (fetched 2026-06-08)",
+            "fallback_encode": "OTHER_OUTDOOR",
+            "fallback_decode": "generic",
+            "target_coarsening": [],
+        },
     }
     defaults = defaults_by_platform[args.platform]
 
@@ -240,6 +247,8 @@ def main() -> int:
         comments = _healthkit_comments(targets)
     elif args.platform == "wahoo":
         comments = _wahoo_comments(targets)
+    elif args.platform == "polar":
+        comments = _polar_comments(targets)
 
     text = render_file(
         args.platform,
@@ -291,6 +300,18 @@ def _wahoo_comments(targets: list[Any]) -> dict[Any, str]:
     for t in targets:
         name, family, location = meta.get(t, ("?", "?", "?"))
         comments[target_key(t)] = f"{name} ({family}/{location})"
+    return comments
+
+
+def _polar_comments(targets: list[Any]) -> dict[Any, str]:
+    """Annotate Polar targets with their Polar Flow label."""
+    src_path = REFERENCE_DIR / "polar" / "detailed_sport_info.yaml"
+    cases = yaml.safe_load(src_path.read_text())["cases"]
+    labels = {c["value"]: c["flow_label"] for c in cases}
+
+    comments: dict[Any, str] = {}
+    for t in targets:
+        comments[target_key(t)] = labels.get(t, "?")
     return comments
 
 

@@ -1,0 +1,563 @@
+# OpenSportTaxonomy — polar mapping (format v3).
+#
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
+
+format_version: 3
+platform: polar
+platform_version: "AccessLink API v3 (fetched 2026-06-08)"
+
+fallback:
+  encode: OTHER_OUTDOOR
+  decode: generic
+
+entries:
+
+  - target: AEROBICS  # Aerobics
+    sport: null
+
+  - target: AGILITY  # Dog agility
+    sport: null
+
+  - target: AMERICAN_FOOTBALL  # Football
+    sport: null
+
+  - target: AQUATICS  # Aqua fitness
+    sport: null
+
+  - target: BACKCOUNTRY_SKIING  # Backcountry skiing
+    sport: null
+
+  - target: BADMINTON  # Badminton
+    sport: null
+
+  - target: BALLET_DANCING  # Ballet
+    sport: null
+
+  - target: BALLROOM_DANCING  # Ballroom
+    sport: null
+
+  - target: BASEBALL  # Baseball
+    sport: null
+
+  - target: BASKETBALL  # Basketball
+    sport: null
+
+  - target: BEACH_TENNIS  # Beach tennis
+    sport: null
+
+  - target: BEACH_VOLLEYBALL  # Beach volley
+    sport: null
+
+  - target: BIATHLON  # Biathlon
+    sport: null
+
+  - target: BODY_AND_MIND  # Body&Mind
+    sport: null
+
+  - target: BOOTCAMP  # Bootcamp
+    sport: null
+
+  - target: BOXING  # Boxing
+    sport: null
+
+  - target: CALISTHENICS  # Calisthenics
+    sport: null
+
+  - target: CIRCUIT_TRAINING  # Circuit training
+    sport: null
+
+  - target: CLIMBING  # Climbing
+    sport: null
+
+  - target: CORE  # Core
+    sport: null
+
+  - target: CRICKET  # Cricket
+    sport: null
+
+  - target: CROSS-COUNTRY_SKIING  # Skiing
+    sport: xc_skiing
+    preferred: true
+
+  - target: CROSS_COUNTRY_RUNNING  # Cross-country running
+    sport: running.trail
+
+  - target: CROSS_TRAINER  # Cross-trainer
+    sport: null
+
+  - target: CURLING  # Curling
+    sport: null
+
+  - target: CYCLING  # Cycling
+    sport: cycling
+    preferred: true
+
+  - target: DANCING  # Dancing
+    sport: null
+
+  - target: DOWNHILL_SKIING  # Downhill skiing
+    sport: null
+
+  - target: DUATHLON  # Duathlon
+    sport: null
+
+  - target: DUATHLON_CYCLING  # Cycling
+    sport: cycling
+
+  - target: DUATHLON_RUNNING  # Running
+    sport: running
+
+  - target: ESPORTS  # Esports
+    sport: null
+
+  - target: E_BIKE  # Electric biking
+    sport: cycling+assisted
+    preferred: true
+
+  - target: FIELD_HOCKEY  # Field hockey
+    sport: null
+
+  - target: FINNISH_BASEBALL  # Finnish baseball
+    sport: null
+
+  - target: FITNESS_BOXING  # Fitness boxing
+    sport: null
+
+  - target: FITNESS_DANCING  # Fitness dancing
+    sport: null
+
+  - target: FITNESS_MARTIAL_ARTS  # Fitness martial arts
+    sport: null
+
+  - target: FITNESS_RACING  # Fitness Racing
+    sport: null
+
+  - target: FITNESS_STEP  # Step workout
+    sport: null
+
+  - target: FLOORBALL  # Floorball
+    sport: null
+
+  - target: FREE_MULTISPORT  # Multisport
+    sport: null
+
+  - target: FRISBEEGOLF  # Disc golf
+    sport: null
+
+  - target: FUNCTIONAL_TRAINING  # Functional training
+    sport: null
+
+  - target: FUTSAL  # Futsal
+    sport: null
+
+  - target: GOLF  # Golf
+    sport: null
+
+  - target: GRAVEL  # Gravel cycling
+    sport: cycling.gravel
+    preferred: true
+
+  - target: GROUP_EXERCISE  # Group exercise
+    sport: null
+
+  - target: GYMNASTICK  # Gymnastics
+    sport: null
+
+  - target: HANDBALL  # Handball
+    sport: null
+
+  - target: HIIT  # High-intensity interval training
+    sport: null
+
+  - target: HIKING  # Hiking
+    sport: walking.hiking
+    preferred: true
+
+  - target: ICE_HOCKEY  # Ice hockey
+    sport: null
+
+  - target: ICE_SKATING  # Ice skating
+    sport: null
+
+  - target: INDOOR_CYCLING  # Indoor cycling
+    sport: cycling+stationary
+    preferred: true
+
+  - target: INDOOR_ROWING  # Indoor rowing
+    sport: rowing+stationary
+    preferred: true
+
+  - target: INLINE_SKATING  # Inline skating
+    sport: null
+
+  - target: JAZZ_DANCING  # Jazz
+    sport: null
+
+  - target: JOGGING  # Jogging
+    sport: running
+
+  - target: JUDO_MARTIAL_ARTS  # Judo
+    sport: null
+
+  - target: JUMP_ROPE  # Rope skipping
+    sport: null
+
+  - target: KETTLEBELL  # Kettlebell
+    sport: null
+
+  - target: KICKBIKE  # Kickbiking
+    sport: null
+
+  - target: KICKBOXING_MARTIAL_ARTS  # Kickboxing
+    sport: null
+
+  - target: LATIN_DANCING  # Latin
+    sport: null
+
+  - target: LES_MILLS_BARRE  # LES MILLS BARRE
+    sport: null
+
+  - target: LES_MILLS_BODYATTACK  # LES MILLS BODYATTACK
+    sport: null
+
+  - target: LES_MILLS_BODYBALANCE  # LES MILLS BODYBALANCE
+    sport: null
+
+  - target: LES_MILLS_BODYCOMBAT  # LES MILLS BODYCOMBAT
+    sport: null
+
+  - target: LES_MILLS_BODYJAM  # LES MILLS BODYJAM
+    sport: null
+
+  - target: LES_MILLS_BODYPUMP  # LES MILLS BODYPUMP
+    sport: null
+
+  - target: LES_MILLS_BODYSTEP  # LES MILLS BODYSTEP
+    sport: null
+
+  - target: LES_MILLS_CXWORKS  # LES MILLS CXWORX
+    sport: null
+
+  - target: LES_MILLS_GRIT_ATHLETIC  # LES MILLS GRIT Athletic
+    sport: null
+
+  - target: LES_MILLS_GRIT_CARDIO  # LES MILLS GRIT Cardio
+    sport: null
+
+  - target: LES_MILLS_GRIT_STRENGTH  # LES MILLS GRIT Strength
+    sport: null
+
+  - target: LES_MILLS_RPM  # LES MILLS RPM
+    sport: null
+
+  - target: LES_MILLS_SHBAM  # LES MILLS SH'BAM
+    sport: null
+
+  - target: LES_MILLS_SPRINT  # LES MILLS SPRINT
+    sport: null
+
+  - target: LES_MILLS_TONE  # LES MILLS TONE
+    sport: null
+
+  - target: LES_MILLS_TRIP  # LES MILLS TRIP
+    sport: null
+
+  - target: MOBILITY_DYNAMIC  # Mobility (dynamic)
+    sport: null
+
+  - target: MOBILITY_STATIC  # Mobility (static)
+    sport: null
+
+  - target: MODERN_DANCING  # Modern
+    sport: null
+
+  - target: MOTORSPORTS_CAR_RACING  # Car racing
+    sport: null
+
+  - target: MOTORSPORTS_ENDURO  # Enduro
+    sport: null
+
+  - target: MOTORSPORTS_HARD_ENDURO  # Hard Enduro
+    sport: null
+
+  - target: MOTORSPORTS_MOTOCROSS  # Motocross
+    sport: null
+
+  - target: MOTORSPORTS_ROADRACING  # Road racing
+    sport: null
+
+  - target: MOTORSPORTS_SNOCROSS  # Snocross
+    sport: null
+
+  - target: MOUNTAIN_BIKING  # Mountain biking
+    sport: cycling.mountain
+    preferred: true
+
+  - target: NORDIC_WALKING  # Nordic walking
+    sport: walking
+
+  - target: OBSTACLE_COURSE_RACING  # Obstacle course racing
+    sport: null
+
+  - target: OFFROADDUATHLON  # Off-road duathlon
+    sport: null
+
+  - target: OFFROADDUATHLON_CYCLING  # Mountain biking
+    sport: cycling.mountain
+
+  - target: OFFROADDUATHLON_RUNNING  # Trail running
+    sport: running.trail
+
+  - target: OFFROADTRIATHLON  # Off-road triathlon
+    sport: null
+
+  - target: OFFROADTRIATHLON_CYCLING  # Mountain biking
+    sport: cycling.mountain
+
+  - target: OFFROADTRIATHLON_RUNNING  # Trail running
+    sport: running.trail
+
+  - target: OFFROADTRIATHLON_SWIMMING  # Open water swimming
+    sport: swimming.open_water
+
+  - target: OPEN_WATER_SWIMMING  # Open water swimming
+    sport: swimming.open_water
+    preferred: true
+
+  - target: ORIENTEERING  # Orienteering
+    sport: null
+
+  - target: ORIENTEERING_MTB  # Mountain bike orienteering
+    sport: cycling.mountain
+
+  - target: ORIENTEERING_SKI  # Ski orienteering
+    sport: xc_skiing
+
+  - target: OTHER_INDOOR  # Other indoor
+    sport: generic
+
+  - target: OTHER_OUTDOOR  # Other outdoor
+    sport: generic
+    preferred: true
+
+  - target: PADEL  # Padel racing
+    sport: null
+
+  - target: PARASPORTS_HAND_CYCLING  # Handcycling
+    sport: cycling
+
+  - target: PARASPORTS_SLED_HOCKEY  # Sled hockey
+    sport: null
+
+  - target: PARASPORTS_WATER_SKIING  # Adaptive water skiing
+    sport: null
+
+  - target: PARASPORTS_WHEELCHAIR  # Wheelchair racing
+    sport: null
+
+  - target: PARASPORTS_WHEELCHAIR_BASKETBALL  # Wheelchair basketball
+    sport: null
+
+  - target: PARASPORTS_WHEELCHAIR_TENNIS  # Wheelchair tennis
+    sport: null
+
+  - target: PICKLEBALL  # Pickleball
+    sport: null
+
+  - target: PILATES  # Pilates
+    sport: null
+
+  - target: POOL_SWIMMING  # Pool swimming
+    sport: swimming.pool
+    preferred: true
+
+  - target: RIDING  # Riding
+    sport: null
+
+  - target: RINGETTE  # Ringette
+    sport: null
+
+  - target: ROAD_BIKING  # Road cycling
+    sport: cycling.road
+    preferred: true
+
+  - target: ROAD_RUNNING  # Road running
+    sport: running.road
+    preferred: true
+
+  - target: ROLLER_BLADING  # Roller skating
+    sport: null
+
+  - target: ROLLER_SKIING_CLASSIC  # Classic roller skiing
+    sport: xc_skiing.classic+roller
+    preferred: true
+
+  - target: ROLLER_SKIING_FREESTYLE  # Freestyle roller skiing
+    sport: xc_skiing.skate+roller
+    preferred: true
+
+  - target: ROWING  # Rowing
+    sport: rowing
+    preferred: true
+
+  - target: RUCKING  # Rucking
+    sport: walking
+
+  - target: RUGBY  # Rugby
+    sport: null
+
+  - target: RUNNING  # Running
+    sport: running
+    preferred: true
+
+  - target: SHOOTING_SPORT_INDOOR  # Shooting (indoor)
+    sport: null
+
+  - target: SHOOTING_SPORT_OUTDOOR  # Shooting (outdoor)
+    sport: null
+
+  - target: SHOW_DANCING  # Show
+    sport: null
+
+  - target: SKATEBOARDING  # Skateboarding
+    sport: null
+
+  - target: SKATING  # Skating
+    sport: null
+
+  - target: SKIERG  # Ski machine
+    sport: null
+
+  - target: SNOWBOARDING  # Snowboarding
+    sport: null
+
+  - target: SNOWSHOE_TREKKING  # Snowshoe trekking
+    sport: null
+
+  - target: SOCCER  # Soccer
+    sport: null
+
+  - target: SPINNING  # Spinning
+    sport: cycling+stationary
+
+  - target: SQUASH  # Squash
+    sport: null
+
+  - target: STAIR_WORKOUT  # Stair workout
+    sport: null
+
+  - target: STREET_DANCING  # Street
+    sport: null
+
+  - target: STRENGTH_TRAINING  # Strength training
+    sport: null
+
+  - target: STRETCHING  # Stretching
+    sport: null
+
+  - target: SUP  # SUP
+    sport: null
+
+  - target: SWIMMING  # Swimming
+    sport: swimming
+    preferred: true
+
+  - target: TABLE_TENNIS  # Table tennis
+    sport: null
+
+  - target: TAEKWONDO_MARTIAL_ARTS  # Taekwondo
+    sport: null
+
+  - target: TELEMARK_SKIING  # Telemark skiing
+    sport: null
+
+  - target: TENNIS  # Tennis
+    sport: null
+
+  - target: TRACK_AND_FIELD_RUNNING  # Track&field running
+    sport: running.track
+    preferred: true
+
+  - target: TRAIL_RUNNING  # Trail running
+    sport: running.trail
+    preferred: true
+
+  - target: TREADMILL_RUNNING  # Treadmill running
+    sport: running+stationary
+    preferred: true
+
+  - target: TRIATHLON  # Triathlon
+    sport: null
+
+  - target: TRIATHLON_CYCLING  # Cycling
+    sport: cycling
+
+  - target: TRIATHLON_RUNNING  # Running
+    sport: running
+
+  - target: TRIATHLON_SWIMMING  # Open water swimming
+    sport: swimming.open_water
+
+  - target: TROTTING  # Trotting
+    sport: null
+
+  - target: ULTIMATE  # Ultimate
+    sport: null
+
+  - target: ULTRARUNNING_RUNNING  # Ultra running
+    sport: running
+
+  - target: VERTICALSPORTS_OUTCLIMBING  # Climbing (outdoor)
+    sport: null
+
+  - target: VERTICALSPORTS_WALLCLIMBING  # Climbing (indoor)
+    sport: null
+
+  - target: VOLLEYBALL  # Volleyball
+    sport: null
+
+  - target: WALKING  # Walking
+    sport: walking
+    preferred: true
+
+  - target: WATERSPORTS_CANOEING  # Canoeing
+    sport: null
+
+  - target: WATERSPORTS_KAYAKING  # Kayaking
+    sport: null
+
+  - target: WATERSPORTS_KITESURFING  # Kitesurfing
+    sport: null
+
+  - target: WATERSPORTS_SAILING  # Sailing
+    sport: null
+
+  - target: WATERSPORTS_SURFING  # Surfing
+    sport: null
+
+  - target: WATERSPORTS_WAKEBOARDING  # Wakeboarding
+    sport: null
+
+  - target: WATERSPORTS_WATERSKI  # Water skiing
+    sport: null
+
+  - target: WATERSPORTS_WINDSURFING  # Windsurfing
+    sport: null
+
+  - target: WATER_EXERCISE  # Water sports
+    sport: null
+
+  - target: WATER_RUNNING  # Water running
+    sport: null
+
+  - target: XC_SKIING_CLASSIC  # Classic XC skiing
+    sport: xc_skiing.classic
+    preferred: true
+
+  - target: XC_SKIING_FREESTYLE  # Freestyle XC skiing
+    sport: xc_skiing.skate
+    preferred: true
+
+  - target: YOGA  # Yoga
+    sport: null

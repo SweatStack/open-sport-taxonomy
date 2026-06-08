@@ -72,6 +72,7 @@ Mapping files in [`mappings/`](mappings/) translate OST codes to platform-specif
 - [`apple_healthkit.yaml`](mappings/apple_healthkit.yaml) — HKWorkoutActivityType integer values
 - [`garmin_fit.yaml`](mappings/garmin_fit.yaml) — sport + sub_sport integer pairs
 - [`garmin_training_api.yaml`](mappings/garmin_training_api.yaml) — Training API V2 sport type strings
+- [`polar.yaml`](mappings/polar.yaml) — AccessLink `detailed_sport_info` string values
 - [`strava.yaml`](mappings/strava.yaml) — SportType string values
 - [`wahoo.yaml`](mappings/wahoo.yaml) — Cloud API `workout_type_id` integer values
 
@@ -185,7 +186,7 @@ Sport("running").is_subsport_of(Sport("cycling"))                  # False
 Every platform supports `encode` (OST → platform code) and `decode` (platform code → OST):
 
 ```python
-from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, garmin_training_api, wahoo
+from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, garmin_training_api, wahoo, polar
 
 # Encode: OST → platform
 strava.encode(Sport("cycling.road+virtual"))     # "VirtualRide"
@@ -193,6 +194,7 @@ apple_healthkit.encode(Sport.CYCLING_ROAD)       # 13
 garmin_fit.encode(Sport.CYCLING_ROAD)            # GarminFitCode(sport=2, sub_sport=7)
 garmin_training_api.encode(Sport.CYCLING_ROAD)   # "CYCLING"
 wahoo.encode(Sport.CYCLING_ROAD)                 # 15
+polar.encode(Sport.CYCLING_ROAD)                 # "ROAD_BIKING"
 
 # Decode: platform → OST
 strava.decode("VirtualRide")                     # Sport('cycling.road+virtual')
@@ -200,6 +202,7 @@ apple_healthkit.decode(13)                       # Sport('cycling')
 garmin_fit.decode(2, 7)                          # Sport('cycling.road')
 garmin_training_api.decode("CYCLING")            # Sport('cycling')
 wahoo.decode(68)                                 # Sport('cycling+stationary+virtual')
+polar.decode("INDOOR_CYCLING")                   # Sport('cycling+stationary')
 ```
 
 Garmin FIT `decode` accepts both raw integer enum values and FIT enum names (interchangeably), and tolerates `None` for missing fields:

@@ -343,10 +343,14 @@ changes; fits format v3 as-is.
 2. **`PARASPORTS_HAND_CYCLING → cycling`**, consistent with Wahoo's handcycling call.
 3. **`platform_version = "AccessLink API v3 (fetched 2026-06-08)"`** — pin API version
    + fetch date, since the sport list is unversioned.
+4. **`KICKBIKE → null`** (not `cycling`). Resolved: a kick scooter is not a cycling
+   discipline; diverge from Polar's coarser FIT choice.
+5. **`ORIENTEERING_SKI → xc_skiing`, `ORIENTEERING_MTB → cycling.mountain`** (decode-only).
+   Resolved: map to the dominant locomotion, accepting the contrast with the
+   biathlon/OCR → `null` calls (those bundle a non-locomotion component; orienteering's
+   recorded activity is the skiing/riding itself).
+6. **`generic → OTHER_OUTDOOR`** for the encode fallback. Resolved.
 
 ## Open questions
 
-1. **`KICKBIKE`** → `null` (proposed) vs `cycling` (Polar's choice). Confirm.
-2. **`ORIENTEERING_SKI` / `ORIENTEERING_MTB`** → map to locomotion (proposed) vs `null`
-   (consistent with the biathlon/OCR calls). Confirm the inconsistency is acceptable.
-3. **`generic → OTHER_OUTDOOR`** vs `OTHER_INDOOR` for the encode fallback. Confirm.
+None. All design decisions resolved.

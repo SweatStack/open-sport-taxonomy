@@ -7,7 +7,7 @@ against the runtime built from the same data.
 
 What lives here is a hand-curated set of *representative* cases per
 platform that exercise the encode and decode code paths once each.
-Six cases per platform × five platforms = 30 tests. If an algorithm
+Six cases per platform × six platforms = 36 tests. If an algorithm
 change breaks any of these, the failure points at one code path, not
 292 data points.
 
@@ -35,6 +35,7 @@ from open_sport_taxonomy.platforms import (
     apple_healthkit,
     garmin_fit,
     garmin_training_api,
+    polar,
     strava,
     wahoo,
 )
@@ -229,3 +230,34 @@ class TestWahooRoundTrip:
     def test_unmapped_decode_falls_to_fallback(self):
         # A workout_type_id not in the bundled targets.yaml -> fallback.decode.
         assert wahoo.decode(99999) == Sport("generic")
+
+
+# --------------------------------------------------------------------------
+# Polar — flat string targets (detailed_sport_info), no target_coarsening.
+# --------------------------------------------------------------------------
+
+
+class TestPolarRoundTrip:
+    def test_preferred_round_trip(self):
+        sport = Sport("running.road")
+        assert polar.encode(sport) == "ROAD_RUNNING"
+        assert polar.decode("ROAD_RUNNING") == sport
+
+    def test_synonym_decode_to_canonical(self):
+        # SPINNING decodes to cycling+stationary; INDOOR_CYCLING is preferred.
+        assert polar.decode("SPINNING") == Sport("cycling+stationary")
+
+    def test_null_sport_decodes_to_fallback(self):
+        # YOGA (and most of Polar's 175 values) have no OST equivalent.
+        assert polar.decode("YOGA") == Sport("generic")
+
+    def test_parent_walk_encode(self):
+        # cycling.time_trial has no Polar type; walks up to cycling -> CYCLING.
+        assert polar.encode(Sport("cycling.time_trial")) == "CYCLING"
+
+    def test_modifier_drop_encode(self):
+        # running.road+commute has no entry; drops +commute -> ROAD_RUNNING.
+        assert polar.encode(Sport("running.road+commute")) == "ROAD_RUNNING"
+
+    def test_unmapped_decode_falls_to_fallback(self):
+        assert polar.decode("NOT_A_REAL_SPORT") == Sport("generic")
