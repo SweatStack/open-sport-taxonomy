@@ -45,6 +45,7 @@ PLATFORM_REF_DIR = {
     "garmin_training_api": "garmin-training-api",
     "wahoo": "wahoo",
     "polar": "polar",
+    "suunto": "suunto",
 }
 
 
@@ -214,6 +215,12 @@ def main() -> int:
             "fallback_decode": "generic",
             "target_coarsening": [],
         },
+        "suunto": {
+            "platform_version": "Activities reference PDF (fetched 2026-06-08)",
+            "fallback_encode": 4,
+            "fallback_decode": "generic",
+            "target_coarsening": [],
+        },
     }
     defaults = defaults_by_platform[args.platform]
 
@@ -249,6 +256,8 @@ def main() -> int:
         comments = _wahoo_comments(targets)
     elif args.platform == "polar":
         comments = _polar_comments(targets)
+    elif args.platform == "suunto":
+        comments = _suunto_comments(targets)
 
     text = render_file(
         args.platform,
@@ -312,6 +321,18 @@ def _polar_comments(targets: list[Any]) -> dict[Any, str]:
     comments: dict[Any, str] = {}
     for t in targets:
         comments[target_key(t)] = labels.get(t, "?")
+    return comments
+
+
+def _suunto_comments(targets: list[Any]) -> dict[Any, str]:
+    """Annotate Suunto targets with their activity name."""
+    src_path = REFERENCE_DIR / "suunto" / "activities.yaml"
+    cases = yaml.safe_load(src_path.read_text())["cases"]
+    names = {c["value"]: c["name"] for c in cases}
+
+    comments: dict[Any, str] = {}
+    for t in targets:
+        comments[target_key(t)] = names.get(t, "?")
     return comments
 
 

@@ -3,6 +3,7 @@ from open_sport_taxonomy.platforms._garmin_fit import garmin_fit
 from open_sport_taxonomy.platforms._garmin_training_api import garmin_training_api
 from open_sport_taxonomy.platforms._polar import polar
 from open_sport_taxonomy.platforms._strava import strava
+from open_sport_taxonomy.platforms._suunto import suunto
 from open_sport_taxonomy.platforms._wahoo import wahoo
 
 __all__ = [
@@ -11,5 +12,6 @@ __all__ = [
     "garmin_training_api",
     "polar",
     "strava",
+    "suunto",
     "wahoo",
 ]

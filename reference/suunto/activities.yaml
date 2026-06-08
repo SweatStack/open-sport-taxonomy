@@ -1,0 +1,253 @@
+# Suunto — activity ID enumeration.
+#
+# Source of truth, hand-transcribed from Activities.pdf (text layer extracted
+# with `pdftotext -layout`). Suunto publishes no machine-readable enum. `name`
+# is the Suunto activity label (not unique — IDs 4-9 are all "Sports"); only
+# `value` (the activity ID) is the mapping target. ID 89 is unassigned.
+#
+# See README.md. Pin platform_version in mappings/suunto.yaml to the source +
+# fetch date.
+
+cases:
+  - value: 0
+    name: Walking
+  - value: 1
+    name: Running
+  - value: 2
+    name: Cycling
+  - value: 3
+    name: Cross-country skiing
+  - value: 4
+    name: Sports
+  - value: 5
+    name: Sports
+  - value: 6
+    name: Sports
+  - value: 7
+    name: Sports
+  - value: 8
+    name: Sports
+  - value: 9
+    name: Sports
+  - value: 10
+    name: Mountain biking
+  - value: 11
+    name: Hiking
+  - value: 12
+    name: Roller skating
+  - value: 13
+    name: Downhill skiing
+  - value: 14
+    name: Paddling
+  - value: 15
+    name: Rowing
+  - value: 16
+    name: Golfing
+  - value: 17
+    name: Indoor sports
+  - value: 18
+    name: Parkouring
+  - value: 19
+    name: Ball games
+  - value: 20
+    name: Outdoor gym
+  - value: 21
+    name: Swimming
+  - value: 22
+    name: Trail running
+  - value: 23
+    name: Gym
+  - value: 24
+    name: Nordic walking
+  - value: 25
+    name: Horseback riding
+  - value: 26
+    name: Motorsports
+  - value: 27
+    name: Skateboarding
+  - value: 28
+    name: Water sports
+  - value: 29
+    name: Climbing
+  - value: 30
+    name: Snowboarding
+  - value: 31
+    name: Ski touring
+  - value: 32
+    name: Fitness class
+  - value: 33
+    name: Soccer
+  - value: 34
+    name: Tennis
+  - value: 35
+    name: Basketball
+  - value: 36
+    name: Badminton
+  - value: 37
+    name: Baseball
+  - value: 38
+    name: Volleyball
+  - value: 39
+    name: American football
+  - value: 40
+    name: Table tennis
+  - value: 41
+    name: Racquet ball
+  - value: 42
+    name: Squash
+  - value: 43
+    name: Floorball
+  - value: 44
+    name: Handball
+  - value: 45
+    name: Softball
+  - value: 46
+    name: Bowling
+  - value: 47
+    name: Cricket
+  - value: 48
+    name: Rugby
+  - value: 49
+    name: Ice skating
+  - value: 50
+    name: Ice hockey
+  - value: 51
+    name: Yoga/pilates
+  - value: 52
+    name: Indoor cycling
+  - value: 53
+    name: Treadmill
+  - value: 54
+    name: Crossfit
+  - value: 55
+    name: Crosstrainer
+  - value: 56
+    name: Roller skiing
+  - value: 57
+    name: Indoor rowing
+  - value: 58
+    name: Stretching
+  - value: 59
+    name: Track and field
+  - value: 60
+    name: Orienteering
+  - value: 61
+    name: Standup paddling
+  - value: 62
+    name: Combat sport
+  - value: 63
+    name: Kettlebell
+  - value: 64
+    name: Dancing
+  - value: 65
+    name: Snow shoeing
+  - value: 66
+    name: Frisbee golf
+  - value: 67
+    name: Futsal
+  - value: 68
+    name: Multisport
+  - value: 69
+    name: Aerobics
+  - value: 70
+    name: Trekking
+  - value: 71
+    name: Sailing
+  - value: 72
+    name: Kayaking
+  - value: 73
+    name: Circuit training
+  - value: 74
+    name: Triathlon
+  - value: 75
+    name: Padel
+  - value: 76
+    name: Cheerleading
+  - value: 77
+    name: Boxing
+  - value: 78
+    name: Scubadiving
+  - value: 79
+    name: Freediving
+  - value: 80
+    name: Adventure racing
+  - value: 81
+    name: Gymnastics
+  - value: 82
+    name: Canoeing
+  - value: 83
+    name: Mountaineering
+  - value: 84
+    name: Telemarkskiing
+  - value: 85
+    name: Openwater swimming
+  - value: 86
+    name: Windsurfing
+  - value: 87
+    name: Kitesurfing
+  - value: 88
+    name: Paragliding
+  - value: 90
+    name: Snorkeling
+  - value: 91
+    name: Surfing
+  - value: 92
+    name: Swimrun
+  - value: 93
+    name: Duathlon
+  - value: 94
+    name: Aquathlon
+  - value: 95
+    name: Obstacle racing
+  - value: 96
+    name: Fishing
+  - value: 97
+    name: Hunting
+  - value: 98
+    name: Transition
+  - value: 99
+    name: Gravel cycling
+  - value: 100
+    name: Mermaiding
+  - value: 101
+    name: Spearfishing
+  - value: 102
+    name: Jump rope
+  - value: 103
+    name: Track running
+  - value: 104
+    name: Calisthenics
+  - value: 105
+    name: E-bike
+  - value: 106
+    name: E-mtb
+  - value: 107
+    name: Backcountry skiing
+  - value: 108
+    name: Wheelchair sport
+  - value: 109
+    name: Hand cycling
+  - value: 110
+    name: Splitboarding
+  - value: 111
+    name: Biathlon
+  - value: 112
+    name: Meditation
+  - value: 113
+    name: Field hockey
+  - value: 114
+    name: Cyclocross
+  - value: 115
+    name: Vertical running
+  - value: 116
+    name: Ski mountaineering
+  - value: 117
+    name: Skate skiing
+  - value: 118
+    name: Classic skiing
+  - value: 119
+    name: Chores
+  - value: 120
+    name: Pilates
+  - value: 121
+    name: Yoga

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.8.0] - 2026-06-08
+
+### Added
+
+- **Suunto Activities mapping** (`mappings/suunto.yaml`, `reference/suunto/`). Translates Suunto's integer activity ID (0–121, with gaps) to and from OST. Indoor/treadmill/roller/e-bike activities map to OST sport-with-modifier entries — frequently finer than Suunto's own FIT export, which e.g. files E-mtb under a single `E_BIKING` sport (OST keeps `cycling.mountain+assisted`) and roller skiing under `CROSS_COUNTRY_SKIING` (OST keeps `xc_skiing+roller`). Suunto's broad taxonomy (ball sports, martial arts, named gym/fitness, alpine/touring snow sports, water sports) decodes via the `generic` fallback. The source `Activities.pdf` is stored at `reference/suunto/`; the enumeration is hand-curated in `reference/suunto/activities.yaml`. See [`reference/suunto/README.md`](reference/suunto/README.md).
+
 ## [0.7.0] - 2026-06-08
 
 ### Added

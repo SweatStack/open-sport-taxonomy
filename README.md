@@ -74,6 +74,7 @@ Mapping files in [`mappings/`](mappings/) translate OST codes to platform-specif
 - [`garmin_training_api.yaml`](mappings/garmin_training_api.yaml) — Training API V2 sport type strings
 - [`polar.yaml`](mappings/polar.yaml) — AccessLink `detailed_sport_info` string values
 - [`strava.yaml`](mappings/strava.yaml) — SportType string values
+- [`suunto.yaml`](mappings/suunto.yaml) — Activities integer ID values
 - [`wahoo.yaml`](mappings/wahoo.yaml) — Cloud API `workout_type_id` integer values
 
 Mappings are bidirectional: every entry supports both encoding (OST → platform) and decoding (platform → OST). Translations are lossy by design — some platforms are less granular than the taxonomy, so multiple OST codes may encode to the same platform value (e.g. all cycling disciplines map to HealthKit `13`). The decoded result is the most-specific OST code that the platform actually represents.
@@ -186,7 +187,7 @@ Sport("running").is_subsport_of(Sport("cycling"))                  # False
 Every platform supports `encode` (OST → platform code) and `decode` (platform code → OST):
 
 ```python
-from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, garmin_training_api, wahoo, polar
+from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, garmin_training_api, wahoo, polar, suunto
 
 # Encode: OST → platform
 strava.encode(Sport("cycling.road+virtual"))     # "VirtualRide"
@@ -195,6 +196,7 @@ garmin_fit.encode(Sport.CYCLING_ROAD)            # GarminFitCode(sport=2, sub_sp
 garmin_training_api.encode(Sport.CYCLING_ROAD)   # "CYCLING"
 wahoo.encode(Sport.CYCLING_ROAD)                 # 15
 polar.encode(Sport.CYCLING_ROAD)                 # "ROAD_BIKING"
+suunto.encode(Sport("cycling.gravel"))           # 99
 
 # Decode: platform → OST
 strava.decode("VirtualRide")                     # Sport('cycling.road+virtual')
@@ -203,6 +205,7 @@ garmin_fit.decode(2, 7)                          # Sport('cycling.road')
 garmin_training_api.decode("CYCLING")            # Sport('cycling')
 wahoo.decode(68)                                 # Sport('cycling+stationary+virtual')
 polar.decode("INDOOR_CYCLING")                   # Sport('cycling+stationary')
+suunto.decode(106)                               # Sport('cycling.mountain+assisted')
 ```
 
 Garmin FIT `decode` accepts both raw integer enum values and FIT enum names (interchangeably), and tolerates `None` for missing fields:

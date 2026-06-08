@@ -7,7 +7,7 @@ This document is the normative specification for OpenSportTaxonomy mapping files
 A **mapping file** translates between OST sport strings and a single platform's native sport identifiers. One file per platform, under `mappings/<platform>.yaml`.
 
 - **OST sport string** — the canonical OST identifier, of the form `code` or `code+modifier[+modifier...]` (e.g. `cycling.road`, `cycling+stationary`). Modifiers are sorted alphabetically.
-- **Target** — the platform's native sport identifier. Shape is platform-specific: FIT uses `{sport, sub_sport}` integer pairs; Strava uses strings; HealthKit uses integers; Garmin Training API uses strings; Wahoo uses integers; Polar uses strings.
+- **Target** — the platform's native sport identifier. Shape is platform-specific: FIT uses `{sport, sub_sport}` integer pairs; Strava uses strings; HealthKit uses integers; Garmin Training API uses strings; Wahoo uses integers; Polar uses strings; Suunto uses integers.
 - **Entry** — one row in the mapping file: a `target` paired with the `sport` it decodes to (or `null` for "no OST equivalent").
 - **Preferred entry** — the unique entry per non-null `sport` that is used for encoding.
 

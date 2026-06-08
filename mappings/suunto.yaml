@@ -1,0 +1,399 @@
+# OpenSportTaxonomy — suunto mapping (format v3).
+#
+# See docs/translation.md for the format specification.
+# See CONTRIBUTING.md for the workflow.
+
+format_version: 3
+platform: suunto
+platform_version: "Activities reference PDF (fetched 2026-06-08)"
+
+fallback:
+  encode:    4
+  decode: generic
+
+entries:
+
+  - target:    0  # Walking
+    sport: walking
+    preferred: true
+
+  - target:    1  # Running
+    sport: running
+    preferred: true
+
+  - target:    2  # Cycling
+    sport: cycling
+    preferred: true
+
+  - target:    3  # Cross-country skiing
+    sport: xc_skiing
+    preferred: true
+
+  - target:    4  # Sports
+    sport: generic
+    preferred: true
+
+  - target:    5  # Sports
+    sport: generic
+
+  - target:    6  # Sports
+    sport: generic
+
+  - target:    7  # Sports
+    sport: generic
+
+  - target:    8  # Sports
+    sport: generic
+
+  - target:    9  # Sports
+    sport: generic
+
+  - target:   10  # Mountain biking
+    sport: cycling.mountain
+    preferred: true
+
+  - target:   11  # Hiking
+    sport: walking.hiking
+    preferred: true
+
+  - target:   12  # Roller skating
+    sport: null
+
+  - target:   13  # Downhill skiing
+    sport: null
+
+  - target:   14  # Paddling
+    sport: null
+
+  - target:   15  # Rowing
+    sport: rowing
+    preferred: true
+
+  - target:   16  # Golfing
+    sport: null
+
+  - target:   17  # Indoor sports
+    sport: null
+
+  - target:   18  # Parkouring
+    sport: null
+
+  - target:   19  # Ball games
+    sport: null
+
+  - target:   20  # Outdoor gym
+    sport: null
+
+  - target:   21  # Swimming
+    sport: swimming
+    preferred: true
+
+  - target:   22  # Trail running
+    sport: running.trail
+    preferred: true
+
+  - target:   23  # Gym
+    sport: null
+
+  - target:   24  # Nordic walking
+    sport: walking
+
+  - target:   25  # Horseback riding
+    sport: null
+
+  - target:   26  # Motorsports
+    sport: null
+
+  - target:   27  # Skateboarding
+    sport: null
+
+  - target:   28  # Water sports
+    sport: null
+
+  - target:   29  # Climbing
+    sport: null
+
+  - target:   30  # Snowboarding
+    sport: null
+
+  - target:   31  # Ski touring
+    sport: null
+
+  - target:   32  # Fitness class
+    sport: null
+
+  - target:   33  # Soccer
+    sport: null
+
+  - target:   34  # Tennis
+    sport: null
+
+  - target:   35  # Basketball
+    sport: null
+
+  - target:   36  # Badminton
+    sport: null
+
+  - target:   37  # Baseball
+    sport: null
+
+  - target:   38  # Volleyball
+    sport: null
+
+  - target:   39  # American football
+    sport: null
+
+  - target:   40  # Table tennis
+    sport: null
+
+  - target:   41  # Racquet ball
+    sport: null
+
+  - target:   42  # Squash
+    sport: null
+
+  - target:   43  # Floorball
+    sport: null
+
+  - target:   44  # Handball
+    sport: null
+
+  - target:   45  # Softball
+    sport: null
+
+  - target:   46  # Bowling
+    sport: null
+
+  - target:   47  # Cricket
+    sport: null
+
+  - target:   48  # Rugby
+    sport: null
+
+  - target:   49  # Ice skating
+    sport: null
+
+  - target:   50  # Ice hockey
+    sport: null
+
+  - target:   51  # Yoga/pilates
+    sport: null
+
+  - target:   52  # Indoor cycling
+    sport: cycling+stationary
+    preferred: true
+
+  - target:   53  # Treadmill
+    sport: running+stationary
+    preferred: true
+
+  - target:   54  # Crossfit
+    sport: null
+
+  - target:   55  # Crosstrainer
+    sport: null
+
+  - target:   56  # Roller skiing
+    sport: xc_skiing+roller
+    preferred: true
+
+  - target:   57  # Indoor rowing
+    sport: rowing+stationary
+    preferred: true
+
+  - target:   58  # Stretching
+    sport: null
+
+  - target:   59  # Track and field
+    sport: running.track
+    preferred: true
+
+  - target:   60  # Orienteering
+    sport: null
+
+  - target:   61  # Standup paddling
+    sport: null
+
+  - target:   62  # Combat sport
+    sport: null
+
+  - target:   63  # Kettlebell
+    sport: null
+
+  - target:   64  # Dancing
+    sport: null
+
+  - target:   65  # Snow shoeing
+    sport: null
+
+  - target:   66  # Frisbee golf
+    sport: null
+
+  - target:   67  # Futsal
+    sport: null
+
+  - target:   68  # Multisport
+    sport: null
+
+  - target:   69  # Aerobics
+    sport: null
+
+  - target:   70  # Trekking
+    sport: walking.hiking
+
+  - target:   71  # Sailing
+    sport: null
+
+  - target:   72  # Kayaking
+    sport: null
+
+  - target:   73  # Circuit training
+    sport: null
+
+  - target:   74  # Triathlon
+    sport: null
+
+  - target:   75  # Padel
+    sport: null
+
+  - target:   76  # Cheerleading
+    sport: null
+
+  - target:   77  # Boxing
+    sport: null
+
+  - target:   78  # Scubadiving
+    sport: null
+
+  - target:   79  # Freediving
+    sport: null
+
+  - target:   80  # Adventure racing
+    sport: null
+
+  - target:   81  # Gymnastics
+    sport: null
+
+  - target:   82  # Canoeing
+    sport: null
+
+  - target:   83  # Mountaineering
+    sport: null
+
+  - target:   84  # Telemarkskiing
+    sport: null
+
+  - target:   85  # Openwater swimming
+    sport: swimming.open_water
+    preferred: true
+
+  - target:   86  # Windsurfing
+    sport: null
+
+  - target:   87  # Kitesurfing
+    sport: null
+
+  - target:   88  # Paragliding
+    sport: null
+
+  - target:   90  # Snorkeling
+    sport: null
+
+  - target:   91  # Surfing
+    sport: null
+
+  - target:   92  # Swimrun
+    sport: null
+
+  - target:   93  # Duathlon
+    sport: null
+
+  - target:   94  # Aquathlon
+    sport: null
+
+  - target:   95  # Obstacle racing
+    sport: null
+
+  - target:   96  # Fishing
+    sport: null
+
+  - target:   97  # Hunting
+    sport: null
+
+  - target:   98  # Transition
+    sport: null
+
+  - target:   99  # Gravel cycling
+    sport: cycling.gravel
+    preferred: true
+
+  - target:  100  # Mermaiding
+    sport: null
+
+  - target:  101  # Spearfishing
+    sport: null
+
+  - target:  102  # Jump rope
+    sport: null
+
+  - target:  103  # Track running
+    sport: running.track
+
+  - target:  104  # Calisthenics
+    sport: null
+
+  - target:  105  # E-bike
+    sport: cycling+assisted
+    preferred: true
+
+  - target:  106  # E-mtb
+    sport: cycling.mountain+assisted
+    preferred: true
+
+  - target:  107  # Backcountry skiing
+    sport: xc_skiing
+
+  - target:  108  # Wheelchair sport
+    sport: null
+
+  - target:  109  # Hand cycling
+    sport: cycling
+
+  - target:  110  # Splitboarding
+    sport: null
+
+  - target:  111  # Biathlon
+    sport: null
+
+  - target:  112  # Meditation
+    sport: null
+
+  - target:  113  # Field hockey
+    sport: null
+
+  - target:  114  # Cyclocross
+    sport: cycling.cyclocross
+    preferred: true
+
+  - target:  115  # Vertical running
+    sport: running.trail
+
+  - target:  116  # Ski mountaineering
+    sport: null
+
+  - target:  117  # Skate skiing
+    sport: xc_skiing.skate
+    preferred: true
+
+  - target:  118  # Classic skiing
+    sport: xc_skiing.classic
+    preferred: true
+
+  - target:  119  # Chores
+    sport: null
+
+  - target:  120  # Pilates
+    sport: null
+
+  - target:  121  # Yoga
+    sport: null

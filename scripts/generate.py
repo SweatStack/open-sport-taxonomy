@@ -45,6 +45,7 @@ PLATFORM_REF_DIR = {
     "garmin_training_api": "garmin-training-api",
     "wahoo": "wahoo",
     "polar": "polar",
+    "suunto": "suunto",
 }
 
 

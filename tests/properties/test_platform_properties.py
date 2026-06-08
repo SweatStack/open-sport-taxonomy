@@ -1,4 +1,4 @@
-"""Property-based tests for encode/decode across all six platforms.
+"""Property-based tests for encode/decode across all seven platforms.
 
 These complement ``tests/algorithm/test_encode.py`` and
 ``tests/algorithm/test_decode.py`` (which exercise distinct code paths
@@ -18,11 +18,20 @@ from open_sport_taxonomy.platforms import (
     garmin_training_api,
     polar,
     strava,
+    suunto,
     wahoo,
 )
 from tests.properties.conftest import standard_sports
 
-ALL_PLATFORMS = [garmin_fit, strava, apple_healthkit, garmin_training_api, wahoo, polar]
+ALL_PLATFORMS = [
+    garmin_fit,
+    strava,
+    apple_healthkit,
+    garmin_training_api,
+    wahoo,
+    polar,
+    suunto,
+]
 
 
 def _decode(platform, target):
@@ -32,7 +41,7 @@ def _decode(platform, target):
     return platform.decode(target)
 
 
-@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=5))
+@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=6))
 def test_encode_returns_correct_target_type(sport: Sport, platform_index: int) -> None:
     """For any standard sport on any platform, encode returns a value of
     the platform's native target type — never raises, never returns ``None``."""
@@ -44,18 +53,18 @@ def test_encode_returns_correct_target_type(sport: Sport, platform_index: int) -
         assert isinstance(result, GarminFitCode)
     elif platform in (strava, garmin_training_api, polar):
         assert isinstance(result, str)
-    elif platform in (apple_healthkit, wahoo):
+    elif platform in (apple_healthkit, wahoo, suunto):
         assert isinstance(result, int)
 
 
-@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=5))
+@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=6))
 def test_encode_is_deterministic(sport: Sport, platform_index: int) -> None:
     """Calling encode twice on the same input yields the same target."""
     platform = ALL_PLATFORMS[platform_index]
     assert platform.encode(sport) == platform.encode(sport)
 
 
-@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=5))
+@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=6))
 def test_decode_of_encode_is_a_standard_sport(sport: Sport, platform_index: int) -> None:
     """decode(encode(sport)) always returns a *standard* Sport.
 
@@ -68,7 +77,7 @@ def test_decode_of_encode_is_a_standard_sport(sport: Sport, platform_index: int)
     assert _decode(platform, target).is_standard
 
 
-@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=5))
+@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=6))
 def test_decode_is_deterministic(sport: Sport, platform_index: int) -> None:
     """decode is a pure function — same input, same output."""
     platform = ALL_PLATFORMS[platform_index]
@@ -76,7 +85,7 @@ def test_decode_is_deterministic(sport: Sport, platform_index: int) -> None:
     assert _decode(platform, target) == _decode(platform, target)
 
 
-@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=5))
+@given(sport=standard_sports(), platform_index=st.integers(min_value=0, max_value=6))
 def test_round_trip_is_idempotent(sport: Sport, platform_index: int) -> None:
     """decode(encode(decode(encode(sport)))) == decode(encode(sport)).
 

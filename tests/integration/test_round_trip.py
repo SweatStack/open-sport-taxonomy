@@ -7,7 +7,7 @@ against the runtime built from the same data.
 
 What lives here is a hand-curated set of *representative* cases per
 platform that exercise the encode and decode code paths once each.
-Six cases per platform × six platforms = 36 tests. If an algorithm
+Six cases per platform × seven platforms = 42 tests. If an algorithm
 change breaks any of these, the failure points at one code path, not
 292 data points.
 
@@ -37,6 +37,7 @@ from open_sport_taxonomy.platforms import (
     garmin_training_api,
     polar,
     strava,
+    suunto,
     wahoo,
 )
 
@@ -261,3 +262,37 @@ class TestPolarRoundTrip:
 
     def test_unmapped_decode_falls_to_fallback(self):
         assert polar.decode("NOT_A_REAL_SPORT") == Sport("generic")
+
+
+# --------------------------------------------------------------------------
+# Suunto — flat int targets (activity ID, with gaps), no target_coarsening.
+# --------------------------------------------------------------------------
+
+
+class TestSuuntoRoundTrip:
+    def test_preferred_round_trip(self):
+        sport = Sport("cycling.gravel")
+        assert suunto.encode(sport) == 99
+        assert suunto.decode(99) == sport
+
+    def test_synonym_decode_to_canonical(self):
+        # Nordic walking (24) and the "Sports" duplicates decode to canonical
+        # sports; Walking (0) is the preferred target for walking.
+        assert suunto.decode(24) == Sport("walking")
+        assert suunto.decode(103) == Sport("running.track")  # synonym of Track and field (59)
+
+    def test_null_sport_decodes_to_fallback(self):
+        # Telemarkskiing (84) is sport: null — OST has no alpine code.
+        assert suunto.decode(84) == Sport("generic")
+
+    def test_parent_walk_encode(self):
+        # cycling.road has no Suunto activity; walks up to cycling -> 2.
+        assert suunto.encode(Sport("cycling.road")) == 2
+
+    def test_modifier_drop_encode(self):
+        # cycling.mountain+commute has no entry; drops +commute -> Mountain biking (10).
+        assert suunto.encode(Sport("cycling.mountain+commute")) == 10
+
+    def test_unmapped_decode_falls_to_fallback(self):
+        # An activity ID not in the bundled targets.yaml -> fallback.decode.
+        assert suunto.decode(99999) == Sport("generic")
