@@ -158,6 +158,18 @@
         background: transparent;
       }
 
+      .pill {
+        display: inline-block;
+        margin-left: 0.45rem;
+        padding: 0.02rem 0.4rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background: #c0392b;
+        border-radius: 0.7rem;
+      }
+
       footer {
         padding-bottom: 3rem;
         color: var(--muted);
@@ -296,6 +308,14 @@
           if (encoded.via === null) {
             tdTarget.classList.add("muted");
             tdTarget.title = `${platformById(targetId).label} has no equivalent — falls back.`;
+          }
+          // Same platform in and out: flag values that don't survive the OST round trip.
+          if (sourceId === targetId && encoded.target !== key) {
+            const pill = document.createElement("span");
+            pill.className = "pill";
+            pill.textContent = "lossy";
+            pill.title = "This sport does not round-trip through OpenSportTaxonomy.";
+            tdTarget.append(pill);
           }
 
           tr.append(tdSource, tdOst, tdTarget);
