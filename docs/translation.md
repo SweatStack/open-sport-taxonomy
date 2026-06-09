@@ -223,3 +223,42 @@ These properties are enforced by validation rules 10–12 at load time.
 - Sport string canonicalization (sorting modifiers) happens at parse time. Index keys are built from canonical forms.
 - `apply(rule, target)` is a small dispatch table on rule kind. Only `reset` exists in v3; adding a kind requires a `format_version` bump.
 - `entries_by_target` is keyed by the target value's canonical form; for FIT this is the tuple `(sport_id, sub_sport_id)`. The YAML's `{ sport: 2, sub_sport: 6 }` deserializes to that tuple.
+
+## Future extension (not implemented): `encode_for` — asymmetric granularity
+
+**Status: documented, not implemented.** Recorded here so the design is settled before it is needed. Adopting it requires a `format_version` bump. The trigger to implement is a *second* real instance — today there is exactly one (below).
+
+### The problem it solves
+
+format v3 ties a target's **decode meaning** and its **encode preference** to a single `sport` field on one row. That coupling is fine until a platform's *only* target for a family is named more specifically than the family it must serve — then the two directions pull apart.
+
+Motivating case — **Garmin Training API**. Its sole swimming target is `LAP_SWIMMING`; there is no generic `SWIMMING` target. The faithful behavior is:
+
+- `decode(LAP_SWIMMING) = swimming.pool` — lap swimming *is* pool swimming (the precise truth), **and**
+- `encode(swimming) = LAP_SWIMMING` — a generic swim plan must still push as a swim (the only swim bucket exists), not fall through to `fallback.encode = GENERIC`.
+
+In v3 one row cannot express both. `sport: swimming` gives correct encode but coarse decode; `sport: swimming.pool` gives precise decode but sends generic and open-water swims to `GENERIC`. You cannot add a separate `SWIMMING` row, because the platform has no such target. So the file must choose one direction to favor (it currently favors encode: `LAP_SWIMMING → swimming`).
+
+### The field
+
+A row keeps `sport` as its **true decode meaning** and optionally lists the ancestor sports it is also the encode target for:
+
+```yaml
+- target: LAP_SWIMMING
+  sport: swimming.pool        # decode(LAP_SWIMMING) = swimming.pool  (the truth)
+  encode_for: [swimming]      # encode(swimming) = LAP_SWIMMING; descendants reach it via the walk
+```
+
+Semantics:
+
+- **Decode** is unchanged: `decode(target) = sport`.
+- **Encode**: `preferred_index` is populated from both `preferred: true` (key = the row's own `sport`) and every code in `encode_for` (key = that ancestor sport). `encode(swimming.pool)` still resolves to this row via its own `preferred`; `encode(swimming)` resolves via `encode_for`; `encode(swimming.open_water)` walks up to `swimming` and resolves via `encode_for`.
+- **Constraint** (keeps it principled): every code in `encode_for` must be a **strict ancestor** of `sport`. You may declare a precise target as the encode home for a *broader* sport — never for an unrelated or finer one. The "one encode target per sport" rule (validation rule 8) still holds across both mechanisms.
+
+### Effect on round-trip
+
+The strict `decode(encode(s)) == s` (validation rule 10) relaxes for sports encoded via `encode_for`: `encode(swimming) = LAP_SWIMMING`, then `decode(LAP_SWIMMING) = swimming.pool`, so `decode(encode(s))` is a **sub-sport** of `s` — encoding a vague sport and reading it back *sharpens* it to the platform's actual granularity. This is the dual of the existing **coarsening** (encoding a fine sport with no exact target and reading it back yields an *ancestor*). The generalized invariant: a round trip moves only **along the hierarchy** (up or down), never sideways — `decode(encode(s))` is always comparable to `s` in the sub-sport order.
+
+### Why not now
+
+Across the seven bundled mappings, `LAP_SWIMMING` is the **only** row that wants this. A format field + validator + generator change + a relaxed round-trip rule + spec, all for one row, is over-engineering — and Garmin Training API is a push (encode-first) API, so decode precision there is low value. `LAP_SWIMMING → swimming` is correct for the direction that matters. Adopt `encode_for` when a second instance appears; `LAP_SWIMMING` becomes its first user that day. The change is purely additive — existing rows are unaffected.
