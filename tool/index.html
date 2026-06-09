@@ -77,7 +77,8 @@
         color: var(--muted);
       }
 
-      select {
+      select,
+      input[type="search"] {
         font: inherit;
         padding: 0.4rem 0.5rem;
         min-width: 15rem;
@@ -170,6 +171,18 @@
         border-radius: 0.7rem;
       }
 
+      mark {
+        background: #fff2a8;
+        color: inherit;
+        padding: 0 0.05rem;
+        border-radius: 0.15rem;
+      }
+
+      .empty {
+        color: var(--muted);
+        font-style: italic;
+      }
+
       footer {
         padding-bottom: 3rem;
         color: var(--muted);
@@ -201,6 +214,10 @@
         <p class="field">
           <label for="target">Target platform</label>
           <select id="target"></select>
+        </p>
+        <p class="field">
+          <label for="search">Filter</label>
+          <input type="search" id="search" placeholder="Filter sports…" autocomplete="off" />
         </p>
       </form>
     </header>
@@ -252,77 +269,149 @@
         caption: document.getElementById("caption"),
         headSource: document.getElementById("head-source"),
         headTarget: document.getElementById("head-target"),
+        search: document.getElementById("search"),
+        controls: document.getElementById("controls"),
       };
 
       const platformById = (id) => PLATFORMS.find((p) => p.id === id);
 
-      /** Append a `<code>value</code> name` pair to a cell. */
-      function nativeCell(td, value, name) {
-        const code = document.createElement("code");
-        code.textContent = value;
-        td.append(code);
-        if (name && name !== value) {
-          const span = document.createElement("span");
-          span.className = "name";
-          span.textContent = " " + name;
-          td.append(span);
-        }
-      }
+      // Fields searched and highlighted by the filter, in column order.
+      const SEARCH_FIELDS = ["sourceValue", "sourceName", "ost", "targetValue", "targetName"];
 
-      function render() {
-        const sourceId = els.source.value;
-        const targetId = els.target.value;
+      // The current source→target rows, rebuilt once per platform change.
+      let model = [];
+
+      /**
+       * Build the row model for a source→target pair: one descriptor per source
+       * sport, carrying everything render and search need. No DOM.
+       */
+      function buildModel(sourceId, targetId) {
         const source = indices.get(sourceId);
         const target = indices.get(targetId);
-        if (!source || !target) return;
+        const samePlatform = sourceId === targetId;
 
-        els.headSource.textContent = `${platformById(sourceId).label} · ${platformById(sourceId).target}`;
-        els.headTarget.textContent = `${platformById(targetId).label} · ${platformById(targetId).target}`;
-        els.caption.textContent =
-          `${source.order.length} ${platformById(sourceId).label} sports, ` +
-          `decoded to OpenSportTaxonomy and re-encoded for ${platformById(targetId).label}.`;
-
-        const body = document.createDocumentFragment();
-        for (const key of source.order) {
+        return source.order.map((key) => {
           const entry = source.byKey.get(key);
           const ost = entry.sport ?? source.fallbackDecode;
           const encoded = encode(target, ost);
           const targetEntry = target.byKey.get(encoded.target);
 
-          const tr = document.createElement("tr");
+          const row = {
+            sourceValue: entry.target.value,
+            sourceName: entry.name,
+            ost,
+            noEquivalent: entry.sport === null,
+            targetValue: targetEntry ? targetEntry.target.value : encoded.target,
+            targetName: targetEntry ? targetEntry.name : "",
+            fallback: encoded.via === null,
+            lossy: samePlatform && encoded.target !== key,
+          };
+          row.haystack = SEARCH_FIELDS.map((field) => row[field]).join("\n").toLowerCase();
+          return row;
+        });
+      }
 
-          const tdSource = document.createElement("td");
-          nativeCell(tdSource, entry.target.value, entry.name);
+      /** Append `text` to `parent`, wrapping each case-insensitive match of `query` in <mark>. */
+      function appendHighlighted(parent, text, query) {
+        if (!query) {
+          parent.append(text);
+          return;
+        }
+        const haystack = text.toLowerCase();
+        let from = 0;
+        for (let at = haystack.indexOf(query, from); at !== -1; at = haystack.indexOf(query, from)) {
+          if (at > from) parent.append(text.slice(from, at));
+          const mark = document.createElement("mark");
+          mark.textContent = text.slice(at, at + query.length);
+          parent.append(mark);
+          from = at + query.length;
+        }
+        parent.append(text.slice(from));
+      }
 
-          const tdOst = document.createElement("td");
-          const ostCode = document.createElement("code");
-          ostCode.textContent = ost;
-          tdOst.append(ostCode);
-          if (entry.sport === null) {
-            tdOst.classList.add("muted");
-            tdOst.title = "No OpenSportTaxonomy equivalent — falls back to generic.";
-          }
+      /** Append a `<code>value</code> name` pair to a cell, highlighting `query`. */
+      function nativeCell(td, value, name, query) {
+        const code = document.createElement("code");
+        appendHighlighted(code, value, query);
+        td.append(code);
+        if (name && name !== value) {
+          const span = document.createElement("span");
+          span.className = "name";
+          appendHighlighted(span, " " + name, query);
+          td.append(span);
+        }
+      }
 
-          const tdTarget = document.createElement("td");
-          nativeCell(tdTarget, targetEntry ? targetEntry.target.value : encoded.target, targetEntry ? targetEntry.name : "");
-          if (encoded.via === null) {
-            tdTarget.classList.add("muted");
-            tdTarget.title = `${platformById(targetId).label} has no equivalent — falls back.`;
-          }
-          // Same platform in and out: flag values that don't survive the OST round trip.
-          if (sourceId === targetId && encoded.target !== key) {
-            const pill = document.createElement("span");
-            pill.className = "pill";
-            pill.textContent = "lossy";
-            pill.title = "This sport does not round-trip through OpenSportTaxonomy.";
-            tdTarget.append(pill);
-          }
+      /** Render one model row as a <tr>, highlighting `query`. */
+      function renderRow(row, query) {
+        const tr = document.createElement("tr");
 
-          tr.append(tdSource, tdOst, tdTarget);
-          body.append(tr);
+        const tdSource = document.createElement("td");
+        nativeCell(tdSource, row.sourceValue, row.sourceName, query);
+
+        const tdOst = document.createElement("td");
+        const ostCode = document.createElement("code");
+        appendHighlighted(ostCode, row.ost, query);
+        tdOst.append(ostCode);
+        if (row.noEquivalent) {
+          tdOst.classList.add("muted");
+          tdOst.title = "No OpenSportTaxonomy equivalent — falls back to generic.";
         }
 
+        const tdTarget = document.createElement("td");
+        nativeCell(tdTarget, row.targetValue, row.targetName, query);
+        if (row.fallback) {
+          tdTarget.classList.add("muted");
+          tdTarget.title = "The target platform has no equivalent — falls back.";
+        }
+        if (row.lossy) {
+          const pill = document.createElement("span");
+          pill.className = "pill";
+          pill.textContent = "lossy";
+          pill.title = "This sport does not round-trip through OpenSportTaxonomy.";
+          tdTarget.append(pill);
+        }
+
+        tr.append(tdSource, tdOst, tdTarget);
+        return tr;
+      }
+
+      /** Filter the model by `rawQuery` and paint the table body, highlighting matches. */
+      function paint(rawQuery) {
+        const query = rawQuery.trim().toLowerCase();
+        const body = document.createDocumentFragment();
+        let shown = 0;
+        for (const row of model) {
+          if (query && !row.haystack.includes(query)) continue;
+          body.append(renderRow(row, query));
+          shown += 1;
+        }
+        if (shown === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 3;
+          td.className = "empty";
+          td.textContent = `No sports match “${rawQuery.trim()}”.`;
+          tr.append(td);
+          body.append(tr);
+        }
         els.rows.replaceChildren(body);
+      }
+
+      /** React to a source/target change: update headings, rebuild the model, repaint. */
+      function select() {
+        const sourceId = els.source.value;
+        const targetId = els.target.value;
+        if (!indices.has(sourceId) || !indices.has(targetId)) return;
+
+        els.headSource.textContent = `${platformById(sourceId).label} · ${platformById(sourceId).target}`;
+        els.headTarget.textContent = `${platformById(targetId).label} · ${platformById(targetId).target}`;
+        els.caption.textContent =
+          `${indices.get(sourceId).order.length} ${platformById(sourceId).label} sports, ` +
+          `decoded to OpenSportTaxonomy and re-encoded for ${platformById(targetId).label}.`;
+
+        model = buildModel(sourceId, targetId);
+        paint(els.search.value);
       }
 
       function populateSelect(select, selectedId) {
@@ -352,11 +441,13 @@
 
         populateSelect(els.source, "strava");
         populateSelect(els.target, "garmin_fit");
-        els.source.addEventListener("change", render);
-        els.target.addEventListener("change", render);
+        els.source.addEventListener("change", select);
+        els.target.addEventListener("change", select);
+        els.search.addEventListener("input", () => paint(els.search.value));
+        els.controls.addEventListener("submit", (event) => event.preventDefault());
 
         els.status.textContent = "";
-        render();
+        select();
       }
 
       main();
