@@ -98,6 +98,8 @@ Find the relevant row by its target. Change `sport: null` to the OST sport strin
 - **Virtual indoor-trainer activities** (Zwift-style `Virtual*`, `*_INDOOR_VIRTUAL`) are *both* stationary and virtual → `cycling+stationary+virtual` (likewise `running+stationary+virtual`, `rowing+stationary+virtual`).
 - **A base e-bike or virtual ride takes no `.road`** (or any discipline) unless the platform names one: `EBikeRide → cycling+assisted`, but `EMountainBikeRide → cycling.mountain+assisted`.
 
+**Hierarchical targets (e.g. Garmin FIT).** When a platform has a sport/sub-sport hierarchy, a sub-sport under a parent that maps to a real OST modality must decode to that modality (or finer) — never `null`. A recumbent or BMX ride is still `cycling`; `walking/casual_walking` is still `walking`. `target_coarsening` only rescues *future-SDK* sub-sports that are absent from the file; it does **not** override an explicit `null` row, so annotate every known sub-sport down to its parent.
+
 ### Bumping a platform version
 
 When the upstream SDK adds new values:

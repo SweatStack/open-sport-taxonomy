@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.8.4] - 2026-06-09
+
+### Fixed
+
+- **Garmin FIT: sub-sports of mapped sports no longer decode to `generic`.** Eleven rows that were left `sport: null` now decode to the right OST modality: `cycling/recumbent`, `cycling/bmx`, `cycling/mixed_surface` → `cycling`; `cycling/downhill` → `cycling.mountain`; `walking/casual_walking`, `walking/speed_walking` → `walking`; `running/indoor_running` → `running`; `cycling/commuting` → `cycling+commute`; `cycling/e_bike_mountain` → `cycling.mountain+assisted`; and the previously-unmapped `e_biking` sport (`e_biking/generic`, `e_biking/e_bike_fitness`) → `cycling+assisted`. Consequently `cycling+assisted` now encodes to FIT `e_biking (21, 0)` instead of plain `cycling` (which dropped the assist), and `cycling+commute` / `cycling.mountain+assisted` gain FIT encode targets.
+
 ## [0.8.3] - 2026-06-09
 
 ### Changed

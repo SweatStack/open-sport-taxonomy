@@ -69,8 +69,8 @@ class TestOSTHierarchyWalk:
 
 class TestModifierFallback:
     def test_unknown_modifier_combo_drops_modifier(self):
-        # cycling+commute has no preferred row; drop modifier → cycling.
-        assert garmin_fit.encode(Sport("cycling+commute")) == GarminFitCode(2, 0)
+        # cycling+leisure has no FIT target; drop the modifier → cycling.
+        assert garmin_fit.encode(Sport("cycling+leisure")) == GarminFitCode(2, 0)
 
 
 class TestEncodeFallback:

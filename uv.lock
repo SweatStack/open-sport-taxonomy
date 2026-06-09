@@ -417,7 +417,7 @@ wheels = [
 
 [[package]]
 name = "open-sport-taxonomy"
-version = "0.8.3"
+version = "0.8.4"
 source = { editable = "." }
 
 [package.optional-dependencies]

@@ -42,7 +42,7 @@ entries:
     preferred: true
 
   - target: { sport:   1, sub_sport:  45 }  # running / indoor_running
-    sport: null
+    sport: running
 
   - target: { sport:   2, sub_sport:   0 }  # cycling / generic
     sport: cycling
@@ -64,10 +64,10 @@ entries:
     preferred: true
 
   - target: { sport:   2, sub_sport:   9 }  # cycling / downhill
-    sport: null
+    sport: cycling.mountain
 
   - target: { sport:   2, sub_sport:  10 }  # cycling / recumbent
-    sport: null
+    sport: cycling
 
   - target: { sport:   2, sub_sport:  11 }  # cycling / cyclocross
     sport: cycling.cyclocross
@@ -82,20 +82,22 @@ entries:
     preferred: true
 
   - target: { sport:   2, sub_sport:  29 }  # cycling / bmx
-    sport: null
+    sport: cycling
 
   - target: { sport:   2, sub_sport:  46 }  # cycling / gravel_cycling
     sport: cycling.gravel
     preferred: true
 
   - target: { sport:   2, sub_sport:  47 }  # cycling / e_bike_mountain
-    sport: null
+    sport: cycling.mountain+assisted
+    preferred: true
 
   - target: { sport:   2, sub_sport:  48 }  # cycling / commuting
-    sport: null
+    sport: cycling+commute
+    preferred: true
 
   - target: { sport:   2, sub_sport:  49 }  # cycling / mixed_surface
-    sport: null
+    sport: cycling
 
   - target: { sport:   3, sub_sport:   0 }  # transition / generic
     sport: null
@@ -194,10 +196,10 @@ entries:
     preferred: true
 
   - target: { sport:  11, sub_sport:  30 }  # walking / casual_walking
-    sport: null
+    sport: walking
 
   - target: { sport:  11, sub_sport:  31 }  # walking / speed_walking
-    sport: null
+    sport: walking
 
   - target: { sport:  12, sub_sport:   0 }  # cross_country_skiing / generic
     sport: xc_skiing
@@ -284,10 +286,11 @@ entries:
     sport: null
 
   - target: { sport:  21, sub_sport:   0 }  # e_biking / generic
-    sport: null
+    sport: cycling+assisted
+    preferred: true
 
   - target: { sport:  21, sub_sport:  28 }  # e_biking / e_bike_fitness
-    sport: null
+    sport: cycling+assisted
 
   - target: { sport:  22, sub_sport:   0 }  # motorcycling / generic
     sport: null

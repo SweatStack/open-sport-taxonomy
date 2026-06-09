@@ -75,9 +75,9 @@ class TestGarminFitRoundTrip:
         assert garmin_fit.encode(Sport("cycling.gravel+race")) == GarminFitCode(2, 46)
 
     def test_modifier_drop_encode(self):
-        # Case 5: cycling+commute has no preferred entry; drops +commute,
+        # Case 5: cycling+leisure has no FIT target; drops +leisure,
         # then encodes plain cycling.
-        assert garmin_fit.encode(Sport("cycling+commute")) == GarminFitCode(2, 0)
+        assert garmin_fit.encode(Sport("cycling+leisure")) == GarminFitCode(2, 0)
 
     def test_coarsening_decode_unknown_sub_sport(self):
         # Case 6: (2, 99) is not in entries (would need a newer FIT SDK);
