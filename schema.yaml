@@ -1,8 +1,11 @@
 # OpenSportTaxonomy — https://github.com/sweatstack/open-sport-taxonomy
 
-version: "0.8.1"
+version: "0.8.2"
 
 sports:
+
+  - code: alpine_skiing
+    label: alpine skiing
 
   - code: cycling
     label: cycling
@@ -28,6 +31,9 @@ sports:
   - code: generic
     label: generic
 
+  - code: hand_cycling
+    label: hand cycling
+
   - code: rowing
     label: rowing
 
@@ -42,6 +48,9 @@ sports:
 
   - code: running.trail
     label: trail running
+
+  - code: snowboarding
+    label: snowboarding
 
   - code: swimming
     label: swimming

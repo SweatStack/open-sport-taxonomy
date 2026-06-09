@@ -63,7 +63,7 @@ def test_garmin_fit_decode_under_threshold(benchmark) -> None:
 
 
 def test_strava_encode_under_threshold(benchmark) -> None:
-    sport = Sport("cycling.road+virtual")
+    sport = Sport("cycling+stationary+virtual")
     result = benchmark(strava.encode, sport)
     assert benchmark.stats.stats.mean < THRESHOLD_S
     assert result == "VirtualRide"
@@ -72,7 +72,7 @@ def test_strava_encode_under_threshold(benchmark) -> None:
 def test_strava_decode_under_threshold(benchmark) -> None:
     result = benchmark(strava.decode, "VirtualRide")
     assert benchmark.stats.stats.mean < THRESHOLD_S
-    assert result == Sport("cycling.road+virtual")
+    assert result == Sport("cycling+stationary+virtual")
 
 
 # --------------------------------------------------------------------------

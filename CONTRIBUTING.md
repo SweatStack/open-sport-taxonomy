@@ -92,7 +92,11 @@ Find the relevant row by its target. Change `sport: null` to the OST sport strin
 
 **`null` vs `generic`** (see [`docs/taxonomy.md`](docs/taxonomy.md)): a target that names a **specific** activity OST doesn't model (yoga, elliptical, alpine skiing) is `null`; only the platform's own **catch-all** bucket ("Other"/"Workout"/"Unknown"/"Sports") is `generic`. Don't route a named fitness/cardio activity to `generic` just because it's a vague workout.
 
-**Auditing tip.** Many platforms encode OST modifiers as distinct platform types (FIT's `indoor_*` sub_sports, Strava's `Virtual*` types, Garmin Training API's `INDOOR_*` / `VIRTUAL_*` activities). When working through a platform's targets, search for prefixes like `indoor_`, `virtual_`, `e_`, `treadmill` — these almost always belong as OST sport-with-modifier entries (e.g. `cycling+stationary`, `cycling.road+virtual`), not as new OST sport codes.
+**Auditing tip.** Many platforms encode OST modifiers as distinct platform types (FIT's `indoor_*` sub_sports, Strava's `Virtual*` types, Garmin Training API's `INDOOR_*` / `VIRTUAL_*` activities). When working through a platform's targets, search for prefixes like `indoor_`, `virtual_`, `e_`, `treadmill` — these almost always belong as OST sport-with-modifier entries (e.g. `cycling+stationary`, `running+stationary+virtual`), not as new OST sport codes.
+
+**Modifier conventions.** Apply modifiers for the circumstance the target *actually* denotes, and don't invent a discipline:
+- **Virtual indoor-trainer activities** (Zwift-style `Virtual*`, `*_INDOOR_VIRTUAL`) are *both* stationary and virtual → `cycling+stationary+virtual` (likewise `running+stationary+virtual`, `rowing+stationary+virtual`).
+- **A base e-bike or virtual ride takes no `.road`** (or any discipline) unless the platform names one: `EBikeRide → cycling+assisted`, but `EMountainBikeRide → cycling.mountain+assisted`.
 
 ### Bumping a platform version
 

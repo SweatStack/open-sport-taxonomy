@@ -201,7 +201,8 @@ entries:
     preferred: true
 
   - target:   61  # downhillSkiing
-    sport: null
+    sport: alpine_skiing
+    preferred: true
 
   - target:   62  # flexibility
     sport: null
@@ -219,7 +220,8 @@ entries:
     sport: null
 
   - target:   67  # snowboarding
-    sport: null
+    sport: snowboarding
+    preferred: true
 
   - target:   68  # stairs
     sport: null
@@ -240,7 +242,8 @@ entries:
     sport: null
 
   - target:   74  # handCycling
-    sport: null
+    sport: hand_cycling
+    preferred: true
 
   - target:   75  # discSports
     sport: null

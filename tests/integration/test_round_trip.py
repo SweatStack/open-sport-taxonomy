@@ -92,7 +92,7 @@ class TestGarminFitRoundTrip:
 
 class TestStravaRoundTrip:
     def test_preferred_round_trip(self):
-        sport = Sport("cycling.road+virtual")
+        sport = Sport("cycling+stationary+virtual")
         assert strava.encode(sport) == "VirtualRide"
         assert strava.decode("VirtualRide") == sport
 
@@ -106,9 +106,9 @@ class TestStravaRoundTrip:
         assert strava.decode("GravelRide") == Sport("cycling.gravel")
 
     def test_null_sport_decodes_to_fallback(self):
-        # Many Strava sport types (e.g. AlpineSki, Yoga) have no OST
+        # Many Strava sport types (e.g. Golf, Yoga, Sail) have no OST
         # equivalent today and decode to the fallback.
-        assert strava.decode("AlpineSki") == Sport("generic")
+        assert strava.decode("Golf") == Sport("generic")
 
     def test_parent_walk_encode(self):
         # cycling.cyclocross has no Strava entry; walks up to cycling -> Ride.
@@ -217,8 +217,8 @@ class TestWahooRoundTrip:
         assert wahoo.decode(61) == canonical
 
     def test_null_sport_decodes_to_fallback(self):
-        # SKIING (28) is sport: null — OST has no alpine skiing code.
-        assert wahoo.decode(28) == Sport("generic")
+        # YOGA (66) is sport: null — OST does not model yoga.
+        assert wahoo.decode(66) == Sport("generic")
 
     def test_parent_walk_encode(self):
         # cycling.gravel has no Wahoo type; walks up the OST tree to cycling -> 0.
@@ -282,8 +282,8 @@ class TestSuuntoRoundTrip:
         assert suunto.decode(103) == Sport("running.track")  # synonym of Track and field (59)
 
     def test_null_sport_decodes_to_fallback(self):
-        # Telemarkskiing (84) is sport: null — OST has no alpine code.
-        assert suunto.decode(84) == Sport("generic")
+        # Soccer (33) is sport: null — OST does not model ball sports.
+        assert suunto.decode(33) == Sport("generic")
 
     def test_parent_walk_encode(self):
         # cycling.road has no Suunto activity; walks up to cycling -> 2.

@@ -60,7 +60,8 @@ entries:
     sport: null
 
   - target:   13  # Downhill skiing
-    sport: null
+    sport: alpine_skiing
+    preferred: true
 
   - target:   14  # Paddling
     sport: null
@@ -114,7 +115,8 @@ entries:
     sport: null
 
   - target:   30  # Snowboarding
-    sport: null
+    sport: snowboarding
+    preferred: true
 
   - target:   31  # Ski touring
     sport: null
@@ -281,7 +283,7 @@ entries:
     sport: null
 
   - target:   84  # Telemarkskiing
-    sport: null
+    sport: alpine_skiing
 
   - target:   85  # Openwater swimming
     sport: swimming.open_water
@@ -357,10 +359,11 @@ entries:
     sport: null
 
   - target:  109  # Hand cycling
-    sport: null
+    sport: hand_cycling
+    preferred: true
 
   - target:  110  # Splitboarding
-    sport: null
+    sport: snowboarding
 
   - target:  111  # Biathlon
     sport: null

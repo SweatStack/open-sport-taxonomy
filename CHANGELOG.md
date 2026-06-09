@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.8.2] - 2026-06-09
+
+### Added
+
+- **New modality codes `alpine_skiing`, `snowboarding`, `hand_cycling`.** Per [`docs/taxonomy.md`](docs/taxonomy.md), each is a distinct movement pattern — not a discipline or modifier of an existing sport (alpine skiing ≠ `xc_skiing`; hand cycling is arm-powered, not `cycling`). All six platforms that distinguish them now decode to the real modality instead of `generic`: e.g. `AlpineSki`, `downhillSkiing`, `SKIING_DOWNHILL`, `Downhill skiing`; `Snowboard`/`SNOWBOARDING`/`Splitboarding`; `Handcycle`/`handCycling`/`HANDCYCLING`/`hand_cycling`.
+
+### Changed
+
+- **Cycling/running/rowing modifier conventions (Strava).** A base e-bike/virtual ride no longer asserts a `.road` discipline: `EBikeRide → cycling+assisted` (was `cycling.road+assisted`). Virtual indoor-trainer activities now carry `+stationary`: `VirtualRide → cycling+stationary+virtual`, `VirtualRun → running+stationary+virtual`, `VirtualRow → rowing+stationary+virtual`. This aligns Strava with Wahoo's `*_INDOOR_VIRTUAL` mappings; the convention is recorded in `CONTRIBUTING.md`.
+
 ## [0.8.1] - 2026-06-09
 
 ### Fixed

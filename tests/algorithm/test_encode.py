@@ -81,10 +81,12 @@ class TestEncodeFallback:
 
 
 class TestStravaModifierWins:
-    def test_road_virtual_uses_virtual_ride(self):
-        # cycling.road+virtual is a preferred Strava entry — exact match.
-        # Smoke test that the algorithm works against a non-FIT platform.
-        assert strava.encode(Sport("cycling.road+virtual")) == "VirtualRide"
+    def test_assisted_dominates_discipline(self):
+        # +assisted (modifier) dominates .gravel (discipline) in the walk:
+        # (cycling.gravel, {assisted}) misses, then (cycling, {assisted}) hits
+        # EBikeRide — rather than dropping +assisted to reach GravelRide.
+        # Smoke test that modifier-dominance holds against a non-FIT platform.
+        assert strava.encode(Sport("cycling.gravel+assisted")) == "EBikeRide"
 
 
 class TestTypeContract:

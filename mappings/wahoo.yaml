@@ -107,13 +107,15 @@ entries:
     preferred: true
 
   - target:   27  # SNOWBOARDING (SNOW_SPORTS/OUTDOOR)
-    sport: null
+    sport: snowboarding
+    preferred: true
 
   - target:   28  # SKIING (SNOW_SPORTS/OUTDOOR)
-    sport: null
+    sport: alpine_skiing
 
   - target:   29  # SKIING_DOWNHILL (SNOW_SPORTS/OUTDOOR)
-    sport: null
+    sport: alpine_skiing
+    preferred: true
 
   - target:   30  # SKIINGCROSS_COUNTRY (SNOW_SPORTS/OUTDOOR)
     sport: xc_skiing
@@ -210,7 +212,8 @@ entries:
     sport: null
 
   - target:   70  # HANDCYCLING (BIKING/OUTDOOR)
-    sport: null
+    sport: hand_cycling
+    preferred: true
 
   - target:   71  # RUNNING_INDOOR_VIRTUAL (RUNNING/INDOOR)
     sport: running+stationary+virtual

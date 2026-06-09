@@ -11,6 +11,7 @@ from open_sport_taxonomy._modifier import Modifier, validate_modifiers
 
 # Taxonomy data — generated from schema.yaml.
 _LABELS: dict[str, str] = {
+    "alpine_skiing": "alpine skiing",
     "cycling": "cycling",
     "cycling.cyclocross": "cyclocross",
     "cycling.gravel": "gravel cycling",
@@ -19,11 +20,13 @@ _LABELS: dict[str, str] = {
     "cycling.time_trial": "time trial cycling",
     "cycling.track": "track cycling",
     "generic": "generic",
+    "hand_cycling": "hand cycling",
     "rowing": "rowing",
     "running": "running",
     "running.road": "road running",
     "running.track": "track running",
     "running.trail": "trail running",
+    "snowboarding": "snowboarding",
     "swimming": "swimming",
     "swimming.open_water": "open water swimming",
     "swimming.pool": "pool swimming",
@@ -36,6 +39,7 @@ _LABELS: dict[str, str] = {
 }
 
 _PARENTS: dict[str, str | None] = {
+    "alpine_skiing": None,
     "cycling": None,
     "cycling.cyclocross": 'cycling',
     "cycling.gravel": 'cycling',
@@ -44,11 +48,13 @@ _PARENTS: dict[str, str | None] = {
     "cycling.time_trial": 'cycling',
     "cycling.track": 'cycling',
     "generic": None,
+    "hand_cycling": None,
     "rowing": None,
     "running": None,
     "running.road": 'running',
     "running.track": 'running',
     "running.trail": 'running',
+    "snowboarding": None,
     "swimming": None,
     "swimming.open_water": 'swimming',
     "swimming.pool": 'swimming',
@@ -61,6 +67,7 @@ _PARENTS: dict[str, str | None] = {
 }
 
 _CHILDREN: dict[str, tuple[str, ...]] = {
+    "alpine_skiing": (),
     "cycling": ("cycling.cyclocross", "cycling.gravel", "cycling.mountain", "cycling.road", "cycling.time_trial", "cycling.track",),
     "cycling.cyclocross": (),
     "cycling.gravel": (),
@@ -69,11 +76,13 @@ _CHILDREN: dict[str, tuple[str, ...]] = {
     "cycling.time_trial": (),
     "cycling.track": (),
     "generic": (),
+    "hand_cycling": (),
     "rowing": (),
     "running": ("running.road", "running.track", "running.trail",),
     "running.road": (),
     "running.track": (),
     "running.trail": (),
+    "snowboarding": (),
     "swimming": ("swimming.open_water", "swimming.pool",),
     "swimming.open_water": (),
     "swimming.pool": (),
@@ -271,6 +280,7 @@ class Sport:
 
 
 # Class constants.
+Sport.ALPINE_SKIING = Sport("alpine_skiing")  # type: ignore[attr-defined]
 Sport.CYCLING = Sport("cycling")  # type: ignore[attr-defined]
 Sport.CYCLING_CYCLOCROSS = Sport("cycling.cyclocross")  # type: ignore[attr-defined]
 Sport.CYCLING_GRAVEL = Sport("cycling.gravel")  # type: ignore[attr-defined]
@@ -279,11 +289,13 @@ Sport.CYCLING_ROAD = Sport("cycling.road")  # type: ignore[attr-defined]
 Sport.CYCLING_TIME_TRIAL = Sport("cycling.time_trial")  # type: ignore[attr-defined]
 Sport.CYCLING_TRACK = Sport("cycling.track")  # type: ignore[attr-defined]
 Sport.GENERIC = Sport("generic")  # type: ignore[attr-defined]
+Sport.HAND_CYCLING = Sport("hand_cycling")  # type: ignore[attr-defined]
 Sport.ROWING = Sport("rowing")  # type: ignore[attr-defined]
 Sport.RUNNING = Sport("running")  # type: ignore[attr-defined]
 Sport.RUNNING_ROAD = Sport("running.road")  # type: ignore[attr-defined]
 Sport.RUNNING_TRACK = Sport("running.track")  # type: ignore[attr-defined]
 Sport.RUNNING_TRAIL = Sport("running.trail")  # type: ignore[attr-defined]
+Sport.SNOWBOARDING = Sport("snowboarding")  # type: ignore[attr-defined]
 Sport.SWIMMING = Sport("swimming")  # type: ignore[attr-defined]
 Sport.SWIMMING_OPEN_WATER = Sport("swimming.open_water")  # type: ignore[attr-defined]
 Sport.SWIMMING_POOL = Sport("swimming.pool")  # type: ignore[attr-defined]

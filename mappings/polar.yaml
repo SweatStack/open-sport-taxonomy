@@ -26,7 +26,7 @@ entries:
     sport: null
 
   - target: BACKCOUNTRY_SKIING  # Backcountry skiing
-    sport: null
+    sport: alpine_skiing
 
   - target: BADMINTON  # Badminton
     sport: null
@@ -97,7 +97,8 @@ entries:
     sport: null
 
   - target: DOWNHILL_SKIING  # Downhill skiing
-    sport: null
+    sport: alpine_skiing
+    preferred: true
 
   - target: DUATHLON  # Duathlon
     sport: null
@@ -345,7 +346,8 @@ entries:
     sport: null
 
   - target: PARASPORTS_HAND_CYCLING  # Handcycling
-    sport: null
+    sport: hand_cycling
+    preferred: true
 
   - target: PARASPORTS_SLED_HOCKEY  # Sled hockey
     sport: null
@@ -430,7 +432,8 @@ entries:
     sport: null
 
   - target: SNOWBOARDING  # Snowboarding
-    sport: null
+    sport: snowboarding
+    preferred: true
 
   - target: SNOWSHOE_TREKKING  # Snowshoe trekking
     sport: null
@@ -470,7 +473,7 @@ entries:
     sport: null
 
   - target: TELEMARK_SKIING  # Telemark skiing
-    sport: null
+    sport: alpine_skiing
 
   - target: TENNIS  # Tennis
     sport: null

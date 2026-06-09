@@ -126,19 +126,17 @@ The clearest cross-platform disagreements are around cycling modifiers, all cent
 | Virtual run | `running.road+virtual` (VirtualRun) | `running+stationary+virtual` | — |
 | Virtual row | `rowing+virtual` (VirtualRow) | — | indoor rowing → `rowing+stationary` |
 
-Two underlying questions to settle once, then apply everywhere:
+Two underlying questions — **both resolved in 0.8.2**, with the convention recorded in
+`CONTRIBUTING.md`:
 
-1. **Does Strava's base e-bike / virtual ride deserve `.road`?** Strava maps plain
-   `Ride → cycling` (bare) but `EBikeRide`/`VirtualRide` → `cycling.road+…`. The other
-   platforms use bare `cycling+modifier`. Recommend dropping the spurious `.road` so the
-   base maps to `cycling+assisted` / `cycling+virtual` (Strava's `.mountain`/`.gravel`
-   variants stay, as those are genuine disciplines).
-2. **Does `+virtual` imply `+stationary`?** Strava says no (`VirtualRide` =
-   `cycling.road+virtual`); Wahoo says yes (`cycling+stationary+virtual`). A Zwift ride
-   *is* on a trainer, so `+stationary+virtual` is arguably more correct — but this needs
-   a deliberate ruling, then Strava's `VirtualRide`/`VirtualRun`/`VirtualRow` and
-   Wahoo's `*_INDOOR_VIRTUAL` should agree. Same question affects `rowing+virtual` vs
-   `rowing+stationary`.
+1. **Base e-bike / virtual ride no `.road`.** ✅ Strava `EBikeRide → cycling+assisted`
+   (was `cycling.road+assisted`); a base e-bike/virtual ride asserts no discipline. The
+   `.mountain`/`.gravel` variants stay, as those are genuine disciplines the platform
+   names (`EMountainBikeRide → cycling.mountain+assisted`).
+2. **`+virtual` implies `+stationary`.** ✅ Strava `VirtualRide → cycling+stationary+virtual`,
+   `VirtualRun → running+stationary+virtual`, `VirtualRow → rowing+stationary+virtual` —
+   a Zwift-style session *is* on a trainer. Strava now agrees with Wahoo's
+   `*_INDOOR_VIRTUAL` mappings.
 
 ### 1.5 Minor / discretionary
 
@@ -287,20 +285,23 @@ is a "vague workout"; only the platform's own unspecified bucket ("Other"/"Worko
 2. ✅ **Wahoo named-fitness aligned** (§1.2) → `null` for `FE_ELLIPTICAL`, `FE_CLIMBER`,
    `CARDIO_CLASS`, `STAIR_CLIMBER`; `FE`/`FE_GENERAL`/`TICKR_OFFLINE` stay `generic`
    (0.8.1).
-3. ✅ **Hand cycling corrected** (§1.3) → the 3 `cycling` rows now `null` (0.8.1).
-   *Still open:* add a `hand_cycling` root so all five rows carry the real modality.
-4. **Add winter sports** `alpine_skiing` + `snowboarding` (Part 2) — the clearest
-   taxonomy gap; lets six platforms stop nulling them. (Separate roots, not a shared
-   `skiing` parent — §3.1.)
-5. **Settle the cycling-modifier conventions** (§1.4): Strava `.road` default and
-   whether `+virtual ⇒ +stationary`; then make Strava and Wahoo agree.
+3. ✅ **Hand cycling** (§1.3) — `cycling` rows fixed to `null` (0.8.1); **`hand_cycling`
+   root added** (0.8.2) and all six platform rows now decode to it.
+4. ✅ **Winter sports added** (0.8.2): `alpine_skiing` + `snowboarding` roots, wired into
+   all six platforms that distinguish them (separate roots, not a shared `skiing`
+   parent — §3.1). Touring/mountaineering variants stay `null`; Suunto `Backcountry
+   skiing` stays `xc_skiing` per the earlier explicit call (revisit if desired).
+5. ✅ **Cycling-modifier conventions settled** (§1.4, 0.8.2): no `.road` on base
+   e-bike/virtual; `+virtual` implies `+stationary`. Convention recorded in
+   `CONTRIBUTING.md`.
 6. ~~Fix `garmin_training_api` LAP_SWIMMING → `swimming.pool`~~ — **withdrawn on
-   re-assessment** (§1.3): it is correct as-is for a single-swim-type platform.
+   re-assessment** (§1.3): correct as-is for a single-swim-type platform; the clean
+   `encode_for` path is specified in `docs/translation.md`.
 7. Optional: a `generate.py` lint warning for non-catch-all targets → `generic` (§3.3),
    so the Wahoo class of issue can't recur silently.
 8. Consider a **paddling family** (kayaking/canoeing/SUP) and **skating** codes if
    broadening scope; design a **multisport/container** model separately (Group B).
 
-Items 0–3 are **done (0.8.1)**. Items 3 (new root), 4, 8 require schema additions
-(patch/minor bumps) and would update every platform's mapping plus regenerate; item 5 is
-a convention decision; item 7 is tooling. None require algorithm changes.
+Items 0–5 are **done** (0.8.1–0.8.2). Remaining: item 7 (tooling) and item 8 (further
+schema scope — to be run through `docs/taxonomy.md` per-candidate). None require
+algorithm changes.

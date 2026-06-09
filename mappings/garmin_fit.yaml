@@ -74,7 +74,8 @@ entries:
     preferred: true
 
   - target: { sport:   2, sub_sport:  12 }  # cycling / hand_cycling
-    sport: null
+    sport: hand_cycling
+    preferred: true
 
   - target: { sport:   2, sub_sport:  13 }  # cycling / track_cycling
     sport: cycling.track
@@ -207,22 +208,24 @@ entries:
     preferred: true
 
   - target: { sport:  13, sub_sport:   0 }  # alpine_skiing / generic
-    sport: null
+    sport: alpine_skiing
+    preferred: true
 
   - target: { sport:  13, sub_sport:  37 }  # alpine_skiing / backcountry
-    sport: null
+    sport: alpine_skiing
 
   - target: { sport:  13, sub_sport:  38 }  # alpine_skiing / resort
-    sport: null
+    sport: alpine_skiing
 
   - target: { sport:  14, sub_sport:   0 }  # snowboarding / generic
-    sport: null
+    sport: snowboarding
+    preferred: true
 
   - target: { sport:  14, sub_sport:  37 }  # snowboarding / backcountry
-    sport: null
+    sport: snowboarding
 
   - target: { sport:  14, sub_sport:  38 }  # snowboarding / resort
-    sport: null
+    sport: snowboarding
 
   - target: { sport:  15, sub_sport:   0 }  # rowing / generic
     sport: rowing
