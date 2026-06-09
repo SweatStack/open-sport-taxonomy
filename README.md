@@ -4,7 +4,7 @@ An open taxonomy for classifying sports and physical activities.
 
 Every platform has invented its own list of sports. Apple HealthKit calls it `Cycling`, Strava calls it `Ride`, Garmin calls it `ROAD_CYCLING`. None of them are hierarchical, none map to each other, and none are open standards.
 
-OpenSportTaxonomy provides a single canonical set of sport codes that any application can reference.
+OpenSportTaxonomy provides a single canonical set of sport codes that any application can reference. It classifies activities by **how the body moves** — see [`docs/taxonomy.md`](docs/taxonomy.md) for the purpose, terminology, and the rule for what counts as a distinct modality, discipline, or modifier.
 
 > [!WARNING]
 > This taxonomy is young and only covers a few sports at the moment.

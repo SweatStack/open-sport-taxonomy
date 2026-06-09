@@ -31,7 +31,7 @@ Open an issue or pull request with:
 - **Label** — English display name.
 - **Rationale** — why this is a distinct discipline, not a variant of an existing code.
 
-Apply the test: if you removed this level from the code, would an athlete still recognize the activity as the same sport? If yes, it probably belongs as a modifier, not a sport code. If no, it's a distinct discipline and belongs in the tree.
+**Read [`docs/taxonomy.md`](docs/taxonomy.md) first** — it is the canonical rule for whether something is a discipline, a modifier, or a separate modality. In short: OST groups by *movement pattern* (the muscular, kinematic, biomechanical-load, and substitution lenses), ignoring intensity, metabolic load, and circumstance. Same movement → discipline; same movement with only the circumstance changed → modifier; different movement → separate modality (a shared name or shared equipment is not evidence of sameness — hand cycling is not cycling).
 
 Examples of sport codes: `cycling.track` (different bike, different technique, specialized venue). `xc_skiing.double_poling` (distinct technique, own racing category).
 
@@ -39,7 +39,7 @@ Examples of things that are NOT sport codes: indoor cycling (it's `cycling.road`
 
 ## Adding a modifier
 
-Modifiers should be rare. A new modifier must apply to multiple sport codes and represent a concept that cuts across the sport tree. Open an issue with:
+Modifiers should be rare. A modifier is a **circumstance of execution that does not change the movement** (see [`docs/taxonomy.md`](docs/taxonomy.md)) — if it changes which muscles do the work, it is a separate modality, not a modifier. A new modifier must apply to multiple modalities and cut across the tree. Open an issue with:
 
 - **Code** — lowercase, single word.
 - **Group** — if mutually exclusive with existing modifiers, which group? If independent, leave blank.
@@ -89,6 +89,8 @@ The generator (`scripts/generate.py`) enforces 13 validation rules against every
 ### Adding mappings to an existing file
 
 Find the relevant row by its target. Change `sport: null` to the OST sport string. If multiple platform codes mean the same OST concept (e.g. FIT's `spin` and `indoor_cycling` both meaning `cycling+stationary`), mark exactly one as `preferred: true` and leave the others non-preferred.
+
+**`null` vs `generic`** (see [`docs/taxonomy.md`](docs/taxonomy.md)): a target that names a **specific** activity OST doesn't model (yoga, elliptical, alpine skiing) is `null`; only the platform's own **catch-all** bucket ("Other"/"Workout"/"Unknown"/"Sports") is `generic`. Don't route a named fitness/cardio activity to `generic` just because it's a vague workout.
 
 **Auditing tip.** Many platforms encode OST modifiers as distinct platform types (FIT's `indoor_*` sub_sports, Strava's `Virtual*` types, Garmin Training API's `INDOOR_*` / `VIRTUAL_*` activities). When working through a platform's targets, search for prefixes like `indoor_`, `virtual_`, `e_`, `treadmill` — these almost always belong as OST sport-with-modifier entries (e.g. `cycling+stationary`, `cycling.road+virtual`), not as new OST sport codes.
 
