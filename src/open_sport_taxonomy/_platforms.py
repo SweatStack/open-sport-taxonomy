@@ -739,7 +739,7 @@ SUUNTO_ENTRIES_BY_TARGET: dict = {
     104: (None, False),
     105: (Sport('cycling+assisted'), True),
     106: (Sport('cycling.mountain+assisted'), True),
-    107: (Sport('xc_skiing'), False),
+    107: (Sport('alpine_skiing'), False),
     108: (None, False),
     109: (Sport('hand_cycling'), True),
     110: (Sport('snowboarding'), False),

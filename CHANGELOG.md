@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.8.3] - 2026-06-09
+
+### Changed
+
+- Suunto `Backcountry skiing` (107) now decodes to `alpine_skiing` instead of `xc_skiing`. Backcountry skiing is alpine touring, not cross-country; with `alpine_skiing` now in the schema (0.8.2) this is the correct modality. (A `.backcountry` discipline for both alpine and XC may follow.)
+
 ## [0.8.2] - 2026-06-09
 
 ### Added

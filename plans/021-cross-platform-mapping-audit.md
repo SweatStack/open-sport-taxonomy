@@ -110,7 +110,7 @@ too — re-assessing with the crisp rule, those are catch-alls, not named activi
 | Concept | → `cycling`/mapped | → `null` | Note |
 |---|---|---|---|
 | **Hand cycling** | `wahoo` HANDCYCLING, `polar` Handcycling, `suunto` Hand cycling → `cycling` | `apple` handCycling, `garmin_fit` cycling/hand_cycling → `null` | Hand cycling is arm-powered — a separate modality, not a cycling discipline ([`docs/taxonomy.md`](../docs/taxonomy.md)). ✅ **Fixed in 0.8.1**: all five now `null`/`generic`. A `hand_cycling` root (Part 2) would let them carry the real modality. |
-| **Backcountry skiing** | `suunto` → `xc_skiing` | `polar` Backcountry skiing, `strava` BackcountrySki → `null` | Suunto followed its own FIT classification; the others null it. Known divergence, left as-is. |
+| **Backcountry skiing** | — | — | ✅ **Resolved** (0.8.2–0.8.3): all of `strava` BackcountrySki, `polar` Backcountry skiing, and `suunto` Backcountry skiing now decode to `alpine_skiing` (backcountry skiing is alpine touring). A `.backcountry` discipline may follow. |
 | **Lap / pool swimming** | `garmin_fit`, `polar`, `wahoo` → `swimming.pool` | — | **Re-assessed: not a bug.** `garmin_training_api` maps its *only* swim type (`LAP_SWIMMING`) to bare `swimming` so any swim plan encodes to it; its `fallback.encode` is `GENERIC`, so forcing `swimming.pool` would send `encode(swimming)` to `GENERIC`. The other platforms map lap/pool to `swimming.pool` *because they also have a generic swim type*; gta does not. **Left as-is.** The clean way to get precise decode *and* correct encode here — decoupling a target's decode meaning from the broader sport it encodes — is specified as the `encode_for` extension in [`docs/translation.md`](../docs/translation.md) (documented, not implemented; adopt on a second instance). |
 
 ### 1.4 Modifier / discipline conventions for the same concept
@@ -289,8 +289,9 @@ is a "vague workout"; only the platform's own unspecified bucket ("Other"/"Worko
    root added** (0.8.2) and all six platform rows now decode to it.
 4. ✅ **Winter sports added** (0.8.2): `alpine_skiing` + `snowboarding` roots, wired into
    all six platforms that distinguish them (separate roots, not a shared `skiing`
-   parent — §3.1). Touring/mountaineering variants stay `null`; Suunto `Backcountry
-   skiing` stays `xc_skiing` per the earlier explicit call (revisit if desired).
+   parent — §3.1). Touring/mountaineering variants stay `null`. All `Backcountry
+   skiing` rows (incl. Suunto, 0.8.3) decode to `alpine_skiing`; `.backcountry`
+   disciplines for alpine and XC may follow.
 5. ✅ **Cycling-modifier conventions settled** (§1.4, 0.8.2): no `.road` on base
    e-bike/virtual; `+virtual` implies `+stationary`. Convention recorded in
    `CONTRIBUTING.md`.

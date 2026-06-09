@@ -353,7 +353,7 @@ entries:
     preferred: true
 
   - target:  107  # Backcountry skiing
-    sport: xc_skiing
+    sport: alpine_skiing
 
   - target:  108  # Wheelchair sport
     sport: null
