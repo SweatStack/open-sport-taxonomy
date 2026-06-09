@@ -11,6 +11,7 @@ PYTEST_FLAGS ?=
 .PHONY: help \
         lint test test-only check format fix mutmut \
         generate \
+        tool \
         build publish \
         clean
 
@@ -62,6 +63,14 @@ mutmut: ## Run mutation testing on the runtime (slow; periodic health check)
 
 generate: ## Regenerate auto-generated Python from schema.yaml + mappings/
 	@$(UV) run scripts/generate.py
+
+# --------------------------------------------------------------------------
+# Tooling — the browser-based translation explorer (tool/index.html).
+# --------------------------------------------------------------------------
+
+tool: ## Serve the translation explorer (open /tool/ at the address it prints)
+	@printf "Translation explorer — open \033[1m/tool/\033[0m at the address printed below (Ctrl-C to stop)\n"
+	@python3 -m http.server 0
 
 # --------------------------------------------------------------------------
 # Packaging.
