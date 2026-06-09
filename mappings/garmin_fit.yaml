@@ -317,8 +317,7 @@ entries:
     sport: null
 
   - target: { sport:  30, sub_sport:   0 }  # inline_skating / generic
-    sport: xc_skiing+roller
-    preferred: true
+    sport: null
 
   - target: { sport:  31, sub_sport:   0 }  # rock_climbing / generic
     sport: null

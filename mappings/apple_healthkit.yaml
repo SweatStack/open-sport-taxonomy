@@ -103,8 +103,7 @@ entries:
     sport: null
 
   - target:   30  # mixedMetabolicCardioTraining
-    sport: xc_skiing+roller
-    preferred: true
+    sport: null
 
   - target:   31  # paddleSports
     sport: null

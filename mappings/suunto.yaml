@@ -357,7 +357,7 @@ entries:
     sport: null
 
   - target:  109  # Hand cycling
-    sport: cycling
+    sport: null
 
   - target:  110  # Splitboarding
     sport: null

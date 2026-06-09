@@ -86,7 +86,7 @@ entries:
     sport: running+stationary
 
   - target:   20  # FE_ELLIPTICAL (N/A/INDOOR)
-    sport: generic
+    sport: null
 
   - target:   21  # FE_BIKE (BIKING/INDOOR)
     sport: cycling+stationary
@@ -96,7 +96,7 @@ entries:
     preferred: true
 
   - target:   23  # FE_CLIMBER (N/A/INDOOR)
-    sport: generic
+    sport: null
 
   - target:   25  # SWIMMING_LAP (SWIMMING/INDOOR)
     sport: swimming.pool
@@ -157,10 +157,10 @@ entries:
     sport: generic
 
   - target:   43  # CARDIO_CLASS (GYM/INDOOR)
-    sport: generic
+    sport: null
 
   - target:   44  # STAIR_CLIMBER (GYM/INDOOR)
-    sport: generic
+    sport: null
 
   - target:   45  # WHEELCHAIR (OTHER/OUTDOOR)
     sport: null
@@ -210,7 +210,7 @@ entries:
     sport: null
 
   - target:   70  # HANDCYCLING (BIKING/OUTDOOR)
-    sport: cycling
+    sport: null
 
   - target:   71  # RUNNING_INDOOR_VIRTUAL (RUNNING/INDOOR)
     sport: running+stationary+virtual

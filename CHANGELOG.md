@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.8.1] - 2026-06-09
+
+### Fixed
+
+- Cross-platform mapping corrections surfaced by the audit in `plans/021`, now that [`docs/taxonomy.md`](docs/taxonomy.md) defines relatedness (group by movement pattern) and the `null` vs `generic` rule:
+  - `apple_healthkit` `mixedMetabolicCardioTraining` and `garmin_fit` `inline_skating` no longer decode to `xc_skiing+roller` — neither is roller skiing. Now `null` (→ `generic`).
+  - **Hand cycling is a separate modality, not cycling** (it is arm-powered). `wahoo`, `polar`, and `suunto` hand-cycling targets now decode to `generic` instead of `cycling`.
+  - `wahoo` named fitness machines/classes (`FE_ELLIPTICAL`, `FE_CLIMBER`, `CARDIO_CLASS`, `STAIR_CLIMBER`) now `null`, matching the other platforms. Genuinely-unspecified targets (`FE`, `FE_GENERAL`, `TICKR_OFFLINE`, `WORKOUT`, `OTHER`, `UNKNOWN`) stay `generic`.
+
 ## [0.8.0] - 2026-06-08
 
 ### Added

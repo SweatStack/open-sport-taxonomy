@@ -345,7 +345,7 @@ entries:
     sport: null
 
   - target: PARASPORTS_HAND_CYCLING  # Handcycling
-    sport: cycling
+    sport: null
 
   - target: PARASPORTS_SLED_HOCKEY  # Sled hockey
     sport: null
