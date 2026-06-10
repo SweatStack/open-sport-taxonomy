@@ -119,7 +119,7 @@ entries:
     preferred: true
 
   - target:   31  # Ski touring
-    sport: null
+    sport: alpine_skiing
 
   - target:   32  # Fitness class
     sport: null
@@ -382,7 +382,7 @@ entries:
     sport: running.trail
 
   - target:  116  # Ski mountaineering
-    sport: null
+    sport: alpine_skiing
 
   - target:  117  # Skate skiing
     sport: xc_skiing.skate

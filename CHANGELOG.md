@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.8.5] - 2026-06-09
+
+### Changed
+
+- Suunto `Ski touring` (31) and `Ski mountaineering` (116) now decode to `alpine_skiing` instead of `generic` — both are alpine-touring disciplines (skin up, ski down), consistent with `Backcountry skiing` (0.8.3). Plain mountaineering remains `null` across platforms (Suunto 83, Wahoo 10, FIT 16): it is rock/ice climbing, which OST does not model — not hiking.
+
 ## [0.8.4] - 2026-06-09
 
 ### Fixed
