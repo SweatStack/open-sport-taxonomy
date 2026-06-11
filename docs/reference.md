@@ -2,7 +2,7 @@
 
 # OpenSportTaxonomy Reference
 
-10 sport families, 25 sports, 11 modifiers — version 0.8.5
+10 sport families, 25 sports, 11 modifiers — taxonomy version 0.8.5
 
 ## Sports
 
@@ -40,8 +40,8 @@ specialize further.
 
 Modifiers describe the circumstances of an activity, not the
 discipline itself. They are attached alongside a sport code.
-For example, a Zwift race is `cycling.road` with modifiers
-`stationary`, `virtual`, and `race`.
+For example, a virtual indoor race ride is `cycling` with modifiers
+`race`, `stationary`, and `virtual` — `cycling+race+stationary+virtual`.
 
 ### Grouped
 

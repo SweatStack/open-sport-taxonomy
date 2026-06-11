@@ -88,7 +88,7 @@ def main():
 
     template = env.get_template("reference.md.jinja")
     content = template.render(
-        version=schema.get("version", "unknown"),
+        taxonomy_version=schema.get("version", "unknown"),
         families=families,
         total_sports=len(sports),
         total_modifiers=len(modifiers),

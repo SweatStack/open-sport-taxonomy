@@ -1,9 +1,10 @@
 """Lint schema.yaml and mappings/<platform>.yaml.
 
 The mapping lint defers to scripts/generate.py — running generate.py
-with --check validates the v3 mapping files against all 13 rules in
+with --check validates the v4 mapping files against all 14 rules in
 docs/translation.md and confirms the generated Python is up to date.
-This script wraps that plus schema.yaml's own ordering/orphan checks.
+This script wraps that plus schema.yaml's own ordering/orphan checks
+and the generated docs/reference.md drift check.
 
 Usage:
     uv run scripts/lint.py          # check only, exit 1 if issues found
@@ -11,9 +12,10 @@ Usage:
 
 Run in CI to catch:
   - schema.yaml ordering or orphan issues.
-  - mapping files violating any format v3 rule.
+  - mapping files violating any format v4 rule.
   - generated Python out of sync with YAML inputs.
   - build_reference scripts out of sync with reference/*/targets.yaml.
+  - docs/reference.md out of sync with schema.yaml.
 """
 
 import subprocess
@@ -180,6 +182,31 @@ def lint_reference_drift() -> int:
     return 0
 
 
+def lint_reference_doc() -> int:
+    """docs/reference.md must reproduce byte-for-byte from generate_reference.py.
+
+    Wired here so the generated reference doc cannot silently drift from
+    schema.yaml (it previously did, stalling at an old version / sport count).
+    """
+    doc = ROOT / "docs" / "reference.md"
+    before = doc.read_text(encoding="utf-8") if doc.exists() else ""
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "generate_reference.py")],
+        check=True,
+        capture_output=True,
+        cwd=str(ROOT),
+    )
+    after = doc.read_text(encoding="utf-8")
+    if before != after:
+        print(
+            "reference doc error: docs/reference.md is stale. "
+            "Run 'uv run scripts/generate_reference.py' and commit the result."
+        )
+        return 1
+    print("docs/reference.md: ok")
+    return 0
+
+
 # --------------------------------------------------------------------------
 # Static analysis (ruff lint + format check).
 # --------------------------------------------------------------------------
@@ -238,6 +265,7 @@ def main():
     rc = 0
     rc |= lint_schema(fix)
     rc |= lint_reference_drift()
+    rc |= lint_reference_doc()
     rc |= lint_ruff()
     rc |= lint_mypy()
     rc |= lint_mappings()

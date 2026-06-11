@@ -23,7 +23,6 @@ Validation:
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -889,33 +888,28 @@ def generate_platforms(schema: dict, validated: dict[str, dict]) -> str:
 
 
 def generate_init(schema: dict) -> str:
-    version = schema["version"]
+    # Two independent versions (see plans/023):
+    #   - `version`: the installed PACKAGE release, read from distribution
+    #     metadata at runtime (single source: pyproject.toml).
+    #   - `taxonomy_version`: the SPEC version — the vocabulary of sports +
+    #     modifiers and the OST string format (single source: schema.yaml).
+    taxonomy_version = schema["version"]
     return f'''{HEADER}
+from importlib.metadata import PackageNotFoundError, version as _dist_version
+
 from open_sport_taxonomy._modifier import Modifier
 from open_sport_taxonomy._platform import GarminFitCode
 from open_sport_taxonomy._sport import Sport
 
-version = "{version}"
+try:
+    version = _dist_version("open-sport-taxonomy")
+except PackageNotFoundError:  # running from a source tree without an install
+    version = "0+unknown"
 
-__all__ = ["GarminFitCode", "Modifier", "Sport", "version"]
+taxonomy_version = "{taxonomy_version}"
+
+__all__ = ["GarminFitCode", "Modifier", "Sport", "taxonomy_version", "version"]
 '''
-
-
-def _check_version_consistency(schema: dict) -> list[str]:
-    errors = []
-    schema_version = schema["version"]
-    pyproject_text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject_text, re.MULTILINE)
-    if match:
-        pyproject_version = match.group(1)
-        if schema_version != pyproject_version:
-            errors.append(
-                f"Version mismatch: schema.yaml has {schema_version!r}, "
-                f"pyproject.toml has {pyproject_version!r}"
-            )
-    else:
-        errors.append("Could not find version in pyproject.toml")
-    return errors
 
 
 def main() -> int:
@@ -954,16 +948,12 @@ def main() -> int:
         stale = [
             p for p, e in files.items() if not p.exists() or p.read_text(encoding="utf-8") != e
         ]
-        version_errors = _check_version_consistency(schema)
-        if stale or version_errors:
+        if stale:
             for p in stale:
                 print(f"STALE: {p.relative_to(ROOT)}")
-            for e in version_errors:
-                print(f"ERROR: {e}")
             print("\nRun 'uv run scripts/generate.py' to update.")
             return 1
         print("All generated files are up to date.")
-        print("Version is consistent across schema.yaml and pyproject.toml.")
         return 0
 
     for path, content in files.items():
@@ -997,12 +987,7 @@ def main() -> int:
             return 1
         print(f"  {platform}: round-trip ok")
 
-    version_errors = _check_version_consistency(schema)
-    if version_errors:
-        for e in version_errors:
-            print(f"WARNING: {e}")
-    else:
-        print(f"Version {schema['version']} is consistent.")
+    print(f"Taxonomy (spec) version: {schema['version']}")
     return 0
 
 

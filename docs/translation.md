@@ -266,4 +266,19 @@ The strict `decode(encode(s)) == s` (validation rule 10) relaxes for sports enco
 
 ### Adoption
 
-First real users are Garmin FIT's `generic → dominant-discipline` rows (`1/0 → running.road`, `2/0 → cycling.road`, `12/0 → xc_skiing.classic`), each with `encode_for` for the bare modality. `LAP_SWIMMING` (Garmin Training API) remains a *candidate* but is intentionally not migrated: it's a push (encode-first) API, so decode precision there is low value and `LAP_SWIMMING → swimming` is correct for the direction that matters. It can adopt `encode_for: [swimming]` the day decode precision becomes worthwhile. The mechanism is additive — rows without `encode_for` behave exactly as before.
+`encode_for` is used wherever a platform's generic code *is* the dominant discipline — the platform offers the other disciplines (so they self-label) but has no road/classic code, so the generic code carries the road/classic traffic. Every such row decodes to the discipline and lists the bare modality in `encode_for`:
+
+| Platform | row | decodes to | `encode_for` |
+|---|---|---|---|
+| garmin_fit | `1/0` running/generic | `running.road` | `[running]` |
+| garmin_fit | `2/0` cycling/generic | `cycling.road` | `[cycling]` |
+| garmin_fit | `12/0` xc/generic | `xc_skiing.classic` | `[xc_skiing]` |
+| strava | `Run` | `running.road` | `[running]` |
+| strava | `Ride` | `cycling.road` | `[cycling]` |
+| suunto | `1` Running | `running.road` | `[running]` |
+| suunto | `2` Cycling | `cycling.road` | `[cycling]` |
+| wahoo | `1` RUNNING | `running.road` | `[running]` |
+
+Wahoo cycling is deliberately absent — `BIKING_ROAD` exists, so generic `BIKING` stays bare `cycling`. Polar / Apple HealthKit / Garmin Training API are absent too: Polar models road explicitly (generic = a real "unspecified"), and the latter two have a single coarse running/cycling type that also covers trail/mountain (defaulting to road would mislabel).
+
+`LAP_SWIMMING` (Garmin Training API) remains a documented *candidate* but is intentionally not migrated: it's a push (encode-first) API, so decode precision there is low value and `LAP_SWIMMING → swimming` is correct for the direction that matters. It can adopt `encode_for: [swimming]` the day decode precision becomes worthwhile. The mechanism is additive — rows without `encode_for` behave exactly as before.

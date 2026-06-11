@@ -61,8 +61,9 @@ mutmut: ## Run mutation testing on the runtime (slow; periodic health check)
 # Generation — regenerate auto-generated source from schema and mappings.
 # --------------------------------------------------------------------------
 
-generate: ## Regenerate auto-generated Python from schema.yaml + mappings/
+generate: ## Regenerate auto-generated Python + docs from schema.yaml + mappings/
 	@$(UV) run scripts/generate.py
+	@$(UV) run scripts/generate_reference.py
 
 # --------------------------------------------------------------------------
 # Tooling — the browser-based translation explorer (tool/index.html).

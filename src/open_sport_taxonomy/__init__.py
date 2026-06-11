@@ -1,10 +1,17 @@
 # Auto-generated from schema.yaml — do not edit.
 # Run: uv run scripts/generate.py
 
+from importlib.metadata import PackageNotFoundError, version as _dist_version
+
 from open_sport_taxonomy._modifier import Modifier
 from open_sport_taxonomy._platform import GarminFitCode
 from open_sport_taxonomy._sport import Sport
 
-version = "0.8.5"
+try:
+    version = _dist_version("open-sport-taxonomy")
+except PackageNotFoundError:  # running from a source tree without an install
+    version = "0+unknown"
 
-__all__ = ["GarminFitCode", "Modifier", "Sport", "version"]
+taxonomy_version = "0.8.5"
+
+__all__ = ["GarminFitCode", "Modifier", "Sport", "taxonomy_version", "version"]
