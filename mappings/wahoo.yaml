@@ -18,8 +18,9 @@ entries:
     preferred: true
 
   - target:    1  # RUNNING (RUNNING/OUTDOOR)
-    sport: running
-    preferred: true
+    sport: running.road      # opinionated: Wahoo has no RUNNING_ROAD, so road runs use generic RUNNING
+    preferred: true          # (cf. BIKING_ROAD (15) exists, so generic BIKING (0) stays bare cycling)
+    encode_for: [running]    # bare "running" also encodes here
 
   - target:    2  # FE (N/A/INDOOR)
     sport: generic

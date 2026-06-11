@@ -103,8 +103,9 @@ entries:
     sport: null
 
   - target: Ride
-    sport: cycling
+    sport: cycling.road      # opinionated: Strava has no road type, so road rides use generic "Ride"
     preferred: true
+    encode_for: [cycling]    # bare "cycling" also encodes to "Ride"
 
   - target: RockClimbing
     sport: null
@@ -118,8 +119,9 @@ entries:
     preferred: true
 
   - target: Run
-    sport: running
+    sport: running.road      # opinionated: Strava has no road type, so road runs use generic "Run"
     preferred: true
+    encode_for: [running]    # bare "running" also encodes to "Run"
 
   - target: Sail
     sport: null

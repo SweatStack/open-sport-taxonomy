@@ -108,13 +108,22 @@ class TestStravaRoundTrip:
         assert strava.decode("VirtualRide") == sport
 
     def test_synonym_decode_to_canonical(self):
-        # Strava doesn't have multiple targets for the same OST in the
-        # current mapping. Verify the related case: a decode that walks
-        # the parent in a more interesting way than the FIT case.
-        # 'Ride' is canonical for plain cycling; 'GravelRide' is canonical
-        # for cycling.gravel. Both are preferred (no synonyms in Strava).
-        assert strava.decode("Ride") == Sport("cycling")
+        # Strava has no road type, so 'Ride' is the opinionated road default
+        # (generic→road); 'GravelRide' is canonical for cycling.gravel. Both
+        # are preferred (no decode synonyms in Strava).
+        assert strava.decode("Ride") == Sport("cycling.road")
         assert strava.decode("GravelRide") == Sport("cycling.gravel")
+
+    def test_encode_for_collapses_generic_to_road(self):
+        # Strava has no road type: bare cycling and cycling.road both encode to
+        # 'Ride' (via encode_for), which decodes back to cycling.road (sharpen).
+        # Same for running/'Run'.
+        assert strava.encode(Sport("cycling")) == "Ride"
+        assert strava.encode(Sport("cycling.road")) == "Ride"
+        assert strava.decode("Ride") == Sport("cycling.road")
+        assert strava.encode(Sport("running")) == "Run"
+        assert strava.encode(Sport("running.road")) == "Run"
+        assert strava.decode("Run") == Sport("running.road")
 
     def test_null_sport_decodes_to_fallback(self):
         # Many Strava sport types (e.g. Golf, Yoga, Sail) have no OST
@@ -220,6 +229,18 @@ class TestWahooRoundTrip:
         assert wahoo.encode(sport) == 15
         assert wahoo.decode(15) == sport
 
+    def test_running_road_default_but_cycling_stays_bare(self):
+        # The per-modality asymmetry: Wahoo has no RUNNING_ROAD, so generic
+        # RUNNING (1) decodes to running.road and bare running encodes there
+        # (encode_for). But BIKING_ROAD (15) DOES exist, so generic BIKING (0)
+        # stays bare cycling — picking it is a genuine "unspecified" signal.
+        assert wahoo.decode(1) == Sport("running.road")
+        assert wahoo.encode(Sport("running")) == 1
+        assert wahoo.encode(Sport("running.road")) == 1
+        assert wahoo.decode(0) == Sport("cycling")
+        assert wahoo.encode(Sport("cycling")) == 0
+        assert wahoo.encode(Sport("cycling.road")) == 15
+
     def test_synonym_decode_to_canonical(self):
         # BIKING_INDOOR_CYCLING_CLASS (49) and BIKING_INDOOR_TRAINER (61)
         # both decode to cycling+stationary; only BIKING_INDOOR (12) is preferred.
@@ -285,6 +306,14 @@ class TestSuuntoRoundTrip:
         sport = Sport("cycling.gravel")
         assert suunto.encode(sport) == 99
         assert suunto.decode(99) == sport
+
+    def test_encode_for_collapses_generic_to_road(self):
+        # Suunto has no road type: generic Running (1)/Cycling (2) decode to
+        # .road; bare modalities encode there via encode_for (sharpen on round-trip).
+        assert suunto.decode(1) == Sport("running.road")
+        assert suunto.decode(2) == Sport("cycling.road")
+        assert suunto.encode(Sport("running")) == 1
+        assert suunto.encode(Sport("cycling")) == 2
 
     def test_synonym_decode_to_canonical(self):
         # Nordic walking (24) and the "Sports" duplicates decode to canonical

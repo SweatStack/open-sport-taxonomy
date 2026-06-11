@@ -18,12 +18,14 @@ entries:
     preferred: true
 
   - target:    1  # Running
-    sport: running
+    sport: running.road      # opinionated: Suunto has no road type, so road runs use generic "Running"
     preferred: true
+    encode_for: [running]    # bare "running" also encodes here
 
   - target:    2  # Cycling
-    sport: cycling
+    sport: cycling.road      # opinionated: Suunto has no road type, so road rides use generic "Cycling"
     preferred: true
+    encode_for: [cycling]    # bare "cycling" also encodes here
 
   - target:    3  # Cross-country skiing
     sport: xc_skiing

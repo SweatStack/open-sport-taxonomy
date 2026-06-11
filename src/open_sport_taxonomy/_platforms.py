@@ -580,11 +580,11 @@ STRAVA_ENTRIES_BY_TARGET: dict = {
     'Pickleball': (None, False),
     'Pilates': (None, False),
     'Racquetball': (None, False),
-    'Ride': (Sport('cycling'), True),
+    'Ride': (Sport('cycling.road'), True),
     'RockClimbing': (None, False),
     'RollerSki': (Sport('xc_skiing+roller'), True),
     'Rowing': (Sport('rowing'), True),
-    'Run': (Sport('running'), True),
+    'Run': (Sport('running.road'), True),
     'Sail': (None, False),
     'Skateboard': (None, False),
     'Snowboard': (Sport('snowboarding'), True),
@@ -620,9 +620,11 @@ STRAVA_PREFERRED_INDEX: dict = {
     ('walking.hiking', frozenset()): 'Hike',
     ('cycling.mountain', frozenset()): 'MountainBikeRide',
     ('xc_skiing', frozenset()): 'NordicSki',
+    ('cycling.road', frozenset()): 'Ride',
     ('cycling', frozenset()): 'Ride',
     ('xc_skiing', frozenset({'roller'})): 'RollerSki',
     ('rowing', frozenset()): 'Rowing',
+    ('running.road', frozenset()): 'Run',
     ('running', frozenset()): 'Run',
     ('snowboarding', frozenset()): 'Snowboard',
     ('swimming', frozenset()): 'Swim',
@@ -643,8 +645,8 @@ SUUNTO_FALLBACK_DECODE: Sport = Sport('generic')
 
 SUUNTO_ENTRIES_BY_TARGET: dict = {
     0: (Sport('walking'), True),
-    1: (Sport('running'), True),
-    2: (Sport('cycling'), True),
+    1: (Sport('running.road'), True),
+    2: (Sport('cycling.road'), True),
     3: (Sport('xc_skiing'), True),
     4: (Sport('generic'), True),
     5: (Sport('generic'), False),
@@ -767,7 +769,9 @@ SUUNTO_ENTRIES_BY_TARGET: dict = {
 
 SUUNTO_PREFERRED_INDEX: dict = {
     ('walking', frozenset()): 0,
+    ('running.road', frozenset()): 1,
     ('running', frozenset()): 1,
+    ('cycling.road', frozenset()): 2,
     ('cycling', frozenset()): 2,
     ('xc_skiing', frozenset()): 3,
     ('generic', frozenset()): 4,
@@ -802,7 +806,7 @@ WAHOO_FALLBACK_DECODE: Sport = Sport('generic')
 
 WAHOO_ENTRIES_BY_TARGET: dict = {
     0: (Sport('cycling'), True),
-    1: (Sport('running'), True),
+    1: (Sport('running.road'), True),
     2: (Sport('generic'), False),
     3: (Sport('running.track'), True),
     4: (Sport('running.trail'), True),
@@ -866,6 +870,7 @@ WAHOO_ENTRIES_BY_TARGET: dict = {
 
 WAHOO_PREFERRED_INDEX: dict = {
     ('cycling', frozenset()): 0,
+    ('running.road', frozenset()): 1,
     ('running', frozenset()): 1,
     ('running.track', frozenset()): 3,
     ('running.trail', frozenset()): 4,
