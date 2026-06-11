@@ -11,6 +11,10 @@ dist/
 reference/garmin-training-api/*.pdf
 reference/garmin-training-api/*.xlsx
 
+# Vendor source documents — kept locally, not redistributed (see each dir's README)
+reference/garmin-fit-sdk/Profile.xlsx
+reference/suunto/Activities.pdf
+
 # Tooling caches and reports
 .coverage
 htmlcov/

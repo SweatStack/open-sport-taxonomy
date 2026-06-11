@@ -41,4 +41,7 @@ These associations are documented in the comment field but not formally enforced
 
 - [`sports.yaml`](sports.yaml) — Complete sport enum reference
 - [`sub_sports.yaml`](sub_sports.yaml) — Complete sub_sport enum reference with sport associations
-- [`Profile.xlsx`](Profile.xlsx) — Original Garmin FIT SDK profile (source of truth)
+- `Profile.xlsx` — Original Garmin FIT SDK profile (source of truth). **Not committed**
+  — this is a Garmin FIT SDK file and is not redistributed here (gitignored). Download
+  it from the [Garmin FIT SDK](https://developer.garmin.com/fit/download/) and place it
+  in this directory to regenerate the YAML enums.

@@ -2,9 +2,11 @@
 
 > Reference documentation for Suunto's activity classification.
 
-**Source:** `Activities.pdf` (this directory), from Suunto's developer documentation.
-Suunto publishes the activity list as a PDF table; there is no machine-readable enum or
-swagger for the activity IDs.
+**Source:** `Activities.pdf`, from Suunto's developer documentation. Suunto publishes
+the activity list as a PDF table; there is no machine-readable enum or swagger for the
+activity IDs. The PDF itself is **not committed** — it is a Suunto document and is not
+redistributed here (gitignored); the transcribed `activities.yaml` is the source of
+truth in this repo.
 
 ## Versioning
 
@@ -41,7 +43,9 @@ taxonomy covers far more than OST models).
 
 ## Files
 
-- [`Activities.pdf`](Activities.pdf) — source document (Suunto developer docs).
+- `Activities.pdf` — source document (Suunto developer docs). **Not committed** — kept
+  locally only, not redistributed (gitignored). Obtain it from Suunto's developer
+  documentation and place it in this directory to re-transcribe `activities.yaml`.
 - `activities.yaml` — hand-curated `{value, name}` for all 121 activity IDs,
   transcribed from the PDF. **Source of truth.** (Added during implementation; see
   `plans/020-suunto-mapping.md`.)
