@@ -1,9 +1,9 @@
-# OpenSportTaxonomy — strava mapping (format v3).
+# OpenSportTaxonomy — strava mapping (format v4).
 #
 # See docs/translation.md for the format specification.
 # See CONTRIBUTING.md for the workflow.
 
-format_version: 3
+format_version: 4
 platform: strava
 platform_version: "v3 API, 2024"
 

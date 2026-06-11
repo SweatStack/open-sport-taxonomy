@@ -2,7 +2,7 @@
 
 # OpenSportTaxonomy Reference
 
-7 sport families, 22 sports, 11 modifiers — version 0.1.0
+10 sport families, 25 sports, 11 modifiers — version 0.8.5
 
 ## Sports
 
@@ -10,6 +10,7 @@ Sport codes identify the discipline. They form a hierarchy using
 dot notation. A parent groups related disciplines; children
 specialize further.
 
+- **alpine_skiing** — alpine skiing
 - **cycling** — cycling
   - **cycling.cyclocross** — cyclocross
   - **cycling.gravel** — gravel cycling
@@ -18,11 +19,13 @@ specialize further.
   - **cycling.time_trial** — time trial cycling
   - **cycling.track** — track cycling
 - **generic** — generic
+- **hand_cycling** — hand cycling
 - **rowing** — rowing
 - **running** — running
   - **running.road** — road running
   - **running.track** — track running
   - **running.trail** — trail running
+- **snowboarding** — snowboarding
 - **swimming** — swimming
   - **swimming.open_water** — open water swimming
   - **swimming.pool** — pool swimming

@@ -24,16 +24,18 @@ class TestGarminFitCode:
     """NamedTuple construction, identity, and forward-compat."""
 
     def test_attribute_access(self):
-        code = garmin_fit.encode(Sport.CYCLING_ROAD)
+        # CYCLING_GRAVEL has a dedicated FIT sub_sport (46), so it exercises the
+        # named-field accessors. (CYCLING_ROAD now encodes to generic 2/0.)
+        code = garmin_fit.encode(Sport.CYCLING_GRAVEL)
         assert code.sport == 2
-        assert code.sub_sport == 7
+        assert code.sub_sport == 46
         assert code.sport_name == "cycling"
-        assert code.sub_sport_name == "road"
+        assert code.sub_sport_name == "gravel_cycling"
 
     def test_tuple_unpacking(self):
-        sport_id, sub_sport_id = garmin_fit.encode(Sport.CYCLING_ROAD)
+        sport_id, sub_sport_id = garmin_fit.encode(Sport.CYCLING_GRAVEL)
         assert sport_id == 2
-        assert sub_sport_id == 7
+        assert sub_sport_id == 46
 
     def test_construct_from_names(self):
         assert GarminFitCode("cycling", "road") == GarminFitCode(2, 7)
@@ -92,7 +94,8 @@ class TestDecodeArgumentForms:
         assert garmin_fit.decode(sport=2, sub_sport=7) == Sport.CYCLING_ROAD
 
     def test_sub_sport_defaults_to_zero(self):
-        assert garmin_fit.decode(2) == Sport.CYCLING
+        # (2, 0) is the opinionated generic→road default.
+        assert garmin_fit.decode(2) == Sport.CYCLING_ROAD
 
     def test_unknown_name_raises(self):
         with pytest.raises(ValueError, match="Unknown FIT sport name"):
@@ -104,7 +107,8 @@ class TestDecodeArgumentForms:
 
     def test_none_sub_sport_treated_as_generic(self):
         # FIT parsers commonly return None for fields not set in a session.
-        assert garmin_fit.decode(2, None) == Sport.CYCLING
+        # (2, 0) is the opinionated generic→road default.
+        assert garmin_fit.decode(2, None) == Sport.CYCLING_ROAD
 
     def test_none_sport_falls_back(self):
         # Malformed FIT with no sport field at all — graceful, not an error.

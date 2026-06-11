@@ -50,10 +50,21 @@ class TestGarminFitRoundTrip:
     """Six representative cases exercising every encode/decode code path."""
 
     def test_preferred_round_trip(self):
-        # Case 1: canonical entry round-trips both directions.
+        # Case 1: canonical entry round-trips both directions. cycling.road is the
+        # opinionated decode of generic 2/0 and encodes back to it.
         sport = Sport("cycling.road")
-        assert garmin_fit.encode(sport) == GarminFitCode(2, 7)
-        assert garmin_fit.decode(2, 7) == sport
+        assert garmin_fit.encode(sport) == GarminFitCode(2, 0)
+        assert garmin_fit.decode(2, 0) == sport
+
+    def test_encode_for_collapses_and_sharpens(self):
+        # encode_for: bare `cycling` and `cycling.road` both encode to generic 2/0;
+        # decode(2/0) is the canonical cycling.road, so a bare-cycling round trip
+        # SHARPENS to cycling.road (the dual of coarsening). The legacy explicit
+        # road code 2/7 still decodes to road but is the encode target of nothing.
+        assert garmin_fit.encode(Sport("cycling")) == GarminFitCode(2, 0)
+        assert garmin_fit.encode(Sport("cycling.road")) == GarminFitCode(2, 0)
+        assert garmin_fit.decode(2, 7) == Sport("cycling.road")
+        assert garmin_fit.decode(*garmin_fit.encode(Sport("cycling"))) == Sport("cycling.road")
 
     def test_synonym_decode_to_canonical(self):
         # Case 2: (2, 5) spin and (4, 6) fitness_equipment/indoor_cycling
@@ -81,8 +92,8 @@ class TestGarminFitRoundTrip:
 
     def test_coarsening_decode_unknown_sub_sport(self):
         # Case 6: (2, 99) is not in entries (would need a newer FIT SDK);
-        # target_coarsening rewrites to (2, 0) which decodes to cycling.
-        assert garmin_fit.decode(2, 99) == Sport("cycling")
+        # target_coarsening rewrites to (2, 0), the opinionated generic→road default.
+        assert garmin_fit.decode(2, 99) == Sport("cycling.road")
 
 
 # --------------------------------------------------------------------------

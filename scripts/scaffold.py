@@ -113,12 +113,12 @@ def render_file(
 ) -> str:
     """Render a complete v3 mapping file."""
     lines: list[str] = [
-        f"# OpenSportTaxonomy — {platform} mapping (format v3).",
+        f"# OpenSportTaxonomy — {platform} mapping (format v4).",
         "#",
         "# See docs/translation.md for the format specification.",
         "# See CONTRIBUTING.md for the workflow.",
         "",
-        "format_version: 3",
+        "format_version: 4",
         f"platform: {platform}",
         f'platform_version: "{platform_version}"',
         "",

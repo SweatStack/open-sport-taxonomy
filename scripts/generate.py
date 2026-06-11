@@ -83,7 +83,7 @@ ALLOWED_TOP_KEYS = {
     "target_coarsening",
     "entries",
 }
-ALLOWED_ENTRY_KEYS = {"target", "sport", "preferred"}
+ALLOWED_ENTRY_KEYS = {"target", "sport", "preferred", "encode_for"}
 ALLOWED_FALLBACK_KEYS = {"encode", "decode"}
 
 
@@ -127,17 +127,17 @@ def validate_mapping(
 ) -> dict:
     """Run validation rules 1–13. Returns the canonicalized mapping on success.
 
-    The returned dict is the input with derived structures attached:
-      - `_entries_by_target_key`: dict[target_key, dict] of original entries.
-      - `_preferred_by_sport`: dict[(code, frozenset), target] for encode.
-      - `_parsed_entries`: list of (target, (code, mods) | None, preferred).
+    The returned dict is the input with one derived structure attached:
+      - `_parsed_entries`: list of
+        `(target, (code, mods) | None, preferred, [encode_for_key, ...])`, where each
+        `encode_for_key` is a parsed `(code, mods)` from the entry's `encode_for`.
     """
     file_label = f"mappings/{platform}.yaml"
 
     # Rule 1: format_version.
-    if mapping.get("format_version") != 3:
+    if mapping.get("format_version") != 4:
         raise ValidationError(
-            f"{file_label}: format_version must be 3, got {mapping.get('format_version')!r}"
+            f"{file_label}: format_version must be 4, got {mapping.get('format_version')!r}"
         )
 
     # Rule 2: platform field.
@@ -210,13 +210,27 @@ def validate_mapping(
             f"First few: {sample}. Run scripts/scaffold.py {platform} --update to scaffold."
         )
 
-    # Rule 7: parse each non-null sport string. Enforced inside parse_sport.
-    parsed_entries: list[tuple[Any, tuple[str, frozenset[str]] | None, bool]] = []
+    # Rule 7: parse each non-null sport string (and any encode_for ancestors).
+    # Each parsed entry is (target, parsed_sport | None, preferred, encode_for_keys).
+    SportKey = tuple[str, frozenset[str]]
+    parsed_entries: list[tuple[Any, SportKey | None, bool, list[SportKey]]] = []
     for i, e in enumerate(entries):
         sport_raw = e["sport"]
         preferred = bool(e.get("preferred", False))
+        encode_for_raw = e.get("encode_for", []) or []
+        if not isinstance(encode_for_raw, list):
+            raise ValidationError(
+                f"{file_label}: entries[{i}] encode_for must be a list, "
+                f"got {type(encode_for_raw).__name__}"
+            )
+
         if sport_raw is None:
-            parsed_entries.append((e["target"], None, preferred))
+            # Rule 9: preferred and encode_for forbidden when sport is null.
+            if encode_for_raw:
+                raise ValidationError(
+                    f"{file_label}: entries[{i}] has sport: null but non-empty encode_for"
+                )
+            parsed_entries.append((e["target"], None, preferred, []))
             continue
         if not isinstance(sport_raw, str):
             raise ValidationError(
@@ -227,28 +241,63 @@ def validate_mapping(
             parsed = parse_sport(sport_raw, sport_codes, modifier_codes)
         except ValidationError as ex:
             raise ValidationError(f"{file_label}: entries[{i}] {ex}") from None
-        parsed_entries.append((e["target"], parsed, preferred))
+
+        # encode_for attaches to the canonical (preferred) encode home only.
+        if encode_for_raw and not preferred:
+            raise ValidationError(
+                f"{file_label}: entries[{i}] has encode_for but is not preferred; "
+                f"encode_for may only attach to the canonical (preferred) entry for a target"
+            )
+        encode_for_keys: list[SportKey] = []
+        for a in encode_for_raw:
+            if not isinstance(a, str):
+                raise ValidationError(
+                    f"{file_label}: entries[{i}] encode_for must contain strings, "
+                    f"got {type(a).__name__}"
+                )
+            try:
+                ef_key = parse_sport(a, sport_codes, modifier_codes)
+            except ValidationError as ex:
+                raise ValidationError(f"{file_label}: entries[{i}] encode_for {ex}") from None
+            # Constraint: each encode_for code must be a STRICT ANCESTOR of the row's
+            # sport. You may declare a precise target as the encode home for a broader
+            # sport — never for an unrelated or finer one. (See docs/translation.md.)
+            row_code = parsed[0]
+            ef_code = ef_key[0]
+            if not row_code.startswith(ef_code + "."):
+                raise ValidationError(
+                    f"{file_label}: entries[{i}] encode_for {a!r} is not a strict ancestor "
+                    f"of sport {sport_raw!r}"
+                )
+            encode_for_keys.append(ef_key)
+        parsed_entries.append((e["target"], parsed, preferred, encode_for_keys))
 
     # Rule 9: preferred forbidden when sport is null.
-    for i, (_target, parsed, preferred) in enumerate(parsed_entries):
+    for i, (_target, parsed, preferred, _aliases) in enumerate(parsed_entries):
         if parsed is None and preferred:
             raise ValidationError(f"{file_label}: entries[{i}] has sport: null but preferred: true")
 
-    # Rule 8: exactly one preferred per non-null sport.
-    pref_count: dict[tuple[str, frozenset[str]], int] = {}
-    for _target, parsed, preferred in parsed_entries:
-        if parsed is None:
-            continue
-        if preferred:
-            pref_count[parsed] = pref_count.get(parsed, 0) + 1
-    # Every sport appearing as non-null must have exactly one preferred row.
-    all_sports = {p for _, p, _ in parsed_entries if p is not None}
-    for s in all_sports:
-        c = pref_count.get(s, 0)
+    # Rule 8: every non-null sport has exactly ONE encode home — either a preferred
+    # entry whose sport it is, or an encode_for mention. Never both, never neither,
+    # never twice. Encode is many-to-one (several sports → one target), but each sport
+    # encodes to exactly one target.
+    home_count: dict[SportKey, int] = {}
+    for _target, parsed, preferred, encode_for_keys in parsed_entries:
+        if parsed is not None and preferred:
+            home_count[parsed] = home_count.get(parsed, 0) + 1
+        for a in encode_for_keys:
+            home_count[a] = home_count.get(a, 0) + 1
+    # Sports needing a home: every sport that appears as a decode result, plus every
+    # encode_for ancestor (which appears only on the encode side).
+    needs_home = {p for _, p, _, _ in parsed_entries if p is not None}
+    needs_home |= {a for _, _, _, ef in parsed_entries for a in ef}
+    for s in needs_home:
+        c = home_count.get(s, 0)
         if c != 1:
             sport_str = _format_sport(s)
             raise ValidationError(
-                f"{file_label}: sport {sport_str!r} has {c} preferred entries, expected exactly 1"
+                f"{file_label}: sport {sport_str!r} has {c} encode homes "
+                f"(preferred entries + encode_for mentions), expected exactly 1"
             )
 
     # Rule 13: target_coarsening reset rules name valid fields.
@@ -279,7 +328,7 @@ def validate_mapping(
         fallback_decode_parsed = parse_sport(fb["decode"], sport_codes, modifier_codes)
     except ValidationError as ex:
         raise ValidationError(f"{file_label}: fallback.decode {ex}") from None
-    preferred_sports = {p for _, p, pref in parsed_entries if pref and p is not None}
+    preferred_sports = {p for _, p, pref, _ in parsed_entries if pref and p is not None}
     if fallback_decode_parsed not in preferred_sports:
         raise ValidationError(
             f"{file_label}: fallback.decode {fb['decode']!r} is not the `sport` of any "
@@ -317,7 +366,12 @@ def validate_round_trips(platform: str, mapping: dict, runtime_platform: Any) ->
 
     parsed = mapping["_parsed_entries"]
     file_label = f"mappings/{platform}.yaml"
-    for i, (target, p, preferred) in enumerate(parsed):
+
+    def _sport_from_key(key: tuple[str, frozenset[str]]) -> Any:
+        code, mods = key
+        return Sport(code) if not mods else Sport(code + "+" + "+".join(sorted(mods)))
+
+    for i, (target, p, preferred, encode_for_keys) in enumerate(parsed):
         # Build runtime target value matching what generated tables use.
         rt_target = _runtime_target(platform, target)
         if p is None:
@@ -328,8 +382,7 @@ def validate_round_trips(platform: str, mapping: dict, runtime_platform: Any) ->
                     f"{file_label}: entries[{i}] sport: null but decode returned {sport!r}"
                 )
             continue
-        code, mods = p
-        sport = Sport(code) if not mods else Sport(code + "+" + "+".join(sorted(mods)))
+        sport = _sport_from_key(p)
         decoded = runtime_platform.decode(rt_target)
         if decoded != sport:
             raise ValidationError(
@@ -342,6 +395,18 @@ def validate_round_trips(platform: str, mapping: dict, runtime_platform: Any) ->
                 raise ValidationError(
                     f"{file_label}: entries[{i}] encode({sport!r}) returned {encoded!r}, "
                     f"expected {rt_target!r}"
+                )
+        # encode_for invariant: each broader ancestor encodes to THIS target, while
+        # decode(target) stays the canonical (preferred) sport above. Round-trip then
+        # moves along the hierarchy — decode(encode(ancestor)) sharpens to the canonical
+        # sub-sport (the dual of coarsening).
+        for ef_key in encode_for_keys:
+            ef_sport = _sport_from_key(ef_key)
+            encoded = runtime_platform.encode(ef_sport)
+            if encoded != rt_target:
+                raise ValidationError(
+                    f"{file_label}: entries[{i}] encode_for {ef_sport!r} encodes to "
+                    f"{encoded!r}, expected {rt_target!r}"
                 )
 
 
@@ -768,23 +833,24 @@ def generate_platforms(schema: dict, validated: dict[str, dict]) -> str:
         lines.append(f"{prefix}_FALLBACK_DECODE: Sport = Sport({fb['decode']!r})")
         lines.append("")
 
-        # entries_by_target
+        # entries_by_target (decode table — one sport per target)
         lines.append(f"{prefix}_ENTRIES_BY_TARGET: dict = {{")
-        for target, parsed, preferred in entries:
+        for target, parsed, preferred, _ef in entries:
             target_repr = _emit_target_literal(platform, target)
             sport_repr = "None" if parsed is None else _emit_sport_call(parsed)
             lines.append(f"    {target_repr}: ({sport_repr}, {preferred}),")
         lines.append("}")
         lines.append("")
 
-        # preferred_index
+        # preferred_index (encode table — many sports may map to one target via
+        # encode_for; the canonical preferred sport plus each broader ancestor).
         lines.append(f"{prefix}_PREFERRED_INDEX: dict = {{")
-        for target, parsed, preferred in entries:
-            if not preferred or parsed is None:
-                continue
+        for target, parsed, preferred, encode_for_keys in entries:
             target_repr = _emit_target_literal(platform, target)
-            key_repr = _emit_sport_key(parsed)
-            lines.append(f"    {key_repr}: {target_repr},")
+            if preferred and parsed is not None:
+                lines.append(f"    {_emit_sport_key(parsed)}: {target_repr},")
+            for ef_key in encode_for_keys:
+                lines.append(f"    {_emit_sport_key(ef_key)}: {target_repr},")
         lines.append("}")
         lines.append("")
 

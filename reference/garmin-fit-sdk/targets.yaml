@@ -16,6 +16,7 @@ targets:
   - { sport:   1, sub_sport:   3 }  # running / trail
   - { sport:   1, sub_sport:   4 }  # running / track
   - { sport:   1, sub_sport:  45 }  # running / indoor_running
+  - { sport:   1, sub_sport:  58 }  # running / virtual_activity
   - { sport:   2, sub_sport:   0 }  # cycling / generic
   - { sport:   2, sub_sport:   5 }  # cycling / spin
   - { sport:   2, sub_sport:   6 }  # cycling / indoor_cycling
@@ -31,6 +32,7 @@ targets:
   - { sport:   2, sub_sport:  47 }  # cycling / e_bike_mountain
   - { sport:   2, sub_sport:  48 }  # cycling / commuting
   - { sport:   2, sub_sport:  49 }  # cycling / mixed_surface
+  - { sport:   2, sub_sport:  58 }  # cycling / virtual_activity
   - { sport:   3, sub_sport:   0 }  # transition / generic
   - { sport:   3, sub_sport:  32 }  # transition / bike_to_run_transition
   - { sport:   3, sub_sport:  33 }  # transition / run_to_bike_transition
@@ -72,6 +74,7 @@ targets:
   - { sport:  14, sub_sport:  37 }  # snowboarding / backcountry
   - { sport:  14, sub_sport:  38 }  # snowboarding / resort
   - { sport:  15, sub_sport:   0 }  # rowing / generic
+  - { sport:  15, sub_sport:  14 }  # rowing / indoor_rowing
   - { sport:  16, sub_sport:   0 }  # mountaineering / generic
   - { sport:  17, sub_sport:   0 }  # hiking / generic
   - { sport:  18, sub_sport:   0 }  # multisport / generic

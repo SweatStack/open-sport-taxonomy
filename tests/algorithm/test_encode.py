@@ -51,8 +51,8 @@ class TestModifiersDominateDisciplineDepth:
         # matching no preferred row exactly. The algorithm matches whole
         # modifier sets (subset matching is intentionally out of scope).
         # After exhausting the with-modifiers walk, the empty-modifier walk
-        # yields (cycling.road, ∅) → (2, 7). +stationary is lost, .road kept.
-        assert garmin_fit.encode(Sport("cycling.road+race+stationary")) == GarminFitCode(2, 7)
+        # yields (cycling.road, ∅) → (2, 0) generic. +stationary is lost, .road kept.
+        assert garmin_fit.encode(Sport("cycling.road+race+stationary")) == GarminFitCode(2, 0)
 
 
 class TestOSTHierarchyWalk:

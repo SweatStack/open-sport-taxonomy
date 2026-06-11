@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [Unreleased]
+
+### Added
+
+- **Format v4: `encode_for` — decode and encode may now have different cardinality.** Decode stays one-to-one (one platform code → one OST sport); encode becomes many-to-one (several OST sports may collapse onto one platform code). A `preferred` row may list `encode_for: [<broader sport>, …]` — ancestor sports that also encode to that target — so a code can decode to a precise discipline while remaining the encode home for the bare modality. Strict-ancestor constrained and round-trip validated; see [`docs/translation.md`](docs/translation.md).
+- **Garmin FIT `virtual_activity` (sub_sport 58) now mapped.** `cycling/virtual_activity → cycling+stationary+virtual` and `running/virtual_activity → running+stationary+virtual` (previously coarsened to bare `cycling`/`running`, dropping the indoor + virtual facts). Aligns with the Strava/Wahoo `+stationary+virtual` convention.
+
+### Changed
+
+- **Garmin FIT `generic` codes now decode to the dominant discipline (opinionated).** `running/generic → running.road`, `cycling/generic → cycling.road`, `cross_country_skiing/generic → xc_skiing.classic`. Modern Garmin devices have no road/classic profile, so road runs/rides and classic skis are written to the *generic* code while the specific disciplines (trail, gravel, mountain, skate, …) self-label — so on Garmin "generic" *is* the dominant discipline, which is what consumers expect. Via `encode_for`, both the bare modality and the discipline encode back to the generic code (`running`/`running.road → 1/0`, `cycling`/`cycling.road → 2/0`, `xc_skiing`/`xc_skiing.classic → 12/0`); the legacy `street` (1/2) and `road` (2/7) codes now decode to road and are the encode target of nothing.
+- All platform mappings bumped to `format_version: 4`.
+
+### Fixed
+
+- **Garmin FIT `rowing/indoor_rowing` (15/14) → `rowing+stationary`** (was coarsening to bare `rowing`, dropping the indoor signal). `fitness_equipment/indoor_rowing` (4/14) remains the canonical encode target for `rowing+stationary`.
+
+### Removed
+
+- Non-redistributable vendor source documents `reference/garmin-fit-sdk/Profile.xlsx` and `reference/suunto/Activities.pdf` are no longer committed (now gitignored); the derived `*.yaml` reference files remain the in-repo source of truth.
+
+
 ## [0.8.5] - 2026-06-09
 
 ### Changed

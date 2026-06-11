@@ -1,4 +1,4 @@
-"""Loader/validator tests for format v3 (rules 1–13 in docs/translation.md).
+"""Loader/validator tests for format v4 (rules 1–14 in docs/translation.md).
 
 The validator lives in scripts/generate.py — these tests construct
 synthetic mappings and assert the validator rejects each kind of
@@ -43,9 +43,9 @@ MODIFIER_CODES = {"stationary", "virtual", "race", "assisted", "commute"}
 
 
 def _minimal_valid_mapping(extras=None):
-    """The smallest valid format-v3 mapping for testing."""
+    """The smallest valid format-v4 mapping for testing."""
     base = {
-        "format_version": 3,
+        "format_version": 4,
         "platform": "garmin_fit",
         "platform_version": "test",
         "fallback": {
@@ -240,3 +240,58 @@ class TestRule13CoarseningFields:
         m["target_coarsening"] = [{"unknown_rule": {}}]
         with pytest.raises(generate.ValidationError, match="reset"):
             _validate(m)
+
+
+class TestRule14EncodeFor:
+    """encode_for: decode-precise, encode many-to-one (rules 8, 9, 14)."""
+
+    def _road_with_encode_for(self, **overrides):
+        # entry[1] is 2/0 → cycling (preferred). Recast it as the canonical
+        # road row with bare `cycling` collapsing onto it via encode_for.
+        m = _minimal_valid_mapping()
+        m["entries"][1]["sport"] = "cycling.road"
+        m["entries"][1]["encode_for"] = ["cycling"]
+        m["entries"][1].update(overrides)
+        return m
+
+    def test_valid_encode_for_passes(self):
+        # cycling.road decodes at 2/0; bare cycling encodes there too. Both have
+        # exactly one encode home, cycling is a strict ancestor of cycling.road.
+        _validate(self._road_with_encode_for())
+
+    def test_encode_for_non_ancestor_rejected(self):
+        m = self._road_with_encode_for(encode_for=["running"])
+        with pytest.raises(generate.ValidationError, match="strict ancestor"):
+            _validate(m)
+
+    def test_encode_for_on_non_preferred_rejected(self):
+        m = self._road_with_encode_for(preferred=False)
+        with pytest.raises(generate.ValidationError, match="not preferred"):
+            _validate(m)
+
+    def test_encode_for_on_null_sport_rejected(self):
+        m = _minimal_valid_mapping()
+        targets = [*_minimal_targets(), {"sport": 2, "sub_sport": 7}]
+        m["entries"].append(
+            {
+                "target": {"sport": 2, "sub_sport": 7},
+                "sport": None,
+                "encode_for": ["cycling"],
+            }
+        )
+        with pytest.raises(generate.ValidationError, match="encode_for"):
+            _validate(m, targets=targets)
+
+    def test_sport_with_two_encode_homes_rejected(self):
+        # bare cycling is both an encode_for target (2/0) AND a preferred row (2/7).
+        m = self._road_with_encode_for()
+        targets = [*_minimal_targets(), {"sport": 2, "sub_sport": 7}]
+        m["entries"].append(
+            {
+                "target": {"sport": 2, "sub_sport": 7},
+                "sport": "cycling",
+                "preferred": True,
+            }
+        )
+        with pytest.raises(generate.ValidationError, match="encode homes"):
+            _validate(m, targets=targets)

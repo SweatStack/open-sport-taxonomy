@@ -48,8 +48,9 @@ class TestNullSportRoutesToFallback:
 
 class TestCoarseningForUnknownTargets:
     def test_unknown_sub_sport_walks_to_zero(self):
-        # (2, 99) is not a legal FIT pair; coarsening yields (2, 0) → cycling.
-        assert garmin_fit.decode(2, 99) == Sport("cycling")
+        # (2, 99) is not a legal FIT pair; coarsening yields (2, 0), which is the
+        # opinionated generic→road default (Garmin has no road profile).
+        assert garmin_fit.decode(2, 99) == Sport("cycling.road")
 
     def test_unknown_sport_walks_to_root(self):
         # (99, 99) → first rule (2, 0) miss, second rule (0, 0) → generic.

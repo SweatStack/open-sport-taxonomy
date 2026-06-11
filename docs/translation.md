@@ -1,4 +1,4 @@
-# Platform translation — format v3
+# Platform translation — format v4
 
 This document is the normative specification for OpenSportTaxonomy mapping files. A conforming implementation in any language must produce identical behavior from the YAML data alone.
 
@@ -22,7 +22,7 @@ How `targets.yaml` is produced is platform-specific: a per-platform build script
 ## File structure
 
 ```yaml
-format_version: 3
+format_version: 4
 platform: <platform_id>
 platform_version: <version string of the bundled platform spec>
 
@@ -38,6 +38,7 @@ entries:
   - target: <platform value>
     sport: <OST sport string> | null
     preferred: <bool>                       # optional, default false
+    encode_for: [<OST sport string>, …] # optional; only on a preferred row
 ```
 
 Rows in `entries` are sorted lexicographically by `target` so the file scans side-by-side with `reference/<platform>/targets.yaml`.
@@ -46,7 +47,7 @@ Rows in `entries` are sorted lexicographically by `target` so the file scans sid
 
 | Field | Required | Meaning |
 |---|---|---|
-| `format_version` | yes | Integer. Must equal `3`. |
+| `format_version` | yes | Integer. Must equal `4`. |
 | `platform` | yes | Platform identifier; must match the directory name under `reference/`. |
 | `platform_version` | yes | Version string of the bundled platform spec (informational; not parsed). |
 | `fallback.encode` | yes | Platform value returned when no encode candidate matches. |
@@ -55,7 +56,8 @@ Rows in `entries` are sorted lexicographically by `target` so the file scans sid
 | `entries` | yes | List of rows; one row per legal target in `reference/<platform>/targets.yaml`. |
 | `entries[].target` | yes | Platform-specific value. Shape is fixed per platform. |
 | `entries[].sport` | yes | OST sport string, or `null` if no OST equivalent exists. |
-| `entries[].preferred` | optional | If `true`, this row is the encode target for its `sport`. Default `false`. Forbidden when `sport: null`. |
+| `entries[].preferred` | optional | If `true`, this row is the canonical encode target for its `sport`. Default `false`. Forbidden when `sport: null`. |
+| `entries[].encode_for` | optional | List of *additional* OST sports that also encode to this target (beyond the row's own `sport`). Lets several sports collapse onto one code on encode while decode stays one-to-one. Only permitted on a `preferred` row; forbidden when `sport: null`. |
 
 ## Target coarsening
 
@@ -74,7 +76,7 @@ Each rule independently produces one candidate target by rewriting the original 
 
 ### Rule kinds
 
-The only rule kind defined in format v3 is `reset`:
+The only rule kind defined in format v4 is `reset`:
 
 ```yaml
 target_coarsening:
@@ -90,19 +92,20 @@ Future rule kinds require a `format_version` bump.
 
 A loader rejects a mapping file if any of these hold. Validation is fail-fast: the library refuses to operate on a partially valid file.
 
-1. `format_version == 3`.
+1. `format_version == 4`.
 2. `platform` matches a directory under `reference/`.
 3. No unknown top-level or per-entry keys.
 4. Every `target` in `entries` is unique.
 5. Every `target` in `entries` is a member of `reference/<platform>/targets.yaml`.
 6. Every member of `reference/<platform>/targets.yaml` has exactly one matching `target` row in `entries`. *(The rule that makes coverage oversights impossible.)*
-7. Every non-null `sport` parses as a valid sport string per `schema.yaml`. The sport code must be standard (present in `schema.yaml`); non-standard codes are forbidden in mapping files. Modifiers must be alphabetically sorted in the canonical form.
-8. For each non-null `sport` value appearing in `entries`, exactly one entry has `preferred: true`.
-9. `preferred: true` is forbidden on rows where `sport: null`.
+7. Every non-null `sport` (and every `encode_for` member) parses as a valid sport string per `schema.yaml`. The sport code must be standard (present in `schema.yaml`); non-standard codes are forbidden in mapping files. Modifiers must be alphabetically sorted in the canonical form.
+8. **One encode home per sport.** Every non-null sport that appears anywhere (as a row's `sport`, or in any `encode_for` list) has exactly **one** encode home — either a `preferred` row whose `sport` it is, *or* a single `encode_for` mention. Never both, never twice, never neither. (Decode is one-to-one; encode is many-to-one but each sport encodes to exactly one target.)
+9. `preferred: true` and non-empty `encode_for` are both forbidden on rows where `sport: null`. `encode_for` is permitted only on a `preferred` row.
 10. Round-trip on preferred entries: for every preferred entry, `decode(target) == sport` AND `encode(sport) == target`.
 11. Decode of non-preferred synonym rows: for every entry with `preferred: false` (and non-null `sport`), `decode(target) == sport`.
 12. `fallback.decode` parses as a valid sport string AND equals the `sport` of some preferred entry in `entries` (so the fallback round-trips through encode).
 13. Every field named in a `reset` rule exists in the platform's target shape.
+14. **`encode_for` ancestry + round-trip invariant.** Every `encode_for` code is a **strict ancestor** of the row's `sport`. For every `encode_for` sport `A` on a (preferred) target `T`: `encode(A) == T`. Decode of `T` stays the row's canonical `sport` (rule 10), so `decode(encode(A))` *sharpens* `A` to that canonical sub-sport (the dual of coarsening — see "Asymmetric granularity"). E.g. bare `cycling` → `2/0` → `cycling.road`.
 
 ## Algorithms
 
@@ -148,7 +151,7 @@ ost_hierarchy_walk(sport):
       yield (ancestor, ∅)
 ```
 
-`preferred_index` is built at load time by selecting rows with `preferred == true` and inverting them: `(sport.code, frozenset(sport.modifiers)) → target`.
+`preferred_index` is built at load time by mapping `(sport.code, frozenset(sport.modifiers)) → target` for: (a) each `preferred` row's own `sport`, and (b) each sport listed in any `encode_for`. So **decode and encode have different cardinality**: decode is one-to-one (one entry per target — `decode(2/0) = cycling.road`), while encode is **many-to-one** (several sports collapse onto one code — both `cycling` and `cycling.road` encode to `2/0`). `encode_for` is how that fan-in is declared; the dead/legacy synonym codes (e.g. FIT `street`/`road`) then decode correctly to the discipline while being the encode target of *nothing*.
 
 `strict_ancestors(code)` yields the dot-notation ancestors of `code`, nearest first: `strict_ancestors("cycling.road.crit") = ["cycling.road", "cycling"]`. The root code (e.g. `cycling`) has no strict ancestors.
 
@@ -218,26 +221,28 @@ These properties are enforced by validation rules 10–12 at load time.
 
 ## Notes for implementers
 
-- The loader builds two indexes from `entries`: `entries_by_target` (all rows, used by decode) and `preferred_index` (only `preferred: true` rows, inverted, used by encode).
+- The loader builds two indexes from `entries`: `entries_by_target` (all rows, used by decode) and `preferred_index` (used by encode — each `preferred` row's own `sport`, plus every `encode_for` ancestor, inverted to `sport → target`).
 - `sport.modifiers` is a `frozenset`; index keys must use frozenset to be hashable.
 - Sport string canonicalization (sorting modifiers) happens at parse time. Index keys are built from canonical forms.
-- `apply(rule, target)` is a small dispatch table on rule kind. Only `reset` exists in v3; adding a kind requires a `format_version` bump.
+- `apply(rule, target)` is a small dispatch table on rule kind. Only `reset` exists in v4; adding a kind requires a `format_version` bump.
 - `entries_by_target` is keyed by the target value's canonical form; for FIT this is the tuple `(sport_id, sub_sport_id)`. The YAML's `{ sport: 2, sub_sport: 6 }` deserializes to that tuple.
 
-## Future extension (not implemented): `encode_for` — asymmetric granularity
+## Asymmetric granularity: `encode_for`
 
-**Status: documented, not implemented.** Recorded here so the design is settled before it is needed. Adopting it requires a `format_version` bump. The trigger to implement is a *second* real instance — today there is exactly one (below).
+**Implemented in format v4.** Decouples a target's **decode meaning** from its **encode preference**, so several OST sports can collapse onto one platform code on encode while decode stays strictly one-to-one. Validated by rules 8, 9, and 14.
 
 ### The problem it solves
 
-format v3 ties a target's **decode meaning** and its **encode preference** to a single `sport` field on one row. That coupling is fine until a platform's *only* target for a family is named more specifically than the family it must serve — then the two directions pull apart.
+Before v4, the format tied a target's **decode meaning** and its **encode preference** to a single `sport` field on one row. That coupling is fine until a platform's *only* target for a family is named more specifically than the family it must serve — then the two directions pull apart.
 
 Motivating case — **Garmin Training API**. Its sole swimming target is `LAP_SWIMMING`; there is no generic `SWIMMING` target. The faithful behavior is:
 
 - `decode(LAP_SWIMMING) = swimming.pool` — lap swimming *is* pool swimming (the precise truth), **and**
 - `encode(swimming) = LAP_SWIMMING` — a generic swim plan must still push as a swim (the only swim bucket exists), not fall through to `fallback.encode = GENERIC`.
 
-In v3 one row cannot express both. `sport: swimming` gives correct encode but coarse decode; `sport: swimming.pool` gives precise decode but sends generic and open-water swims to `GENERIC`. You cannot add a separate `SWIMMING` row, because the platform has no such target. So the file must choose one direction to favor (it currently favors encode: `LAP_SWIMMING → swimming`).
+Without `encode_for`, one row cannot express both. `sport: swimming` gives correct encode but coarse decode; `sport: swimming.pool` gives precise decode but sends generic and open-water swims to `GENERIC`. You cannot add a separate `SWIMMING` row, because the platform has no such target. So the file must choose one direction to favor (`LAP_SWIMMING` currently still favors encode: `LAP_SWIMMING → swimming`).
+
+The same shape drove the first real adoption — **Garmin FIT's `generic` codes**. Modern Garmin has no road/classic profile, so road runs/rides and classic skis are written to the generic code; the specific disciplines self-label. So `decode(2/0) = cycling.road` (the dominant discipline) is the precise truth, yet bare `cycling` must still encode *somewhere* sensible. `encode_for: [cycling]` on the `2/0` row gives both, and leaves the dead `road`/`street` codes decoding correctly to the discipline while being the encode target of nothing.
 
 ### The field
 
@@ -259,6 +264,6 @@ Semantics:
 
 The strict `decode(encode(s)) == s` (validation rule 10) relaxes for sports encoded via `encode_for`: `encode(swimming) = LAP_SWIMMING`, then `decode(LAP_SWIMMING) = swimming.pool`, so `decode(encode(s))` is a **sub-sport** of `s` — encoding a vague sport and reading it back *sharpens* it to the platform's actual granularity. This is the dual of the existing **coarsening** (encoding a fine sport with no exact target and reading it back yields an *ancestor*). The generalized invariant: a round trip moves only **along the hierarchy** (up or down), never sideways — `decode(encode(s))` is always comparable to `s` in the sub-sport order.
 
-### Why not now
+### Adoption
 
-Across the seven bundled mappings, `LAP_SWIMMING` is the **only** row that wants this. A format field + validator + generator change + a relaxed round-trip rule + spec, all for one row, is over-engineering — and Garmin Training API is a push (encode-first) API, so decode precision there is low value. `LAP_SWIMMING → swimming` is correct for the direction that matters. Adopt `encode_for` when a second instance appears; `LAP_SWIMMING` becomes its first user that day. The change is purely additive — existing rows are unaffected.
+First real users are Garmin FIT's `generic → dominant-discipline` rows (`1/0 → running.road`, `2/0 → cycling.road`, `12/0 → xc_skiing.classic`), each with `encode_for` for the bare modality. `LAP_SWIMMING` (Garmin Training API) remains a *candidate* but is intentionally not migrated: it's a push (encode-first) API, so decode precision there is low value and `LAP_SWIMMING → swimming` is correct for the direction that matters. It can adopt `encode_for: [swimming]` the day decode precision becomes worthwhile. The mechanism is additive — rows without `encode_for` behave exactly as before.

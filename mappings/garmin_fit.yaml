@@ -1,9 +1,9 @@
-# OpenSportTaxonomy — garmin_fit mapping (format v3).
+# OpenSportTaxonomy — garmin_fit mapping (format v4).
 #
 # See docs/translation.md for the format specification.
 # See CONTRIBUTING.md for the workflow.
 
-format_version: 3
+format_version: 4
 platform: garmin_fit
 platform_version: "FIT SDK 21.133"
 
@@ -22,16 +22,16 @@ entries:
     preferred: true
 
   - target: { sport:   1, sub_sport:   0 }  # running / generic
-    sport: running
+    sport: running.road      # opinionated: Garmin has no road profile, so road runs are written as generic
     preferred: true
+    encode_for: [running]  # bare "running" also encodes to generic (not to the dead 'street' code)
 
   - target: { sport:   1, sub_sport:   1 }  # running / treadmill
     sport: running+stationary
     preferred: true
 
   - target: { sport:   1, sub_sport:   2 }  # running / street
-    sport: running.road
-    preferred: true
+    sport: running.road      # legacy 'street' code, unused by modern devices; decodes to road, encodes nothing
 
   - target: { sport:   1, sub_sport:   3 }  # running / trail
     sport: running.trail
@@ -44,9 +44,14 @@ entries:
   - target: { sport:   1, sub_sport:  45 }  # running / indoor_running
     sport: running
 
-  - target: { sport:   2, sub_sport:   0 }  # cycling / generic
-    sport: cycling
+  - target: { sport:   1, sub_sport:  58 }  # running / virtual_activity
+    sport: running+stationary+virtual
     preferred: true
+
+  - target: { sport:   2, sub_sport:   0 }  # cycling / generic
+    sport: cycling.road      # opinionated: modern Garmin has no road profile, so road rides are written as generic
+    preferred: true
+    encode_for: [cycling]  # bare "cycling" also encodes to generic (not to the legacy 'road' code)
 
   - target: { sport:   2, sub_sport:   5 }  # cycling / spin
     sport: cycling+stationary
@@ -56,8 +61,7 @@ entries:
     preferred: true
 
   - target: { sport:   2, sub_sport:   7 }  # cycling / road
-    sport: cycling.road
-    preferred: true
+    sport: cycling.road      # legacy FR735-era road code; decodes to road, encodes nothing
 
   - target: { sport:   2, sub_sport:   8 }  # cycling / mountain
     sport: cycling.mountain
@@ -98,6 +102,10 @@ entries:
 
   - target: { sport:   2, sub_sport:  49 }  # cycling / mixed_surface
     sport: cycling
+
+  - target: { sport:   2, sub_sport:  58 }  # cycling / virtual_activity
+    sport: cycling+stationary+virtual
+    preferred: true
 
   - target: { sport:   3, sub_sport:   0 }  # transition / generic
     sport: null
@@ -202,8 +210,9 @@ entries:
     sport: walking
 
   - target: { sport:  12, sub_sport:   0 }  # cross_country_skiing / generic
-    sport: xc_skiing
+    sport: xc_skiing.classic  # opinionated: generic XC defaults to classic (skate self-labels via 12/42)
     preferred: true
+    encode_for: [xc_skiing]  # bare "xc_skiing" also encodes here (FIT has no other XC code)
 
   - target: { sport:  12, sub_sport:  42 }  # cross_country_skiing / skate_skiing
     sport: xc_skiing.skate
@@ -232,6 +241,9 @@ entries:
   - target: { sport:  15, sub_sport:   0 }  # rowing / generic
     sport: rowing
     preferred: true
+
+  - target: { sport:  15, sub_sport:  14 }  # rowing / indoor_rowing
+    sport: rowing+stationary
 
   - target: { sport:  16, sub_sport:   0 }  # mountaineering / generic
     sport: null

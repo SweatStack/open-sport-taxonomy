@@ -34,6 +34,21 @@ TARGETS_PATH = REF_DIR / "targets.yaml"
 
 ALL_SENTINEL = 254
 
+# Sub_sports the FIT SDK leaves unassociated for a given sport (no entry in
+# `associated_sports`) but that real devices and virtual platforms do emit
+# under that sport. The FIT protocol permits any (sport, sub_sport) pair;
+# targets.yaml is the curated set OST commits to mapping, so these are
+# enumerated explicitly rather than fabricated as SDK associations.
+#   virtual_activity (58): empty SDK comment, but Zwift and similar write
+#   running/virtual_activity and cycling/virtual_activity.
+#   indoor_rowing (14): SDK comment is "Fitness Equipment" only, but Garmin
+#   watches with a dedicated indoor-row profile write rowing/indoor_rowing.
+OBSERVED_TARGETS: list[tuple[str, int]] = [
+    ("running", 58),  # virtual_activity
+    ("cycling", 58),  # virtual_activity
+    ("rowing", 14),  # indoor_rowing
+]
+
 
 def build_targets() -> list[dict]:
     sports = yaml.safe_load(SPORTS_PATH.read_text(encoding="utf-8"))["cases"]
@@ -58,6 +73,13 @@ def build_targets() -> list[dict]:
                 if name == sport_name:
                     targets.append((sport_id, ss["value"]))
                     break
+
+    # Curated pairs the SDK does not associate but devices/platforms emit.
+    name_to_sport_id = {name: sid for sid, name in sport_id_to_name.items()}
+    for sport_name, ss_value in OBSERVED_TARGETS:
+        sport_id = name_to_sport_id.get(sport_name)
+        if sport_id is not None:
+            targets.append((sport_id, ss_value))
 
     # Deduplicate and sort.
     targets = sorted(set(targets))

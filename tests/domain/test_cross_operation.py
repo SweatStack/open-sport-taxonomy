@@ -93,4 +93,5 @@ class TestPlatformTranslationConsistency:
         sport = Sport.parse("cycling.road.criterium")
         assert strava.encode(sport) == "Ride"
         assert apple_healthkit.encode(sport) == 13
-        assert garmin_fit.encode(sport) == GarminFitCode(sport=2, sub_sport=7)
+        # Walks up to cycling.road, which encodes to generic 2/0 (the opinionated default).
+        assert garmin_fit.encode(sport) == GarminFitCode(sport=2, sub_sport=0)
