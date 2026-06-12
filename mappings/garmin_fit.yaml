@@ -1,9 +1,8 @@
-# OpenSportTaxonomy — garmin_fit mapping (format v4).
+# OpenSportTaxonomy — garmin_fit mapping.
 #
 # See docs/translation.md for the format specification.
 # See CONTRIBUTING.md for the workflow.
 
-format_version: 4
 platform: garmin_fit
 platform_version: "FIT SDK 21.133"
 

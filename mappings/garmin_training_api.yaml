@@ -1,9 +1,8 @@
-# OpenSportTaxonomy — garmin_training_api mapping (format v4).
+# OpenSportTaxonomy — garmin_training_api mapping.
 #
 # See docs/translation.md for the format specification.
 # See CONTRIBUTING.md for the workflow.
 
-format_version: 4
 platform: garmin_training_api
 platform_version: "V2 1.0 (2025-05-26)"
 

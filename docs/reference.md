@@ -2,7 +2,7 @@
 
 # OpenSportTaxonomy Reference
 
-10 sport families, 25 sports, 11 modifiers — taxonomy version 0.8.5
+10 sport families, 25 sports, 11 modifiers — taxonomy version 0.9.0
 
 ## Sports
 

@@ -1,4 +1,4 @@
-"""Loader/validator tests for format v4 (rules 1–14 in docs/translation.md).
+"""Loader/validator tests for format v4 (rules 1–13 in docs/translation.md).
 
 The validator lives in scripts/generate.py — these tests construct
 synthetic mappings and assert the validator rejects each kind of
@@ -43,9 +43,8 @@ MODIFIER_CODES = {"stationary", "virtual", "race", "assisted", "commute"}
 
 
 def _minimal_valid_mapping(extras=None):
-    """The smallest valid format-v4 mapping for testing."""
+    """The smallest valid mapping for testing."""
     base = {
-        "format_version": 4,
         "platform": "garmin_fit",
         "platform_version": "test",
         "fallback": {
@@ -98,14 +97,7 @@ class TestSmoke:
         _validate(_minimal_valid_mapping())
 
 
-class TestRule1FormatVersion:
-    def test_wrong_version_rejected(self):
-        m = _minimal_valid_mapping({"format_version": 2})
-        with pytest.raises(generate.ValidationError, match="format_version"):
-            _validate(m)
-
-
-class TestRule2PlatformField:
+class TestRule1PlatformField:
     def test_platform_mismatch_rejected(self):
         # Filename says "garmin_fit" but the field says "strava".
         m = _minimal_valid_mapping({"platform": "strava"})
@@ -113,7 +105,7 @@ class TestRule2PlatformField:
             _validate(m, platform="garmin_fit")
 
 
-class TestRule3UnknownKeys:
+class TestRule2UnknownKeys:
     def test_top_level_unknown_rejected(self):
         m = _minimal_valid_mapping({"unknown_key": "x"})
         with pytest.raises(generate.ValidationError, match="unknown_key"):
@@ -126,7 +118,7 @@ class TestRule3UnknownKeys:
             _validate(m)
 
 
-class TestRule4UniqueTargets:
+class TestRule3UniqueTargets:
     def test_duplicate_target_rejected(self):
         m = _minimal_valid_mapping()
         m["entries"].append(
@@ -140,7 +132,7 @@ class TestRule4UniqueTargets:
             _validate(m)
 
 
-class TestRule5LegalTargets:
+class TestRule4LegalTargets:
     def test_unknown_target_rejected(self):
         m = _minimal_valid_mapping()
         m["entries"].append(
@@ -153,7 +145,7 @@ class TestRule5LegalTargets:
             _validate(m)
 
 
-class TestRule6Coverage:
+class TestRule5Coverage:
     def test_missing_target_rejected(self):
         m = _minimal_valid_mapping()
         # Drop entry[1] so target (2, 0) becomes uncovered.
@@ -162,7 +154,7 @@ class TestRule6Coverage:
             _validate(m)
 
 
-class TestRule7SportString:
+class TestRule6SportString:
     def test_non_standard_code_rejected(self):
         m = _minimal_valid_mapping()
         m["entries"][0]["sport"] = "paragliding"
@@ -182,7 +174,7 @@ class TestRule7SportString:
             _validate(m)
 
 
-class TestRule8OnePreferredPerSport:
+class TestRule7OneEncodeHomePerSport:
     def test_two_preferred_same_sport_rejected(self):
         m = _minimal_valid_mapping()
         m["entries"].append(
@@ -205,7 +197,7 @@ class TestRule8OnePreferredPerSport:
             _validate(m)
 
 
-class TestRule9NullCannotBePreferred:
+class TestRule8NullCannotBePreferred:
     def test_null_sport_with_preferred_rejected(self):
         m = _minimal_valid_mapping()
         targets = [*_minimal_targets(), {"sport": 2, "sub_sport": 7}]
@@ -220,7 +212,7 @@ class TestRule9NullCannotBePreferred:
             _validate(m, targets=targets)
 
 
-class TestRule12FallbackDecodeRoundTrips:
+class TestRule11FallbackDecodeRoundTrips:
     def test_fallback_not_in_preferred_rejected(self):
         m = _minimal_valid_mapping()
         m["fallback"]["decode"] = "running"  # no preferred entry for running
@@ -228,7 +220,7 @@ class TestRule12FallbackDecodeRoundTrips:
             _validate(m)
 
 
-class TestRule13CoarseningFields:
+class TestRule12CoarseningFields:
     def test_unknown_reset_field_rejected(self):
         m = _minimal_valid_mapping()
         m["target_coarsening"] = [{"reset": {"unknown_field": 0}}]
@@ -242,7 +234,7 @@ class TestRule13CoarseningFields:
             _validate(m)
 
 
-class TestRule14EncodeFor:
+class TestRule13EncodeFor:
     """encode_for: decode-precise, encode many-to-one (rules 8, 9, 14)."""
 
     def _road_with_encode_for(self, **overrides):

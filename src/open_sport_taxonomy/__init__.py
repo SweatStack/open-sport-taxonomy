@@ -12,6 +12,6 @@ try:
 except PackageNotFoundError:  # running from a source tree without an install
     version = "0+unknown"
 
-taxonomy_version = "0.8.5"
+taxonomy_version = "0.9.0"
 
 __all__ = ["GarminFitCode", "Modifier", "Sport", "taxonomy_version", "version"]

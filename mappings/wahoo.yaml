@@ -1,9 +1,8 @@
-# OpenSportTaxonomy — wahoo mapping (format v4).
+# OpenSportTaxonomy — wahoo mapping.
 #
 # See docs/translation.md for the format specification.
 # See CONTRIBUTING.md for the workflow.
 
-format_version: 4
 platform: wahoo
 platform_version: "Cloud API (changelog 2025-10-06)"
 

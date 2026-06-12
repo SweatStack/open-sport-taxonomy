@@ -17,7 +17,7 @@ Two modes:
         targets.yaml that the existing mapping omits. Used after bumping
         a platform_version.
 
-See docs/translation.md for the format v3 specification.
+See docs/translation.md for the mapping-format specification.
 """
 
 from __future__ import annotations
@@ -113,12 +113,11 @@ def render_file(
 ) -> str:
     """Render a complete v3 mapping file."""
     lines: list[str] = [
-        f"# OpenSportTaxonomy — {platform} mapping (format v4).",
+        f"# OpenSportTaxonomy — {platform} mapping.",
         "#",
         "# See docs/translation.md for the format specification.",
         "# See CONTRIBUTING.md for the workflow.",
         "",
-        "format_version: 4",
         f"platform: {platform}",
         f'platform_version: "{platform_version}"',
         "",

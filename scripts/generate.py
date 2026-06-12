@@ -5,7 +5,7 @@ Check: uv run scripts/generate.py --check
 
 Inputs:
   - schema.yaml — the OST taxonomy (sports, modifiers).
-  - mappings/<platform>.yaml — format v3 platform-keyed mapping files.
+  - mappings/<platform>.yaml — platform-keyed mapping files.
   - reference/<platform>/targets.yaml — authoritative legal-target enumeration.
 
 Outputs:
@@ -66,7 +66,7 @@ def load_reference(*parts: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Validation — format v3 rules 1–13 from docs/translation.md.
+# Validation — rules 1–13 from docs/translation.md.
 # ---------------------------------------------------------------------------
 
 
@@ -75,7 +75,6 @@ class ValidationError(Exception):
 
 
 ALLOWED_TOP_KEYS = {
-    "format_version",
     "platform",
     "platform_version",
     "fallback",
@@ -96,7 +95,7 @@ def target_key(t: Any) -> Any:
 def parse_sport(
     raw: str, sport_codes: set[str], modifier_codes: set[str]
 ) -> tuple[str, frozenset[str]]:
-    """Parse a sport string into (code, modifiers); enforce rule 7."""
+    """Parse a sport string into (code, modifiers); enforce rule 6."""
     if not raw or "+" in raw[:1] or raw.endswith("+") or "++" in raw:
         raise ValidationError(f"malformed sport string: {raw!r}")
     parts = raw.split("+")
@@ -133,13 +132,7 @@ def validate_mapping(
     """
     file_label = f"mappings/{platform}.yaml"
 
-    # Rule 1: format_version.
-    if mapping.get("format_version") != 4:
-        raise ValidationError(
-            f"{file_label}: format_version must be 4, got {mapping.get('format_version')!r}"
-        )
-
-    # Rule 2: platform field.
+    # Rule 1: platform field.
     if mapping.get("platform") != platform:
         raise ValidationError(
             f"{file_label}: platform field {mapping.get('platform')!r} does not match filename"
@@ -147,7 +140,7 @@ def validate_mapping(
     if platform not in PLATFORM_REF_DIR:
         raise ValidationError(f"{file_label}: platform {platform!r} has no reference/ directory")
 
-    # Rule 3: no unknown top-level keys.
+    # Rule 2: no unknown top-level keys.
     unknown_top = set(mapping) - ALLOWED_TOP_KEYS
     if unknown_top:
         raise ValidationError(f"{file_label}: unknown top-level keys: {sorted(unknown_top)}")
@@ -181,7 +174,7 @@ def validate_mapping(
         if "sport" not in e:
             raise ValidationError(f"{file_label}: entries[{i}] missing sport")
 
-    # Rule 4: targets unique within entries.
+    # Rule 3: targets unique within entries.
     seen: dict[Any, int] = {}
     for i, e in enumerate(entries):
         k = target_key(e["target"])
@@ -191,7 +184,7 @@ def validate_mapping(
             )
         seen[k] = i
 
-    # Rule 5: every target is in targets.yaml.
+    # Rule 4: every target is in targets.yaml.
     legal_keys = {target_key(t) for t in targets}
     for i, e in enumerate(entries):
         if target_key(e["target"]) not in legal_keys:
@@ -199,7 +192,7 @@ def validate_mapping(
                 f"{file_label}: entries[{i}] target {e['target']!r} not in reference targets.yaml"
             )
 
-    # Rule 6: every targets.yaml value has a row.
+    # Rule 5: every targets.yaml value has a row.
     entry_keys = {target_key(e["target"]) for e in entries}
     missing = sorted(t for t in legal_keys if t not in entry_keys)
     if missing:
@@ -209,7 +202,7 @@ def validate_mapping(
             f"First few: {sample}. Run scripts/scaffold.py {platform} --update to scaffold."
         )
 
-    # Rule 7: parse each non-null sport string (and any encode_for ancestors).
+    # Rule 6: parse each non-null sport string (and any encode_for ancestors).
     # Each parsed entry is (target, parsed_sport | None, preferred, encode_for_keys).
     SportKey = tuple[str, frozenset[str]]
     parsed_entries: list[tuple[Any, SportKey | None, bool, list[SportKey]]] = []
@@ -224,7 +217,7 @@ def validate_mapping(
             )
 
         if sport_raw is None:
-            # Rule 9: preferred and encode_for forbidden when sport is null.
+            # Rule 8: preferred and encode_for forbidden when sport is null.
             if encode_for_raw:
                 raise ValidationError(
                     f"{file_label}: entries[{i}] has sport: null but non-empty encode_for"
@@ -271,12 +264,12 @@ def validate_mapping(
             encode_for_keys.append(ef_key)
         parsed_entries.append((e["target"], parsed, preferred, encode_for_keys))
 
-    # Rule 9: preferred forbidden when sport is null.
+    # Rule 8: preferred forbidden when sport is null.
     for i, (_target, parsed, preferred, _aliases) in enumerate(parsed_entries):
         if parsed is None and preferred:
             raise ValidationError(f"{file_label}: entries[{i}] has sport: null but preferred: true")
 
-    # Rule 8: every non-null sport has exactly ONE encode home — either a preferred
+    # Rule 7: every non-null sport has exactly ONE encode home — either a preferred
     # entry whose sport it is, or an encode_for mention. Never both, never neither,
     # never twice. Encode is many-to-one (several sports → one target), but each sport
     # encodes to exactly one target.
@@ -299,7 +292,7 @@ def validate_mapping(
                 f"(preferred entries + encode_for mentions), expected exactly 1"
             )
 
-    # Rule 13: target_coarsening reset rules name valid fields.
+    # Rule 12: target_coarsening reset rules name valid fields.
     coarsening = mapping.get("target_coarsening", []) or []
     if not isinstance(coarsening, list):
         raise ValidationError(f"{file_label}: target_coarsening must be a list")
@@ -322,7 +315,7 @@ def validate_mapping(
                 f"{sorted(unknown_fields)}; valid fields are {sorted(target_fields)}"
             )
 
-    # Rule 12: fallback.decode parses; equals sport of some preferred entry.
+    # Rule 11: fallback.decode parses; equals sport of some preferred entry.
     try:
         fallback_decode_parsed = parse_sport(fb["decode"], sport_codes, modifier_codes)
     except ValidationError as ex:
@@ -356,7 +349,8 @@ def _format_sport(s: tuple[str, frozenset[str]]) -> str:
 
 
 def validate_round_trips(platform: str, mapping: dict, runtime_platform: Any) -> None:
-    """Rules 10–11: round-trip per preferred entry; decode per non-preferred row.
+    """Rules 9–10, 13: round-trip per preferred entry; decode per non-preferred row;
+    encode_for ancestors encode to their target.
 
     Requires the runtime Platform object built from the same data. Runs after
     code generation against the freshly imported module.
@@ -756,7 +750,7 @@ def generate_sport(schema: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# _platforms.py — format v3 tables.
+# _platforms.py — generated platform tables.
 # ---------------------------------------------------------------------------
 
 
@@ -925,7 +919,7 @@ def main() -> int:
     sport_codes = {s["code"] for s in schema["sports"]}
     modifier_codes = {m["code"] for m in schema["modifiers"]}
 
-    # Validate every mapping file (rules 1–9, 12–13).
+    # Validate every mapping file (rules 1–8, 11–12).
     validated: dict[str, dict] = {}
     for platform in PLATFORM_REF_DIR:
         mapping = load_mapping(platform)
@@ -960,7 +954,7 @@ def main() -> int:
         path.write_text(content, encoding="utf-8")
         print(f"Generated {path.relative_to(ROOT)}")
 
-    # Rules 10–11: round-trip validation against the freshly generated runtime.
+    # Rules 9–10, 13: round-trip validation against the freshly generated runtime.
     # Re-import the module to pick up the new file.
     import importlib
 

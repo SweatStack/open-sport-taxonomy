@@ -4,8 +4,8 @@
 # and sub_sports.yaml. Do not edit by hand.
 #
 # Each target is a legal pair the FIT protocol permits in a session
-# `sport`/`sub_sport` field. Used by the format v3 loader (validation
-# rules 5 and 6 in docs/translation.md) to enforce structural coverage
+# `sport`/`sub_sport` field. Used by the loader (validation rules 4 and 5
+# in docs/translation.md) to enforce structural coverage
 # of mappings/garmin_fit.yaml.
 
 targets:

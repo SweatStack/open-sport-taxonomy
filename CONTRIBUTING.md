@@ -62,10 +62,9 @@ uv run scripts/lint.py --fix    # auto-fix ordering
 
 ## Platform mappings
 
-Mapping files in `mappings/` translate platform-native sport identifiers to OST sport strings. The format (v3) is specified in [`docs/translation.md`](docs/translation.md). Briefly:
+Mapping files in `mappings/` translate platform-native sport identifiers to OST sport strings. The format is specified in [`docs/translation.md`](docs/translation.md) and is part of the OST spec version (see [Versioning](#versioning)). Briefly:
 
 ```yaml
-format_version: 3
 platform: <platform_id>
 platform_version: <version of the bundled platform spec>
 
@@ -80,9 +79,10 @@ entries:
   - target: <platform value>
     sport: <OST sport string> | null
     preferred: <bool>               # optional, default false
+    encode_for: [<broader sport>]   # optional; only on a preferred row
 ```
 
-Files are **keyed by platform target** — every legal target in `reference/<platform>/targets.yaml` has exactly one row. Rows with no OST equivalent get `sport: null`. Exactly one row per non-null sport carries `preferred: true`; that row is used for encoding. Other rows decode to the same sport (synonyms).
+Files are **keyed by platform target** — every legal target in `reference/<platform>/targets.yaml` has exactly one row. Rows with no OST equivalent get `sport: null`. Exactly one row per non-null sport carries `preferred: true`; that row is used for encoding. Other rows decode to the same sport (synonyms). A preferred row may also list `encode_for` — broader (ancestor) sports that *also* encode to its target, letting several sports collapse onto one code on encode while decode stays one-to-one.
 
 The generator (`scripts/generate.py`) enforces 13 validation rules against every mapping file. The rule that mattered most for the 0.4.0 oversight: **every value in `reference/<platform>/targets.yaml` must have a row.** New SDK release → new rows or generation fails.
 
@@ -180,21 +180,39 @@ The 12 surviving mutants are categorized:
 - **8 mutations of error-message string content.** Asserting exact error-message wording would make tests brittle without catching real bugs; we assert that the right exception type fires with a useful regex match, not that every character is identical. Accepted.
 - **2 mutations of type aliases** (`SportKey`, `CoarseningRule`). These are runtime no-ops; the `mypy --strict` check is the right tool, not pytest. Accepted.
 - **1 mutation in `decode`'s coarsening loop** (`continue` → `break`). Functionally equivalent given the current FIT mapping data: both code paths reach `fallback.decode = generic`. Would become a real gap if any platform adds non-generic fallbacks or a third coarsening rule; revisit at that time. Accepted with caveat.
-- **1 mutation of an unreachable error string** (`"Unknown coarsening rule kind"`). Format v3 defines only the `reset` rule kind, so this branch can't fire under any valid mapping. Tested for completeness via the loader's validation rules, but the runtime branch isn't reachable. Accepted.
+- **1 mutation of an unreachable error string** (`"Unknown coarsening rule kind"`). The mapping format defines only the `reset` rule kind, so this branch can't fire under any valid mapping. Tested for completeness via the loader's validation rules, but the runtime branch isn't reachable. Accepted.
 
 Periodic mutation runs (recommended quarterly) should not chase 80% by adding brittle tests. The kill rate is a tool for finding genuinely-weak tests, not a target to optimize.
 
 ## Versioning
 
-The `version` field in `schema.yaml` follows [Semantic Versioning](https://semver.org):
+OST carries **two** version numbers (see [`plans/024`](plans/024-two-version-model.md) for the rationale):
 
-- **Patch** (0.1.x) — new sport codes or modifiers added
-- **Minor** (0.x.0) — new fields, new metadata, structural additions
-- **Major** (x.0.0) — breaking changes to the schema format
+- **Spec version** (`schema.yaml`, `version:`) — the version of the *standard*: the sport + modifier vocabulary, the OST string format, the mapping-file format, and the bundled platform mappings, all under one SemVer line. This is the number other implementations of OST (the web tool, future ports) refer to.
+- **Package version** (`pyproject.toml`) — the version of *this Python library*, on its own SemVer line. What you `pip install`.
 
-Sport codes are never removed. A deprecated code gets a `deprecated: true` field and a `replaced_by` pointer.
+They are related but not equal: **`open-sport-taxonomy` implements OST spec X.** The package version advances on any library release; the spec version advances only when the standard's content or format changes. The library exposes both — `open_sport_taxonomy.version` (package, from installed metadata) and `open_sport_taxonomy.taxonomy_version` (spec, from `schema.yaml`).
 
-Each release is tagged in git (`v0.1.0`) and published as a GitHub Release.
+**Compatibility is by spec major version.** Data and mappings are interoperable within a major: an implementation of spec `M.x` reads anything tagged `M.*` — older minors fully, newer minors best-effort (unknown codes decode to `generic`). A major bump signals a breaking change.
+
+When to bump the **spec** version:
+
+- **patch** — editorial only (a label reworded); no code/format/decode change.
+- **minor** — additive & backward-compatible: a new sport/modifier code, a new mapping-file feature, a new platform mapping, a brand-new row for a previously-unmapped target.
+- **major** — breaking: a code removed/renamed, the string grammar changed, the mapping format changed beyond what older loaders can read, **or an existing input re-interpreted** (a target that used to decode to A now decodes to B).
+
+Sport codes are never removed silently. A deprecated code gets a `deprecated: true` field and a `replaced_by` pointer (removal/rename is a major bump).
+
+> **Pre-1.0:** while OST is `0.x`, the major axis is pinned at 0 and breaking changes ride the **minor** number. The major-compatibility rule becomes binding at `1.0`.
+
+### Releasing
+
+1. Bump the spec version in `schema.yaml` if the standard changed; bump the package version in `pyproject.toml`.
+2. Move the CHANGELOG `[Unreleased]` block under a dated version heading.
+3. `make generate && make lint && make test` — all green.
+4. `make build` to produce the wheel/sdist (carries the package version from `pyproject.toml`).
+5. **Tag the release with the spec version** (`git tag v<spec>`, e.g. `v0.9.0`) and push; cut a GitHub Release. A code-only release where the spec is unchanged is tagged with the **package** version instead, so every release has a unique tag. Git tags do not affect what PyPI publishes — `uv_build` reads the static `version` from `pyproject.toml`.
+6. `make publish` to upload to PyPI.
 
 ## Reporting errors
 

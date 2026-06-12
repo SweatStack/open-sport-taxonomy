@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
-## [Unreleased]
+## [0.9.0] - 2026-06-11
 
 ### Added
 
-- **Format v4: `encode_for` — decode and encode may now have different cardinality.** Decode stays one-to-one (one platform code → one OST sport); encode becomes many-to-one (several OST sports may collapse onto one platform code). A `preferred` row may list `encode_for: [<broader sport>, …]` — ancestor sports that also encode to that target — so a code can decode to a precise discipline while remaining the encode home for the bare modality. Strict-ancestor constrained and round-trip validated; see [`docs/translation.md`](docs/translation.md).
+- **`encode_for` — decode and encode may now have different cardinality.** Decode stays one-to-one (one platform code → one OST sport); encode becomes many-to-one (several OST sports may collapse onto one platform code). A `preferred` row may list `encode_for: [<broader sport>, …]` — ancestor sports that also encode to that target — so a code can decode to a precise discipline while remaining the encode home for the bare modality. Strict-ancestor constrained and round-trip validated; see [`docs/translation.md`](docs/translation.md).
 - **Garmin FIT `virtual_activity` (sub_sport 58) now mapped.** `cycling/virtual_activity → cycling+stationary+virtual` and `running/virtual_activity → running+stationary+virtual` (previously coarsened to bare `cycling`/`running`, dropping the indoor + virtual facts). Aligns with the Strava/Wahoo `+stationary+virtual` convention.
 - **`open_sport_taxonomy.taxonomy_version`** — the taxonomy/spec version (the vocabulary of sports + modifiers and the OST string format), exposed independently of the package release. Sourced from `schema.yaml`.
 
@@ -19,8 +19,7 @@ Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 - **Garmin FIT `generic` codes now decode to the dominant discipline (opinionated).** `running/generic → running.road`, `cycling/generic → cycling.road`, `cross_country_skiing/generic → xc_skiing.classic`. Modern Garmin devices have no road/classic profile, so road runs/rides and classic skis are written to the *generic* code while the specific disciplines (trail, gravel, mountain, skate, …) self-label — so on Garmin "generic" *is* the dominant discipline, which is what consumers expect. Via `encode_for`, both the bare modality and the discipline encode back to the generic code (`running`/`running.road → 1/0`, `cycling`/`cycling.road → 2/0`, `xc_skiing`/`xc_skiing.classic → 12/0`); the legacy `street` (1/2) and `road` (2/7) codes now decode to road and are the encode target of nothing.
 - **Same generic→road default extended to Strava, Suunto, and Wahoo** (the platforms that offer the specific disciplines but no road type): Strava `Run → running.road`, `Ride → cycling.road`; Suunto `Running (1) → running.road`, `Cycling (2) → cycling.road`; Wahoo `RUNNING (1) → running.road`. Each carries `encode_for` so the bare modality still encodes home. **Wahoo cycling is deliberately *not* changed** — `BIKING_ROAD` (15) exists, so generic `BIKING` (0) remains bare `cycling` (a genuine "unspecified" signal). Polar, Apple HealthKit, and Garmin Training API are also unchanged: Polar models road explicitly (generic = unspecified), and the latter two have a single coarse running/cycling type that also covers trail/mountain (road would mislabel).
-- All platform mappings bumped to `format_version: 4`.
-- **`open_sport_taxonomy.version` now reports the installed *package* release** (read from distribution metadata) instead of mirroring the taxonomy version. The two are decoupled: the package version moves on any release; `taxonomy_version` moves only on a vocabulary/format change. The schema/pyproject version-equality check is removed. See `plans/023`.
+- **Two-version model (one spec version + one package version).** The mapping-file format is now versioned as part of the OST **spec version** (`schema.yaml`) together with the vocabulary, the OST string format, and the bundled mappings; the per-file `format_version` field is **removed**. The package version (`pyproject.toml`) is independent and reported by `open_sport_taxonomy.version` (from installed metadata); the spec version is `open_sport_taxonomy.taxonomy_version` (from `schema.yaml`). The schema/pyproject version-equality check is removed; git release tags track the spec version. See `plans/023` and `plans/024`.
 
 ### Fixed
 

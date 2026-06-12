@@ -1,9 +1,8 @@
-# OpenSportTaxonomy — apple_healthkit mapping (format v4).
+# OpenSportTaxonomy — apple_healthkit mapping.
 #
 # See docs/translation.md for the format specification.
 # See CONTRIBUTING.md for the workflow.
 
-format_version: 4
 platform: apple_healthkit
 platform_version: "iOS 18"
 

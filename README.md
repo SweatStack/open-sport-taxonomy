@@ -217,7 +217,7 @@ garmin_fit.decode(2)                   # sub_sport omitted → generic
 garmin_fit.decode(2, None)             # None → generic (e.g. from a FIT parser)
 ```
 
-Translation is lossy by design — see [`docs/translation.md`](docs/translation.md) for the format v3 specification, the encode/decode algorithms, and the structural-coverage rules that make both directions well-defined.
+Translation is lossy by design — see [`docs/translation.md`](docs/translation.md) for the mapping-format specification, the encode/decode algorithms, and the structural-coverage rules that make both directions well-defined.
 
 ### Pydantic integration
 
@@ -250,14 +250,19 @@ w.model_dump()    # {"sport": "cycling.road+stationary"}
 
 ## Versioning
 
-The taxonomy follows [Semantic Versioning](https://semver.org). Each release is a git tag and a GitHub Release. Sport codes are stable: once published, never removed, only deprecated.
+OST has two [SemVer](https://semver.org) version numbers:
+
+- **Spec version** (`schema.yaml`) — the standard: vocabulary, OST string format, mapping format, and bundled mappings, versioned together. Git **release tags are the spec version** (`v0.9.0`), so a tag pins a snapshot of the whole standard.
+- **Package version** (`pyproject.toml`) — this Python library; what you `pip install`. It *implements* a spec version. The library exposes both as `open_sport_taxonomy.version` (package) and `open_sport_taxonomy.taxonomy_version` (spec).
+
+Compatibility is by spec major version; sport codes are stable (once published, never removed — only deprecated). See [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning) for the bump rules.
 
 ```
 # Latest
 https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/main/schema.yaml
 
-# Pinned to a version
-https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/v0.1.0/schema.yaml
+# Pinned to a spec version (git tag)
+https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/v0.9.0/schema.yaml
 ```
 
 ## Contributing

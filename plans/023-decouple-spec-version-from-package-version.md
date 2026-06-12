@@ -1,5 +1,9 @@
 # Plan 023: Decouple the taxonomy (spec) version from the package version
 
+> **Superseded in part by [`plans/024`](024-two-version-model.md)**, which folds the
+> per-file `format_version` into the spec version (two versions total, not three). The
+> decouple below stands; only the third axis changed.
+>
 > **Status: implemented.** `open_sport_taxonomy.version` now reads the installed
 > package release via `importlib.metadata`; `taxonomy_version` (from `schema.yaml`) is
 > exposed alongside it; the equality lint check is removed; `docs/reference.md` shows the

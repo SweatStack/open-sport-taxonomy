@@ -1,6 +1,6 @@
-# Platform translation — format v4
+# Platform translation
 
-This document is the normative specification for OpenSportTaxonomy mapping files. A conforming implementation in any language must produce identical behavior from the YAML data alone.
+This document is the normative specification for OpenSportTaxonomy mapping files. A conforming implementation in any language must produce identical behavior from the YAML data alone. The mapping format is part of the OST **spec version** (`schema.yaml`); see [Versioning](#versioning) below.
 
 ## Concepts
 
@@ -15,14 +15,13 @@ The mapping file is keyed by the **finite** side (platform targets). OST sport s
 
 ## Reference data contract
 
-Each platform's `reference/<platform>/targets.yaml` is the authoritative enumeration of legal target values. It is consumed by the loader (validation rules 5–6), the linter, and the scaffolder.
+Each platform's `reference/<platform>/targets.yaml` is the authoritative enumeration of legal target values. It is consumed by the loader (validation rules 4–5), the linter, and the scaffolder.
 
 How `targets.yaml` is produced is platform-specific: a per-platform build script under `scripts/build_reference/<platform>.py` derives it from the platform's upstream source data (FIT's `sports.yaml × sub_sports.yaml` filtered by `associated_sports`; Strava's `sport_types.yaml`; etc.). The runtime never invokes these scripts — they run at commit time. CI runs them and asserts `git diff --exit-code` to catch reference drift.
 
 ## File structure
 
 ```yaml
-format_version: 4
 platform: <platform_id>
 platform_version: <version string of the bundled platform spec>
 
@@ -47,7 +46,6 @@ Rows in `entries` are sorted lexicographically by `target` so the file scans sid
 
 | Field | Required | Meaning |
 |---|---|---|
-| `format_version` | yes | Integer. Must equal `4`. |
 | `platform` | yes | Platform identifier; must match the directory name under `reference/`. |
 | `platform_version` | yes | Version string of the bundled platform spec (informational; not parsed). |
 | `fallback.encode` | yes | Platform value returned when no encode candidate matches. |
@@ -61,7 +59,7 @@ Rows in `entries` are sorted lexicographically by `target` so the file scans sid
 
 ## Target coarsening
 
-`target_coarsening` rules are consulted **only** when decoding a target that does not appear in `entries`. Because validation rule 6 requires every value in the bundled `targets.yaml` to have a row, coarsening only fires for forward-compat (a target value from a newer platform version than the bundled snapshot).
+`target_coarsening` rules are consulted **only** when decoding a target that does not appear in `entries`. Because validation rule 5 requires every value in the bundled `targets.yaml` to have a row, coarsening only fires for forward-compat (a target value from a newer platform version than the bundled snapshot).
 
 ### Semantics
 
@@ -76,7 +74,7 @@ Each rule independently produces one candidate target by rewriting the original 
 
 ### Rule kinds
 
-The only rule kind defined in format v4 is `reset`:
+The only rule kind defined in the current spec is `reset`:
 
 ```yaml
 target_coarsening:
@@ -84,28 +82,27 @@ target_coarsening:
   - reset: { sport: 0, sub_sport: 0 }          # set both fields
 ```
 
-`reset` sets the listed fields to the values declared inline. Fields not named in the rule pass through unchanged. Every field named in a `reset` rule must exist in the platform's target shape (validation rule 13).
+`reset` sets the listed fields to the values declared inline. Fields not named in the rule pass through unchanged. Every field named in a `reset` rule must exist in the platform's target shape (validation rule 12).
 
-Future rule kinds require a `format_version` bump.
+Future rule kinds require a spec version bump (major, since older loaders could not parse them).
 
 ## Validation rules (load-time, strict)
 
 A loader rejects a mapping file if any of these hold. Validation is fail-fast: the library refuses to operate on a partially valid file.
 
-1. `format_version == 4`.
-2. `platform` matches a directory under `reference/`.
-3. No unknown top-level or per-entry keys.
-4. Every `target` in `entries` is unique.
-5. Every `target` in `entries` is a member of `reference/<platform>/targets.yaml`.
-6. Every member of `reference/<platform>/targets.yaml` has exactly one matching `target` row in `entries`. *(The rule that makes coverage oversights impossible.)*
-7. Every non-null `sport` (and every `encode_for` member) parses as a valid sport string per `schema.yaml`. The sport code must be standard (present in `schema.yaml`); non-standard codes are forbidden in mapping files. Modifiers must be alphabetically sorted in the canonical form.
-8. **One encode home per sport.** Every non-null sport that appears anywhere (as a row's `sport`, or in any `encode_for` list) has exactly **one** encode home — either a `preferred` row whose `sport` it is, *or* a single `encode_for` mention. Never both, never twice, never neither. (Decode is one-to-one; encode is many-to-one but each sport encodes to exactly one target.)
-9. `preferred: true` and non-empty `encode_for` are both forbidden on rows where `sport: null`. `encode_for` is permitted only on a `preferred` row.
-10. Round-trip on preferred entries: for every preferred entry, `decode(target) == sport` AND `encode(sport) == target`.
-11. Decode of non-preferred synonym rows: for every entry with `preferred: false` (and non-null `sport`), `decode(target) == sport`.
-12. `fallback.decode` parses as a valid sport string AND equals the `sport` of some preferred entry in `entries` (so the fallback round-trips through encode).
-13. Every field named in a `reset` rule exists in the platform's target shape.
-14. **`encode_for` ancestry + round-trip invariant.** Every `encode_for` code is a **strict ancestor** of the row's `sport`. For every `encode_for` sport `A` on a (preferred) target `T`: `encode(A) == T`. Decode of `T` stays the row's canonical `sport` (rule 10), so `decode(encode(A))` *sharpens* `A` to that canonical sub-sport (the dual of coarsening — see "Asymmetric granularity"). E.g. bare `cycling` → `2/0` → `cycling.road`.
+1. `platform` matches a directory under `reference/`.
+2. No unknown top-level or per-entry keys.
+3. Every `target` in `entries` is unique.
+4. Every `target` in `entries` is a member of `reference/<platform>/targets.yaml`.
+5. Every member of `reference/<platform>/targets.yaml` has exactly one matching `target` row in `entries`. *(The rule that makes coverage oversights impossible.)*
+6. Every non-null `sport` (and every `encode_for` member) parses as a valid sport string per `schema.yaml`. The sport code must be standard (present in `schema.yaml`); non-standard codes are forbidden in mapping files. Modifiers must be alphabetically sorted in the canonical form.
+7. **One encode home per sport.** Every non-null sport that appears anywhere (as a row's `sport`, or in any `encode_for` list) has exactly **one** encode home — either a `preferred` row whose `sport` it is, *or* a single `encode_for` mention. Never both, never twice, never neither. (Decode is one-to-one; encode is many-to-one but each sport encodes to exactly one target.)
+8. `preferred: true` and non-empty `encode_for` are both forbidden on rows where `sport: null`. `encode_for` is permitted only on a `preferred` row.
+9. Round-trip on preferred entries: for every preferred entry, `decode(target) == sport` AND `encode(sport) == target`.
+10. Decode of non-preferred synonym rows: for every entry with `preferred: false` (and non-null `sport`), `decode(target) == sport`.
+11. `fallback.decode` parses as a valid sport string AND equals the `sport` of some preferred entry in `entries` (so the fallback round-trips through encode).
+12. Every field named in a `reset` rule exists in the platform's target shape.
+13. **`encode_for` ancestry + round-trip invariant.** Every `encode_for` code is a **strict ancestor** of the row's `sport`. For every `encode_for` sport `A` on a (preferred) target `T`: `encode(A) == T`. Decode of `T` stays the row's canonical `sport` (rule 9), so `decode(encode(A))` *sharpens* `A` to that canonical sub-sport (the dual of coarsening — see "Asymmetric granularity"). E.g. bare `cycling` → `2/0` → `cycling.road`.
 
 ## Algorithms
 
@@ -217,19 +214,19 @@ fallback.decode parses to a valid Sport
 encode(fallback.decode) is the target of some preferred entry
 ```
 
-These properties are enforced by validation rules 10–12 at load time.
+These properties are enforced by validation rules 9–11 at load time.
 
 ## Notes for implementers
 
 - The loader builds two indexes from `entries`: `entries_by_target` (all rows, used by decode) and `preferred_index` (used by encode — each `preferred` row's own `sport`, plus every `encode_for` ancestor, inverted to `sport → target`).
 - `sport.modifiers` is a `frozenset`; index keys must use frozenset to be hashable.
 - Sport string canonicalization (sorting modifiers) happens at parse time. Index keys are built from canonical forms.
-- `apply(rule, target)` is a small dispatch table on rule kind. Only `reset` exists in v4; adding a kind requires a `format_version` bump.
+- `apply(rule, target)` is a small dispatch table on rule kind. Only `reset` exists; adding a kind requires a spec version bump.
 - `entries_by_target` is keyed by the target value's canonical form; for FIT this is the tuple `(sport_id, sub_sport_id)`. The YAML's `{ sport: 2, sub_sport: 6 }` deserializes to that tuple.
 
 ## Asymmetric granularity: `encode_for`
 
-**Implemented in format v4.** Decouples a target's **decode meaning** from its **encode preference**, so several OST sports can collapse onto one platform code on encode while decode stays strictly one-to-one. Validated by rules 8, 9, and 14.
+Decouples a target's **decode meaning** from its **encode preference**, so several OST sports can collapse onto one platform code on encode while decode stays strictly one-to-one. Validated by rules 7, 8, and 13.
 
 ### The problem it solves
 
@@ -258,11 +255,11 @@ Semantics:
 
 - **Decode** is unchanged: `decode(target) = sport`.
 - **Encode**: `preferred_index` is populated from both `preferred: true` (key = the row's own `sport`) and every code in `encode_for` (key = that ancestor sport). `encode(swimming.pool)` still resolves to this row via its own `preferred`; `encode(swimming)` resolves via `encode_for`; `encode(swimming.open_water)` walks up to `swimming` and resolves via `encode_for`.
-- **Constraint** (keeps it principled): every code in `encode_for` must be a **strict ancestor** of `sport`. You may declare a precise target as the encode home for a *broader* sport — never for an unrelated or finer one. The "one encode target per sport" rule (validation rule 8) still holds across both mechanisms.
+- **Constraint** (keeps it principled): every code in `encode_for` must be a **strict ancestor** of `sport`. You may declare a precise target as the encode home for a *broader* sport — never for an unrelated or finer one. The "one encode home per sport" rule (validation rule 7) still holds across both mechanisms.
 
 ### Effect on round-trip
 
-The strict `decode(encode(s)) == s` (validation rule 10) relaxes for sports encoded via `encode_for`: `encode(swimming) = LAP_SWIMMING`, then `decode(LAP_SWIMMING) = swimming.pool`, so `decode(encode(s))` is a **sub-sport** of `s` — encoding a vague sport and reading it back *sharpens* it to the platform's actual granularity. This is the dual of the existing **coarsening** (encoding a fine sport with no exact target and reading it back yields an *ancestor*). The generalized invariant: a round trip moves only **along the hierarchy** (up or down), never sideways — `decode(encode(s))` is always comparable to `s` in the sub-sport order.
+The strict `decode(encode(s)) == s` (validation rule 9) relaxes for sports encoded via `encode_for`: `encode(swimming) = LAP_SWIMMING`, then `decode(LAP_SWIMMING) = swimming.pool`, so `decode(encode(s))` is a **sub-sport** of `s` — encoding a vague sport and reading it back *sharpens* it to the platform's actual granularity. This is the dual of the existing **coarsening** (encoding a fine sport with no exact target and reading it back yields an *ancestor*). The generalized invariant: a round trip moves only **along the hierarchy** (up or down), never sideways — `decode(encode(s))` is always comparable to `s` in the sub-sport order.
 
 ### Adoption
 
@@ -282,3 +279,11 @@ The strict `decode(encode(s)) == s` (validation rule 10) relaxes for sports enco
 Wahoo cycling is deliberately absent — `BIKING_ROAD` exists, so generic `BIKING` stays bare `cycling`. Polar / Apple HealthKit / Garmin Training API are absent too: Polar models road explicitly (generic = a real "unspecified"), and the latter two have a single coarse running/cycling type that also covers trail/mountain (defaulting to road would mislabel).
 
 `LAP_SWIMMING` (Garmin Training API) remains a documented *candidate* but is intentionally not migrated: it's a push (encode-first) API, so decode precision there is low value and `LAP_SWIMMING → swimming` is correct for the direction that matters. It can adopt `encode_for: [swimming]` the day decode precision becomes worthwhile. The mechanism is additive — rows without `encode_for` behave exactly as before.
+
+## Versioning
+
+The mapping format described here has **no version field of its own**. It is part of the **OST spec version** declared once in [`schema.yaml`](../schema.yaml) (`version:`), alongside the sport/modifier vocabulary and the OST string format. One spec version governs the whole standard — vocabulary, string format, mapping format, and the bundled mappings — so a mapping-format change (like adding `encode_for`) is simply a spec version bump.
+
+The Python package has its own, independent release version (`pyproject.toml`). The package **implements** a spec version and is compatible with spec data of the same major version. See the **Versioning** section in [`CONTRIBUTING.md`](../CONTRIBUTING.md) for the full policy and bump rules.
+
+> Bundled mappings always match the package's spec version, so files carry no per-file version marker. If externally-authored mapping files ever travel independently of the package, a `requires_spec` marker would be reintroduced at that point (the FIT-header pattern) — see `plans/024`.

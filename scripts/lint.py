@@ -1,7 +1,7 @@
 """Lint schema.yaml and mappings/<platform>.yaml.
 
 The mapping lint defers to scripts/generate.py — running generate.py
-with --check validates the v4 mapping files against all 14 rules in
+with --check validates the mapping files against all 13 rules in
 docs/translation.md and confirms the generated Python is up to date.
 This script wraps that plus schema.yaml's own ordering/orphan checks
 and the generated docs/reference.md drift check.
@@ -12,7 +12,7 @@ Usage:
 
 Run in CI to catch:
   - schema.yaml ordering or orphan issues.
-  - mapping files violating any format v4 rule.
+  - mapping files violating any mapping-format rule.
   - generated Python out of sync with YAML inputs.
   - build_reference scripts out of sync with reference/*/targets.yaml.
   - docs/reference.md out of sync with schema.yaml.

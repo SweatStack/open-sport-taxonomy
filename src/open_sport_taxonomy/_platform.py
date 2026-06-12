@@ -86,7 +86,7 @@ def _resolve_fit_value(value: int | str, field: str) -> int:
 # Platform — bidirectional translator between OST sports and platform codes.
 # ---------------------------------------------------------------------------
 #
-# See docs/translation.md for the format v3 specification and the
+# See docs/translation.md for the mapping-format specification and the
 # normative algorithm definitions. The runtime here implements them
 # directly from data assembled at generation time by scripts/generate.py.
 
@@ -215,7 +215,7 @@ def _ost_hierarchy_walk(sport: Sport) -> Iterator[SportKey]:
 def _apply_coarsening_rule(rule: CoarseningRule, target: Any) -> Any:
     """Apply one coarsening rule to a target, returning the new target.
 
-    Only the `reset` rule kind is defined in format v3. A rule whose
+    Only the `reset` rule kind is defined. A rule whose
     output equals the input is a no-op for that input; the caller
     skips no-ops.
     """
