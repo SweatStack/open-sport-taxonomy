@@ -273,8 +273,9 @@
     </main>
 
     <footer>
-      Data is read live from <code>../mappings/*.yaml</code>. The translation logic is a reference
-      implementation of <code>docs/translation.md</code>, in <code>tool/translate.js</code>.
+      Data is read live from the
+      <a href="https://github.com/sweatstack/open-sport-taxonomy/tree/main/mappings"><code>open-sport-taxonomy</code> mappings on GitHub</a>.
+      The translation logic is a reference implementation of <code>docs/translation.md</code>, in <code>translate.js</code>.
     </footer>
 
     <script type="module">
@@ -290,7 +291,11 @@
         { id: "polar", label: "Polar", target: "detailed_sport_info" },
         { id: "suunto", label: "Suunto", target: "activity id" },
       ];
-      const MAPPINGS_BASE = "../mappings/";
+      // Mappings are read live from the canonical source on GitHub (main), so this
+      // page is a standalone static file with no bundled data. Pin to a spec tag
+      // (e.g. .../spec/v0.9.0/mappings/) to freeze the tool to a spec release.
+      const MAPPINGS_BASE =
+        "https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/main/mappings/";
 
       /** @type {Map<string, import("./translate.js").PlatformIndex>} */
       const indices = new Map();
@@ -467,7 +472,7 @@
         try {
           await Promise.all(PLATFORMS.map(loadPlatform));
         } catch (error) {
-          els.status.textContent = `Could not load mappings (${error.message}). Serve from the repo root: make tool`;
+          els.status.textContent = `Could not load mappings from GitHub (${error.message}). Check your connection and retry.`;
           els.status.classList.add("error");
           return;
         }

@@ -15,7 +15,7 @@ PY = $(UV) run --directory python
 .PHONY: help \
         lint test test-only check format fix mutmut \
         generate \
-        tool \
+        serve deploy \
         build publish \
         clean
 
@@ -70,12 +70,16 @@ generate: ## Regenerate auto-generated Python (python/) + docs from schema.yaml 
 	@$(UV) run scripts/generate_reference.py
 
 # --------------------------------------------------------------------------
-# Tooling — the browser-based translation explorer (tool/index.html).
+# Site — the published static site in site/ (the translation explorer for now).
+# Mappings load live from GitHub raw, so site/ is self-contained static files.
 # --------------------------------------------------------------------------
 
-tool: ## Serve the translation explorer (open /tool/ at the address it prints)
-	@printf "Translation explorer — open \033[1m/tool/\033[0m at the address printed below (Ctrl-C to stop)\n"
-	@python3 -m http.server 0
+serve: ## Preview the site locally (open the address it prints; Ctrl-C to stop)
+	@printf "Serving \033[1msite/\033[0m at the address printed below (Ctrl-C to stop)\n"
+	@python3 -m http.server --directory site 0
+
+deploy: ## Deploy site/ to Cloudflare Pages production (needs `wrangler login`)
+	@npx wrangler pages deploy site --project-name=open-sport-taxonomy --branch=main --commit-dirty=true
 
 # --------------------------------------------------------------------------
 # Packaging.
