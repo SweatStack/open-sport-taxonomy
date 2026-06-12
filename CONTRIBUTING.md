@@ -19,7 +19,7 @@ See [Test discipline](#test-discipline) below for the full workflow and rational
 
 The canonical schema is [`schema.yaml`](schema.yaml). It contains two flat lists:
 
-**Sports** are sorted alphabetically by code. Each entry has a `code` and a `label`. Hierarchy is encoded in the dot notation: `cycling.mountain.xco` is a child of `cycling.mountain`, which is a child of `cycling`. Every parent must have its own entry.
+**Sports** is the **standard-sports catalogue** — the curated set OST recommends. Each entry has a canonical `sport` string and a hand-crafted `label`. Entries are both **bare codes** (the modality tree; hierarchy in the dot notation, `cycling.mountain.xco` under `cycling.mountain` under `cycling`, every parent its own entry) and **recommended combinations** (a code plus modifiers, `cycling+stationary` → "indoor cycling"). Sorted by code, then modifier list (bare entry first). Any well-formed sport string is still usable — the catalogue is the *recommended* subset, not the limit; see [`docs/taxonomy.md`](docs/taxonomy.md).
 
 **Modifiers** are sorted alphabetically by code. Each entry has a `code` and `label`. Modifiers with a `group` field are mutually exclusive within that group. Modifiers without a group are independent flags.
 
@@ -35,7 +35,13 @@ Open an issue or pull request with:
 
 Examples of sport codes: `cycling.track` (different bike, different technique, specialized venue). `xc_skiing.double_poling` (distinct technique, own racing category).
 
-Examples of things that are NOT sport codes: indoor cycling (it's `cycling.road` + `stationary`), e-bike gravel (it's `cycling.gravel` + `assisted`), roller skiing (it's `xc_skiing.classic` + `roller` — same technique, different surface), a cycling race (it's any cycling code + `race`).
+Examples of things that are NOT sport codes: indoor cycling (it's `cycling` + `stationary`), e-bike gravel (it's `cycling.gravel` + `assisted`), roller skiing (it's `xc_skiing.classic` + `roller` — same technique, different surface), a cycling race (it's any cycling code + `race`).
+
+## Adding a recommended combination
+
+A combination (a code plus modifiers, e.g. `cycling+stationary`) is added to the catalogue as a standard sport when it's a recognizable activity worth a hand-crafted label. **Keep the catalogue close to what the mappings distinguish** — every sport used in a mapping must be a catalogue entry (that's the floor, and its own justification). Add combinations *beyond* the mapping floor only with a solid, legitimate use case.
+
+The bar is **highest for new disciplines** (new dotted codes): a discipline expands the modality tree and is governed by the movement-pattern rule in [`docs/taxonomy.md`](docs/taxonomy.md) — don't invent finer codes speculatively. A combination of existing atoms is cheaper, but still earns its place by being a real, named activity rather than an arbitrary pairing.
 
 ## Adding a modifier
 
@@ -50,7 +56,7 @@ Modifiers should be rare. A modifier is a **circumstance of execution that does 
 - Codes are lowercase, using underscores for multi-word segments: `hand_cycling`, not `handCycling`.
 - Codes use full words, not abbreviations: `cycling.time_trial`, not `cycling.tt`. Abbreviations are acceptable only when the full form is rarely used (e.g. `xc_skiing`).
 - Labels are lowercase, with capitals only for acronyms: "road cycling", "classic XC skiing", "BMX".
-- Both sports and modifiers are sorted alphabetically by code.
+- Sports are sorted by code, then by modifier list (bare entry first); modifiers are sorted alphabetically by code. `uv run scripts/lint.py --fix` enforces this.
 - Keep entries minimal. Descriptions, emoji, mappings, and translations live in separate files, not in the core schema.
 
 Before submitting a pull request, run the linter:
@@ -131,7 +137,7 @@ The library test suite under `python/tests/` is organized into four directories 
 The suite earns its keep, not its size. Plan 017 trimmed it from 643 tests to ~268 example-based tests plus 11 property-based tests by removing redundancies. Future test additions are evaluated against these principles:
 
 1. **One test per claim.** Each test asserts a distinct logical property. If two tests fail together for the same root cause, one is redundant.
-2. **Test the algorithm, not the data.** Mapping YAML files are the canonical specification. Tests that assert specific data values (`assert garmin_fit.encode(Sport.CYCLING_ROAD) == GarminFitCode(2, 0)`) are tautologies. Test the *algorithms* with representative inputs.
+2. **Test the algorithm, not the data.** Mapping YAML files are the canonical specification. Tests that assert specific data values (`assert garmin_fit.encode(Sport("cycling.road")) == GarminFitCode(2, 0)`) are tautologies. Test the *algorithms* with representative inputs.
 3. **Prefer build-time validation over runtime tests.** Properties enforceable in `python/scripts/generate.py` belong there. Runtime tests for the same property are defense-in-depth; ration them.
 4. **Properties over examples for pure functions.** For Sport parsing, encode/decode, hierarchy walks: reach for `python/tests/properties/` first. Hypothesis covers more space than parametrized hand-written cases.
 5. **Suite quality is measured, not asserted.** Coverage (`pytest-cov`), mutation score (`mutmut`), and strict typing (`mypy --strict`) are the falsifiable evidence. Use them.
@@ -198,10 +204,10 @@ They are related but not equal: **`open-sport-taxonomy` implements OST spec X.**
 When to bump the **spec** version:
 
 - **patch** — editorial only (a label reworded); no code/format/decode change.
-- **minor** — additive & backward-compatible: a new sport/modifier code, a new mapping-file feature, a new platform mapping, a brand-new row for a previously-unmapped target.
-- **major** — breaking: a code removed/renamed, the string grammar changed, the mapping format changed beyond what older loaders can read, **or an existing input re-interpreted** (a target that used to decode to A now decodes to B).
+- **minor** — additive & backward-compatible: a new standard sport (code or combination), a new modifier, a new mapping-file feature, a new platform mapping, a brand-new row for a previously-unmapped target.
+- **major** — breaking: a code removed/renamed, a standard sport de-catalogued, the string grammar changed, the mapping format changed beyond what older loaders can read, **or an existing input re-interpreted** (a target that used to decode to A now decodes to B).
 
-Sport codes are never removed silently. A deprecated code gets a `deprecated: true` field and a `replaced_by` pointer (removal/rename is a major bump).
+The **standard-sports catalogue is append-only within a major version**: once a canonical string is a standard sport it stays one — entries are deprecated, never removed — so `is_standard` is monotone (absent→present is additive/minor; present→absent is a re-interpretation/major). Sport codes are never removed silently: a deprecated code gets a `deprecated: true` field and a `replaced_by` pointer.
 
 > **Pre-1.0:** while OST is `0.x`, the major axis is pinned at 0 and breaking changes ride the **minor** number. The major-compatibility rule becomes binding at `1.0`.
 

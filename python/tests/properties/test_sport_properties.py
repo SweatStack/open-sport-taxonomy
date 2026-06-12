@@ -11,16 +11,16 @@ from __future__ import annotations
 from hypothesis import given
 
 from open_sport_taxonomy import Sport
-from tests.properties.conftest import standard_sports
+from tests.properties.conftest import known_atom_sports
 
 
-@given(sport=standard_sports())
+@given(sport=known_atom_sports())
 def test_str_roundtrips_through_constructor(sport: Sport) -> None:
     """For any standard sport ``s``: ``Sport(str(s)) == s``."""
     assert Sport(str(sport)) == sport
 
 
-@given(sport=standard_sports())
+@given(sport=known_atom_sports())
 def test_str_roundtrips_through_parse(sport: Sport) -> None:
     """For any standard sport ``s``: ``Sport.parse(str(s)) == s``.
 
@@ -30,7 +30,7 @@ def test_str_roundtrips_through_parse(sport: Sport) -> None:
     assert Sport.parse(str(sport)) == sport
 
 
-@given(sport=standard_sports())
+@given(sport=known_atom_sports())
 def test_str_sorts_modifiers_alphabetically(sport: Sport) -> None:
     """``str(sport)`` always lists modifiers in alphabetical order."""
     rendered = str(sport)
@@ -40,7 +40,7 @@ def test_str_sorts_modifiers_alphabetically(sport: Sport) -> None:
     assert mods == sorted(mods)
 
 
-@given(sport=standard_sports())
+@given(sport=known_atom_sports())
 def test_hash_consistent_with_equality(sport: Sport) -> None:
     """Equal sports have equal hashes; reconstructed sports compare equal."""
     other = Sport(str(sport))
@@ -48,7 +48,7 @@ def test_hash_consistent_with_equality(sport: Sport) -> None:
     assert hash(sport) == hash(other)
 
 
-@given(sport=standard_sports())
+@given(sport=known_atom_sports())
 def test_parent_preserves_modifiers(sport: Sport) -> None:
     """``sport.parent`` (when non-None) has the same modifier set."""
     parent = sport.parent
@@ -57,7 +57,7 @@ def test_parent_preserves_modifiers(sport: Sport) -> None:
     assert parent.modifiers == sport.modifiers
 
 
-@given(sport=standard_sports())
+@given(sport=known_atom_sports())
 def test_is_subsport_of_is_reflexive(sport: Sport) -> None:
     """Every sport is a subsport of itself."""
     assert sport.is_subsport_of(sport)

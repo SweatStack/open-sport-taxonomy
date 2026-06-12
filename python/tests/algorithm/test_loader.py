@@ -40,6 +40,10 @@ SPORT_CODES = {
     "walking",
 }
 MODIFIER_CODES = {"stationary", "virtual", "race", "assisted", "commute"}
+# The standard-sports catalogue these synthetic mappings reference. Every sport
+# used here is a bare code, so the catalogue equals the code set (rule 6 requires
+# each mapping sport to be an exact catalogue member).
+CATALOGUE = set(SPORT_CODES)
 
 
 def _minimal_valid_mapping(extras=None):
@@ -82,6 +86,7 @@ def _validate(mapping, targets=None, platform="garmin_fit"):
         platform,
         mapping,
         targets or _minimal_targets(),
+        CATALOGUE,
         SPORT_CODES,
         MODIFIER_CODES,
     )

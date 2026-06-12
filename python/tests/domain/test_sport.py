@@ -1,6 +1,7 @@
 import pytest
 
 from open_sport_taxonomy import Modifier, Sport
+from open_sport_taxonomy._sport import _CODES
 from open_sport_taxonomy._sport import _LABELS as TAXONOMY
 
 
@@ -70,7 +71,7 @@ class TestStringRepresentation:
 
     def test_repr_standard(self):
         assert repr(Sport("cycling.road")) == "Sport('cycling.road')"
-        assert repr(Sport("cycling.road+race")) == "Sport('cycling.road+race')"
+        assert repr(Sport("cycling+stationary")) == "Sport('cycling+stationary')"
 
     def test_repr_non_standard(self):
         sport = Sport.parse("cycling.road.criterium")
@@ -82,7 +83,7 @@ class TestStringRepresentation:
             assert Sport(str(sport)) == sport
 
     def test_roundtrip_with_modifiers(self):
-        for code in TAXONOMY:
+        for code in _CODES:
             sport = Sport(code, modifiers={Modifier.RACE, Modifier.VIRTUAL})
             assert Sport(str(sport)) == sport
 
@@ -102,13 +103,17 @@ class TestEquality:
     def test_not_equal_different_modifiers(self):
         assert Sport("cycling.road") != Sport("cycling.road+race")
 
+    def test_not_equal_to_non_sport(self):
+        assert Sport("cycling.road") != "cycling.road"
+        assert (Sport("cycling.road") == 42) is False
+
     def test_hash_equal(self):
         a = Sport("cycling.road+race")
         b = Sport("cycling.road", modifiers={Modifier.RACE})
         assert hash(a) == hash(b)
 
     def test_usable_as_dict_key(self):
-        d = {Sport.CYCLING_ROAD: "road"}
+        d = {Sport("cycling.road"): "road"}
         assert d[Sport("cycling.road")] == "road"
 
     def test_usable_in_set(self):
@@ -135,29 +140,29 @@ class TestImmutability:
 
 class TestTaxonomy:
     def test_label(self):
-        assert Sport.CYCLING_ROAD.label == "road cycling"
+        assert Sport("cycling.road").label == "road cycling"
 
     def test_parent(self):
-        assert Sport.CYCLING_ROAD.parent == Sport.CYCLING
+        assert Sport("cycling.road").parent == Sport("cycling")
 
     def test_parent_top_level_is_none(self):
-        assert Sport.CYCLING.parent is None
+        assert Sport("cycling").parent is None
 
     def test_disciplines(self):
-        disciplines = Sport.CYCLING.disciplines
-        assert Sport.CYCLING_ROAD in disciplines
-        assert Sport.CYCLING_GRAVEL in disciplines
-        assert Sport.CYCLING_TRACK in disciplines
+        disciplines = Sport("cycling").disciplines
+        assert Sport("cycling.road") in disciplines
+        assert Sport("cycling.gravel") in disciplines
+        assert Sport("cycling.track") in disciplines
 
     def test_disciplines_leaf_is_empty(self):
-        assert Sport.CYCLING_ROAD.disciplines == ()
+        assert Sport("cycling.road").disciplines == ()
 
     def test_parent_preserves_modifiers(self):
         sport = Sport("cycling.road+race")
         assert sport.parent.modifiers == frozenset({Modifier.RACE})
 
     def test_disciplines_without_modifiers(self):
-        for d in Sport.CYCLING.disciplines:
+        for d in Sport("cycling").disciplines:
             assert d.modifiers == frozenset()
 
     def test_disciplines_preserve_modifiers(self):
@@ -167,22 +172,22 @@ class TestTaxonomy:
 
 
 class TestAll:
-    def test_all_codes_match_taxonomy(self):
-        """Sport.all() returns one entry per known code, all with empty modifiers."""
+    def test_all_returns_the_catalogue(self):
+        """Sport.all() returns one entry per catalogue sport (codes and combinations)."""
         all_sports = Sport.all()
-        assert {s.code for s in all_sports} == set(TAXONOMY.keys())
-        assert all(s.modifiers == frozenset() for s in all_sports)
+        assert {str(s) for s in all_sports} == set(TAXONOMY.keys())
+        assert all(s.is_standard for s in all_sports)
 
 
-class TestClassConstants:
-    def test_all_taxonomy_entries_have_constants(self):
-        for code in TAXONOMY:
-            name = code.replace(".", "_").upper()
-            constant = getattr(Sport, name)
-            assert constant.code == code
-            assert constant.modifiers == frozenset()
+class TestStandardSportType:
+    def test_literal_matches_catalogue(self):
+        """StandardSport enumerates exactly the catalogue (codes and combinations)."""
+        import typing
 
-    def test_constant_equals_constructed(self):
-        assert Sport("cycling.road") == Sport.CYCLING_ROAD
-        assert Sport("running.trail") == Sport.RUNNING_TRAIL
-        assert Sport("xc_skiing.double_poling") == Sport.XC_SKIING_DOUBLE_POLING
+        from open_sport_taxonomy import StandardSport
+
+        assert set(typing.get_args(StandardSport)) == set(TAXONOMY)
+
+    def test_no_class_constants(self):
+        """Per-code class constants were dropped in favour of StandardSport."""
+        assert not hasattr(Sport, "CYCLING_ROAD")

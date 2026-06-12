@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Allowed section headers: Added, Changed, Deprecated, Removed, Fixed, Security.
 
 
+## [0.10.0] - 2026-06-12
+
+The standard-sports catalogue: a curated, labelled set of recommended sports layered over
+the open canonical-string format. See [`plans/027`](plans/027-standard-sports-atoms-labels.md)
+and [`docs/taxonomy.md`](docs/taxonomy.md).
+
+### Added
+
+- **Standard-sports catalogue.** `schema.yaml`'s `sports:` list is now the curated catalogue of standard sports: it holds **recommended combinations** (a code plus modifiers, e.g. `cycling+stationary` → "indoor cycling") alongside bare codes, each with a hand-crafted label. Combinations are first-class standard sports, not composed approximations. The 14 combinations the bundled mappings use are seeded in (the catalogue floor).
+- **Three-level model**, named explicitly in [`docs/taxonomy.md`](docs/taxonomy.md): *well-formed* ⊇ *known-atoms* ⊇ *standard sport*. Identity remains the canonical string; the catalogue is the recommended profile over that open space.
+
+### Changed
+
+- **Catalogue entry field renamed `code:` → `sport:`.** Its value is now a canonical sport string (a bare code is the modifier-free special case), so the field name describes the value. Entries are ordered by code, then modifier list (bare entry first).
+- **"Standard sport" now means exact catalogue membership** — the recommended set — rather than merely "known code + known modifiers." A well-formed, known-atoms string that is not catalogued (e.g. `cycling.road+race`) is still valid and usable, just outside the recommended profile.
+- **Mappings may reference only standard sports** (validation rule 6 in [`docs/translation.md`](docs/translation.md) rewritten): every mapping `sport` and `encode_for` member must be an exact catalogue entry — the catalogue floor, enforced at build time.
+- **Labels.** Every standard sport and modifier carries a hand-crafted label; any other well-formed sport gets a label composed from its parts (`cycling.road+race` → "road cycling (race)"; unknown atoms fall back to their token with `.`/`_` → spaces). Labels are presentation only, never identity.
+
+### Deprecated
+
+- The standard-sports catalogue is **append-only within a major version**: once a canonical string is a standard sport it stays one (deprecate, never remove), keeping `is_standard` monotone. Binding from 1.0.
+
+
 ## [0.9.0] - 2026-06-11
 
 ### Added

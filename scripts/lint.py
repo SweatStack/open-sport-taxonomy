@@ -41,29 +41,45 @@ def load_schema():
     return yaml.safe_load(SCHEMA_PATH.read_text())
 
 
+def _sport_key(entry):
+    """(code, [modifiers]) for a sports entry — its canonical sort/identity key."""
+    parts = entry["sport"].split("+")
+    return parts[0], parts[1:]
+
+
 def check_orphans(entries):
-    codes = {e["code"] for e in entries}
+    """Every code has an explicit bare entry, and every ancestor code too."""
+    bare = {e["sport"] for e in entries if "+" not in e["sport"]}
+    codes = {_sport_key(e)[0] for e in entries}
     errors = []
     for code in sorted(codes):
+        if code not in bare:
+            errors.append(f"code {code!r} has no bare (modifier-free) entry")
         parts = code.split(".")
         for i in range(1, len(parts)):
             parent = ".".join(parts[:i])
-            if parent not in codes:
+            if parent not in bare:
                 errors.append(f"orphan: {code!r} has no parent {parent!r}")
     return errors
 
 
 def check_order(entries, section):
-    codes = [e["code"] for e in entries]
-    expected = sorted(codes)
-    errors = []
-    if codes != expected:
-        errors.append(f"{section}: not sorted alphabetically")
-    return errors
+    """Modifiers sort alphabetically by code; sports by (code, modifier list)."""
+    if section == "modifiers":
+        codes = [e["code"] for e in entries]
+        if codes != sorted(codes):
+            return [f"{section}: not sorted alphabetically"]
+        return []
+    keys = [_sport_key(e) for e in entries]
+    if keys != sorted(keys):
+        return [f"{section}: not in canonical order (sort by code, then modifier list)"]
+    return []
 
 
-def sort_entries(entries):
-    return sorted(entries, key=lambda e: e["code"])
+def sort_entries(entries, section):
+    if section == "modifiers":
+        return sorted(entries, key=lambda e: e["code"])
+    return sorted(entries, key=_sport_key)
 
 
 def write_schema(schema):
@@ -76,7 +92,7 @@ def write_schema(schema):
     ]
     for entry in schema["sports"]:
         lines.append("")
-        lines.append(f"  - code: {entry['code']}")
+        lines.append(f"  - sport: {entry['sport']}")
         lines.append(f"    label: {entry['label']}")
     lines.append("")
     lines.append("modifiers:")
@@ -105,8 +121,8 @@ def lint_schema(fix: bool) -> int:
         return 0
 
     if fix:
-        schema["sports"] = sort_entries(sports)
-        schema["modifiers"] = sort_entries(modifiers)
+        schema["sports"] = sort_entries(sports, "sports")
+        schema["modifiers"] = sort_entries(modifiers, "modifiers")
         write_schema(schema)
         remaining = check_orphans(schema["sports"])
         if remaining:

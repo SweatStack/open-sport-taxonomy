@@ -10,9 +10,9 @@ class TestStandardInput:
         assert sport.is_standard is True
 
     def test_standard_with_modifiers(self):
-        sport = Sport.parse("cycling.road+race+virtual")
-        assert sport.code == "cycling.road"
-        assert Modifier.RACE in sport.modifiers
+        sport = Sport.parse("cycling+stationary+virtual")
+        assert sport.code == "cycling"
+        assert Modifier.STATIONARY in sport.modifiers
         assert Modifier.VIRTUAL in sport.modifiers
         assert sport.is_standard is True
 
@@ -27,9 +27,13 @@ class TestNonStandardCode:
         assert sport.code == "cycling.road.criterium"
         assert sport.is_standard is False
 
-    def test_unknown_code_label_is_none(self):
+    def test_unknown_code_label_is_composed(self):
+        # label is always a string; for an unknown code it composes from the
+        # token (dots/underscores → spaces). is_standard signals it's not curated.
         sport = Sport.parse("cycling.road.criterium")
-        assert sport.label is None
+        assert sport.label == "cycling road criterium"
+        assert sport.is_standard is False
+        assert sport.uses_known_atoms is False
 
     def test_unknown_code_parent_derived(self):
         sport = Sport.parse("cycling.road.criterium")

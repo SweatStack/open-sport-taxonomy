@@ -19,10 +19,11 @@ from __future__ import annotations
 from hypothesis import strategies as st
 
 from open_sport_taxonomy import Modifier, Sport
-from open_sport_taxonomy._sport import _LABELS
+from open_sport_taxonomy._sport import _CODES
 
-# Standard sport codes from schema.yaml.
-STANDARD_CODES = sorted(_LABELS)
+# Bare sport codes from schema.yaml (the modality tree). Combinations are built
+# by pairing a code with conflict-free modifiers; see known_atom_sports().
+STANDARD_CODES = sorted(_CODES)
 KNOWN_MODIFIERS = sorted(m.value for m in Modifier)
 
 # Modifier groups for conflict filtering.
@@ -60,16 +61,21 @@ def conflict_free_modifier_sets(max_size: int = 4) -> st.SearchStrategy[frozense
     )
 
 
-def standard_sports() -> st.SearchStrategy[Sport]:
-    """Standard Sport instances (valid code + conflict-free known modifiers)."""
+def known_atom_sports() -> st.SearchStrategy[Sport]:
+    """Constructible Sport instances: a known code + conflict-free known modifiers.
+
+    These are *known-atoms* sports (every part declared); the combination need
+    not be a catalogue standard sport. This is the right space for universal
+    Sport-contract properties (str round-trip, parent, sub-sport, hashing).
+    """
     return st.builds(
-        _build_standard_sport,
+        _build_known_atom_sport,
         standard_codes(),
         conflict_free_modifier_sets(),
     )
 
 
-def _build_standard_sport(code: str, mods: frozenset[str]) -> Sport:
+def _build_known_atom_sport(code: str, mods: frozenset[str]) -> Sport:
     if not mods:
         return Sport(code)
     return Sport(code, modifiers={Modifier(m) for m in mods})

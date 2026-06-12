@@ -1,83 +1,125 @@
 # OpenSportTaxonomy — https://github.com/sweatstack/open-sport-taxonomy
 
-version: "0.9.0"
+version: "0.10.0"
 
 sports:
 
-  - code: alpine_skiing
+  - sport: alpine_skiing
     label: alpine skiing
 
-  - code: cycling
+  - sport: cycling
     label: cycling
 
-  - code: cycling.cyclocross
+  - sport: cycling+assisted
+    label: e-bike ride
+
+  - sport: cycling+commute
+    label: bike commute
+
+  - sport: cycling+stationary
+    label: indoor cycling
+
+  - sport: cycling+stationary+virtual
+    label: virtual indoor cycling
+
+  - sport: cycling.cyclocross
     label: cyclocross
 
-  - code: cycling.gravel
+  - sport: cycling.gravel
     label: gravel cycling
 
-  - code: cycling.mountain
+  - sport: cycling.mountain
     label: mountain biking
 
-  - code: cycling.road
+  - sport: cycling.mountain+assisted
+    label: e-mountain biking
+
+  - sport: cycling.road
     label: road cycling
 
-  - code: cycling.time_trial
+  - sport: cycling.time_trial
     label: time trial cycling
 
-  - code: cycling.track
+  - sport: cycling.track
     label: track cycling
 
-  - code: generic
+  - sport: generic
     label: generic
 
-  - code: hand_cycling
+  - sport: hand_cycling
     label: hand cycling
 
-  - code: rowing
+  - sport: rowing
     label: rowing
 
-  - code: running
+  - sport: rowing+stationary
+    label: indoor rowing
+
+  - sport: rowing+stationary+virtual
+    label: virtual indoor rowing
+
+  - sport: running
     label: running
 
-  - code: running.road
+  - sport: running+race
+    label: running race
+
+  - sport: running+stationary
+    label: treadmill running
+
+  - sport: running+stationary+virtual
+    label: virtual treadmill running
+
+  - sport: running.road
     label: road running
 
-  - code: running.track
+  - sport: running.track
     label: track running
 
-  - code: running.trail
+  - sport: running.trail
     label: trail running
 
-  - code: snowboarding
+  - sport: snowboarding
     label: snowboarding
 
-  - code: swimming
+  - sport: swimming
     label: swimming
 
-  - code: swimming.open_water
+  - sport: swimming.open_water
     label: open water swimming
 
-  - code: swimming.pool
+  - sport: swimming.pool
     label: pool swimming
 
-  - code: walking
+  - sport: walking
     label: walking
 
-  - code: walking.hiking
+  - sport: walking+stationary
+    label: treadmill walking
+
+  - sport: walking.hiking
     label: hiking
 
-  - code: xc_skiing
+  - sport: xc_skiing
     label: XC skiing
 
-  - code: xc_skiing.classic
+  - sport: xc_skiing+roller
+    label: roller skiing
+
+  - sport: xc_skiing.classic
     label: classic XC skiing
 
-  - code: xc_skiing.double_poling
+  - sport: xc_skiing.classic+roller
+    label: classic roller skiing
+
+  - sport: xc_skiing.double_poling
     label: double poling XC skiing
 
-  - code: xc_skiing.skate
+  - sport: xc_skiing.skate
     label: skate XC skiing
+
+  - sport: xc_skiing.skate+roller
+    label: skate roller skiing
 
 modifiers:
 

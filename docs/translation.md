@@ -95,7 +95,7 @@ A loader rejects a mapping file if any of these hold. Validation is fail-fast: t
 3. Every `target` in `entries` is unique.
 4. Every `target` in `entries` is a member of `reference/<platform>/targets.yaml`.
 5. Every member of `reference/<platform>/targets.yaml` has exactly one matching `target` row in `entries`. *(The rule that makes coverage oversights impossible.)*
-6. Every non-null `sport` (and every `encode_for` member) parses as a valid sport string per `schema.yaml`. The sport code must be standard (present in `schema.yaml`); non-standard codes are forbidden in mapping files. Modifiers must be alphabetically sorted in the canonical form.
+6. Every non-null `sport` (and every `encode_for` member) is a **standard sport**: an exact canonical-string match in the `schema.yaml` standard-sports catalogue (a bare code *or* a recommended combination). This is the catalogue floor — mappings may reference only standard sports. Atom-level checks still apply for clear errors: the code must be a known code, every modifier must be declared, and modifiers must be alphabetically sorted in the canonical form.
 7. **One encode home per sport.** Every non-null sport that appears anywhere (as a row's `sport`, or in any `encode_for` list) has exactly **one** encode home — either a `preferred` row whose `sport` it is, *or* a single `encode_for` mention. Never both, never twice, never neither. (Decode is one-to-one; encode is many-to-one but each sport encodes to exactly one target.)
 8. `preferred: true` and non-empty `encode_for` are both forbidden on rows where `sport: null`. `encode_for` is permitted only on a `preferred` row.
 9. Round-trip on preferred entries: for every preferred entry, `decode(target) == sport` AND `encode(sport) == target`.

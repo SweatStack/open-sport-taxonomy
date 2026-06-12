@@ -3,13 +3,14 @@ from open_sport_taxonomy import Modifier, Sport
 
 class TestResolveEqualsConstructor:
     def test_standard_input(self):
-        assert Sport.parse("cycling.road+race").resolve() == Sport("cycling.road+race")
+        assert Sport.parse("running+race").resolve() == Sport("running+race")
 
     def test_resolved_non_standard_equals_standard(self):
-        assert Sport.parse("cycling.road.criterium+race").resolve() == Sport("cycling.road+race")
+        # running.fell climbs to running; +race survives because running+race is standard.
+        assert Sport.parse("running.fell+race").resolve() == Sport("running+race")
 
     def test_resolved_with_unknown_modifiers(self):
-        assert Sport.parse("cycling.road+race+rainy").resolve() == Sport("cycling.road+race")
+        assert Sport.parse("running+race+rainy").resolve() == Sport("running+race")
 
     def test_two_different_resolves_same_result(self):
         a = Sport.parse("cycling.road.criterium+race").resolve()
@@ -30,8 +31,10 @@ class TestParseNotEqualsConstructor:
 
 class TestStrAlwaysFaithful:
     def test_resolve_str_is_canonical(self):
+        # criterium and rainy are unknown; race is dropped too (cycling.road has
+        # no standard combination), leaving the bare canonical code.
         sport = Sport.parse("cycling.road.criterium+race+rainy").resolve()
-        assert str(sport) == "cycling.road+race"
+        assert str(sport) == "cycling.road"
 
     def test_parse_str_preserves_input(self):
         sport = Sport.parse("cycling.road.criterium+race+rainy")
@@ -50,7 +53,13 @@ class TestIsStandard:
         assert Sport.parse("cycling.road.criterium").resolve().is_standard is True
 
     def test_parse_standard_when_known(self):
-        assert Sport.parse("cycling.road+race").is_standard is True
+        assert Sport.parse("running+race").is_standard is True
+
+    def test_parse_known_atoms_but_not_catalogued_is_not_standard(self):
+        # All atoms are known, but cycling.road+race is not a catalogue entry.
+        sport = Sport.parse("cycling.road+race")
+        assert sport.is_standard is False
+        assert sport.uses_known_atoms is True
 
     def test_parse_non_standard_unknown_code(self):
         assert Sport.parse("cycling.road.criterium").is_standard is False
@@ -61,19 +70,19 @@ class TestIsStandard:
 
 class TestUnifiedModifiers:
     def test_parse_mixed_modifiers_in_single_set(self):
-        sport = Sport.parse("cycling.road+race+rainy")
+        sport = Sport.parse("running+race+rainy")
         assert Modifier.RACE in sport.modifiers
         assert "rainy" in sport.modifiers
         assert "race" in sport.modifiers  # Modifier.RACE == "race"
 
     def test_resolve_drops_unknown_modifiers(self):
-        sport = Sport.parse("cycling.road+race+rainy")
+        sport = Sport.parse("running+race+rainy")
         resolved = sport.resolve()
         assert Modifier.RACE in resolved.modifiers
         assert "rainy" not in resolved.modifiers
 
     def test_diff_reveals_unknowns(self):
-        sport = Sport.parse("cycling.road+race+rainy")
+        sport = Sport.parse("running+race+rainy")
         resolved = sport.resolve()
         unknowns = sport.modifiers - resolved.modifiers
         assert unknowns == {"rainy"}

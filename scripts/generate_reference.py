@@ -26,9 +26,13 @@ def load_schema():
     return yaml.safe_load(SCHEMA_PATH.read_text())
 
 
-def build_tree(sports):
-    """Build a nested tree from the flat sport list."""
-    nodes = {s["code"]: {**s, "children": []} for s in sports}
+def build_tree(codes):
+    """Build a nested tree from the flat list of bare-code catalogue entries.
+
+    `codes` are the modifier-free entries — the modality tree. Combinations
+    (entries with modifiers) are rendered separately; see group_combinations.
+    """
+    nodes = {c["code"]: {**c, "children": []} for c in codes}
     roots = []
 
     for code in sorted(nodes):
@@ -43,6 +47,22 @@ def build_tree(sports):
                 roots.append(nodes[code])
 
     return roots
+
+
+def split_catalogue(sports):
+    """Split the catalogue into bare codes (the tree) and combinations.
+
+    A bare code becomes ``{"code": ..., "label": ...}``; a combination keeps its
+    full ``sport`` string plus ``label``, grouped under its base code.
+    """
+    codes = []
+    combinations = []
+    for s in sports:
+        if "+" in s["sport"]:
+            combinations.append(s)
+        else:
+            codes.append({"code": s["sport"], "label": s["label"]})
+    return codes, combinations
 
 
 def group_modifiers(modifiers):
@@ -74,9 +94,10 @@ def main():
     sports = schema.get("sports", [])
     modifiers = schema.get("modifiers", [])
 
-    tree = build_tree(sports)
+    codes, combinations = split_catalogue(sports)
+    tree = build_tree(codes)
     groups, ungrouped = group_modifiers(modifiers)
-    families = sum(1 for s in sports if "." not in s["code"])
+    families = sum(1 for c in codes if "." not in c["code"])
 
     env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
@@ -90,9 +111,12 @@ def main():
     content = template.render(
         taxonomy_version=schema.get("version", "unknown"),
         families=families,
+        total_codes=len(codes),
+        total_combinations=len(combinations),
         total_sports=len(sports),
         total_modifiers=len(modifiers),
         tree=tree,
+        combinations=combinations,
         groups=groups,
         ungrouped=ungrouped,
     )

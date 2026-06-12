@@ -2,7 +2,14 @@
 
 # OpenSportTaxonomy Reference
 
-{{ families }} sport families, {{ total_sports }} sports, {{ total_modifiers }} modifiers — taxonomy version {{ taxonomy_version }}
+{{ families }} sport families, {{ total_codes }} codes, {{ total_combinations }} recommended combinations, {{ total_modifiers }} modifiers — taxonomy version {{ taxonomy_version }}
+
+OST identifies a sport by a canonical string — a `code` plus any number of
+`+modifier`s. Three nested levels apply (see [taxonomy.md](taxonomy.md)): any
+well-formed string is usable; this page lists the **standard sports** — the
+curated catalogue OST recommends, each with a hand-crafted label. Codes form the
+modality tree; recommended combinations name idiomatic activities built from a
+code and modifiers.
 
 ## Sports
 
@@ -12,6 +19,16 @@ specialize further.
 
 {% for node in tree %}
 {{ render_sport(node, 0) }}
+{% endfor %}
+
+## Recommended combinations
+
+Standard sports that pair a code with one or more modifiers. These are the named
+activities OST recommends; any other well-formed combination is still valid, it
+just composes its label from the parts instead of carrying a curated one.
+
+{% for c in combinations %}
+- **{{ c.sport }}** — {{ c.label }}
 {% endfor %}
 
 ## Modifiers

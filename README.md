@@ -65,7 +65,7 @@ The sport string is the canonical form. The structured format is derived from it
 
 ## Schema format
 
-The canonical schema is [`schema.yaml`](schema.yaml), a single YAML file with two flat lists: `sports` (sorted alphabetically, hierarchy in the dot notation) and `modifiers` (with optional `group` for mutual exclusivity).
+The canonical schema is [`schema.yaml`](schema.yaml), a single YAML file with two flat lists. `sports` is the **standard-sports catalogue** — the curated set OST recommends, each entry a canonical `sport` string with a hand-crafted `label`. It holds both bare codes (the modality tree, in dot notation) and recommended combinations (`cycling+stationary` → "indoor cycling"), ordered by code then modifiers. `modifiers` declares each modifier (with an optional `group` for mutual exclusivity). Any well-formed sport string is usable; the catalogue is the recommended profile over that open space — see [`docs/taxonomy.md`](docs/taxonomy.md).
 
 ## Platform mappings
 
@@ -95,8 +95,8 @@ pip install open-sport-taxonomy
 from open_sport_taxonomy import Sport
 from open_sport_taxonomy.platforms import garmin_fit
 
-garmin_fit.decode(2, 0)                 # Sport('cycling.road')
-garmin_fit.encode(Sport.CYCLING_ROAD)   # GarminFitCode(sport=2, sub_sport=0)
+garmin_fit.decode(2, 0)                   # Sport('cycling.road')
+garmin_fit.encode(Sport("cycling.road"))  # GarminFitCode(sport=2, sub_sport=0)
 ```
 
 Full API docs — sport strings, storage, matching, platform translation, Pydantic

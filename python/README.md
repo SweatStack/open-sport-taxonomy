@@ -19,35 +19,47 @@ The library has two entry points for creating Sport objects:
 | `Sport(raw)` | Application code, constants, prescriptions. Enforces the standard vocabulary. |
 | `Sport.parse(raw)` | Receiving external input. Accepts any structurally valid sport string. |
 
-A **standard sport** is one where the code and all modifiers are defined in the current taxonomy version. A **non-standard sport** is structurally valid but contains codes or modifiers not yet in the taxonomy, typically from a newer version. Non-standard is not invalid, it's unrecognized.
+Three nested levels describe any sport (see [`docs/taxonomy.md`](https://github.com/sweatstack/open-sport-taxonomy/blob/main/docs/taxonomy.md)):
+
+- **well-formed** — the string parses (`Sport.parse` succeeds);
+- **known-atoms** (`uses_known_atoms`) — the code and every modifier are declared in the current taxonomy version;
+- **standard sport** (`is_standard`) — the exact canonical string is in the curated standard-sports catalogue.
+
+The strict `Sport(raw)` constructor enforces **known-atoms**; `is_standard` additionally checks catalogue membership. A sport can be valid and usable without being standard.
 
 ```python
 from open_sport_taxonomy import Sport, Modifier
 
-# Strict constructor for application code
-sport = Sport("cycling.road+race+virtual")
-sport.code          # "cycling.road"
-sport.label         # "road cycling"
-sport.modifiers     # frozenset({Modifier.RACE, Modifier.VIRTUAL})
-sport.is_standard   # True
-str(sport)          # "cycling.road+race+virtual"
+# Strict constructor: enforces known atoms (known code + declared modifiers)
+sport = Sport("cycling+stationary")
+sport.code             # "cycling"
+sport.label            # "indoor cycling" — hand-crafted catalogue label
+sport.is_standard      # True  (in the catalogue)
+sport.uses_known_atoms # True
+str(sport)             # "cycling+stationary"
 
-# Unknown codes and modifiers are rejected
+# Known atoms, but not a catalogued combination
+sport = Sport("cycling.road+race")
+sport.is_standard      # False — valid and usable, just not a recommended sport
+sport.uses_known_atoms # True
+sport.label            # "road cycling (race)" — composed from the parts
+
+# Unknown atoms are rejected by the strict constructor
 Sport("cycling.road.criterium")  # ValueError: Unknown sport code
-Sport("cycling.road+rainy")     # ValueError (unknown modifier)
+Sport("cycling+rainy")           # ValueError (unknown modifier)
 
 # Parse: for external input, preserves everything
 sport = Sport.parse("cycling.road.criterium+race+rainy")
-sport.code          # "cycling.road.criterium" (preserved)
-sport.modifiers     # frozenset({Modifier.RACE, "rainy"})
-sport.is_standard   # False
-str(sport)          # "cycling.road.criterium+race+rainy" (round-trips)
+sport.code             # "cycling.road.criterium" (preserved)
+sport.is_standard      # False
+sport.uses_known_atoms # False — criterium and rainy aren't declared
+sport.label            # "cycling road criterium (race, rainy)" — composed
+str(sport)             # "cycling.road.criterium+race+rainy" (round-trips)
 
-# Resolve: map a non-standard sport to the nearest standard equivalent
+# Resolve: nearest standard sport — climbs the code tree, drops modifiers; never adds
 resolved = sport.resolve()
-resolved.code       # "cycling.road"
-resolved.modifiers  # frozenset({Modifier.RACE})
-resolved.is_standard  # True
+resolved               # Sport('cycling.road')
+resolved.is_standard   # True
 ```
 
 ## Storage pattern
@@ -64,22 +76,31 @@ sport = Sport.parse(db.activity.sport)
 resolved = sport.resolve()         # for application logic
 ```
 
-## Class constants
+## Typed sport vocabulary
 
-For known sports in application code, use class constants:
+There are no per-code class constants. Instead, `StandardSport` is a `Literal` of every
+standard-sport canonical string (codes *and* combinations), generated from the catalogue.
+**Annotate your own variables and fields with it** — type-aware editors (Pyright/Pylance,
+PyCharm) autocomplete the catalogue strings and mypy flags typos:
 
 ```python
-Sport.CYCLING_ROAD
-Sport.RUNNING_TRAIL
-Sport.SWIMMING_OPEN_WATER
+from open_sport_taxonomy import Sport, StandardSport
+
+favourite: StandardSport = "cycling+stationary"   # autocompleted; mypy errors on a typo
 ```
+
+The `Sport(...)` / `Sport.parse(...)` constructors take a plain `str` on purpose — they
+ingest runtime data (API and database values) and validate at runtime, so they accept any
+string and you check standardness with `is_standard`. `StandardSport` is the static,
+opt-in vocabulary for *your* code; it never constrains what the library accepts. To browse
+the full catalogue, see [`docs/reference.md`](https://github.com/sweatstack/open-sport-taxonomy/blob/main/docs/reference.md) or call `Sport.all()`.
 
 ## Taxonomy navigation
 
 ```python
-Sport.CYCLING.disciplines   # (Sport('cycling.cyclocross'), Sport('cycling.gravel'), ...)
-Sport.CYCLING_ROAD.parent   # Sport('cycling')
-Sport.all()                 # all standard sports
+Sport("cycling").disciplines       # (Sport('cycling.cyclocross'), Sport('cycling.gravel'), ...)
+Sport("cycling.road").parent       # Sport('cycling')
+Sport.all()                        # all standard sports (codes and combinations)
 
 # Parent preserves modifiers
 Sport("cycling.road+stationary").parent  # Sport('cycling+stationary')
@@ -112,11 +133,11 @@ from open_sport_taxonomy.platforms import strava, apple_healthkit, garmin_fit, g
 
 # Encode: OST → platform
 strava.encode(Sport("cycling.road+virtual"))     # "VirtualRide"
-apple_healthkit.encode(Sport.CYCLING_ROAD)       # 13
-garmin_fit.encode(Sport.CYCLING_ROAD)            # GarminFitCode(sport=2, sub_sport=0)
-garmin_training_api.encode(Sport.CYCLING_ROAD)   # "CYCLING"
-wahoo.encode(Sport.CYCLING_ROAD)                 # 15
-polar.encode(Sport.CYCLING_ROAD)                 # "ROAD_BIKING"
+apple_healthkit.encode(Sport("cycling.road"))    # 13
+garmin_fit.encode(Sport("cycling.road"))         # GarminFitCode(sport=2, sub_sport=0)
+garmin_training_api.encode(Sport("cycling.road")) # "CYCLING"
+wahoo.encode(Sport("cycling.road"))              # 15
+polar.encode(Sport("cycling.road"))              # "ROAD_BIKING"
 suunto.encode(Sport("cycling.gravel"))           # 99
 
 # Decode: platform → OST
@@ -148,7 +169,7 @@ Install with the pydantic extra:
 pip install open-sport-taxonomy[pydantic]
 ```
 
-Use `SportField` in Pydantic models for permissive parsing, or `StrictSportField` to enforce the standard vocabulary:
+Use `SportField` in Pydantic models for permissive parsing, or `StrictSportField` to enforce known atoms (known code + declared modifiers, via the `Sport()` constructor):
 
 ```python
 from pydantic import BaseModel

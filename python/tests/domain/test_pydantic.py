@@ -26,8 +26,8 @@ class TestSportFieldValidation:
         assert Modifier.STATIONARY in m.sport.modifiers
 
     def test_sport_instance_passthrough(self):
-        m = PermissiveModel(sport=Sport.CYCLING_ROAD)
-        assert m.sport == Sport.CYCLING_ROAD
+        m = PermissiveModel(sport=Sport("cycling.road"))
+        assert m.sport == Sport("cycling.road")
 
     def test_non_standard_preserved(self):
         m = PermissiveModel(sport="cycling.road.criterium+race+rainy")
@@ -83,9 +83,11 @@ class TestSportFieldSchema:
 
 class TestStrictSportFieldValidation:
     def test_standard_accepted(self):
+        # Strict enforces known atoms (the Sport() constructor), not catalogue
+        # membership: cycling.road+race has known atoms but is not catalogued.
         m = StrictModel(sport="cycling.road+race")
         assert m.sport.code == "cycling.road"
-        assert m.sport.is_standard is True
+        assert m.sport.uses_known_atoms is True
 
     def test_unknown_code_raises(self):
         with __import__("pytest").raises(ValidationError):

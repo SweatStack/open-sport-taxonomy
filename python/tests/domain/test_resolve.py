@@ -1,21 +1,34 @@
+"""Tests for Sport.resolve() — the two-phase, drop-only resolution.
+
+resolve() maps any well-formed sport to the nearest *standard* (catalogue)
+sport: (1) climb the code tree to the nearest ancestor whose bare form is
+standard (else `generic`); (2) keep the largest subset of the original
+modifiers that forms a catalogue entry. It only ever drops — it never adds a
+modifier or specificity. See docs/taxonomy.md and plans/027 §7.1.
+"""
+
 import pytest
 
 from open_sport_taxonomy import Sport
 
 
-class TestKnownCodes:
+class TestStandardReturnsSelf:
     def test_bare_code(self):
-        assert Sport.parse("cycling.road").resolve() == Sport("cycling.road")
+        s = Sport("cycling.road")
+        assert s.resolve() is s
 
-    def test_with_modifiers(self):
-        assert Sport.parse("cycling.road+race").resolve() == Sport("cycling.road+race")
+    def test_standard_combination(self):
+        s = Sport("cycling+stationary")
+        assert s.resolve() is s
 
 
-class TestUnknownSport:
-    def test_walks_up_one_level(self):
+class TestClimbCodeTree:
+    """Phase 1: climb to the nearest ancestor whose bare form is standard."""
+
+    def test_unknown_child_of_known_code(self):
         assert Sport.parse("cycling.road.criterium").resolve() == Sport("cycling.road")
 
-    def test_walks_up_from_unknown_child_of_known_parent(self):
+    def test_unknown_child_of_known_parent(self):
         assert Sport.parse("running.fell").resolve() == Sport("running")
 
     def test_unknown_top_level_resolves_to_generic(self):
@@ -24,39 +37,41 @@ class TestUnknownSport:
     def test_unknown_nested_under_unknown_top_level(self):
         assert Sport.parse("parkour.freerunning").resolve() == Sport("generic")
 
-    def test_preserves_known_modifiers(self):
-        assert Sport.parse("cycling.road.criterium+race").resolve() == Sport("cycling.road+race")
+
+class TestDropModifiers:
+    """Phase 2: keep the largest modifier subset that forms a catalogue entry."""
+
+    def test_modifier_kept_when_combination_is_standard(self):
+        # running+race is standard, so race survives once the unknown is gone.
+        assert Sport.parse("running+race+relay").resolve() == Sport("running+race")
+
+    def test_modifier_dropped_when_combination_not_standard(self):
+        # cycling.road+race is not catalogued → race is dropped to bare cycling.road.
+        assert Sport.parse("cycling.road+race").resolve() == Sport("cycling.road")
+
+    def test_largest_standard_subset_kept(self):
+        # cycling+stationary is standard; cycling+leisure is not, so leisure goes.
+        assert Sport.parse("cycling+leisure+stationary").resolve() == Sport("cycling+stationary")
+
+    def test_unknown_modifier_dropped_known_combination_kept(self):
+        assert Sport.parse("cycling+stationary+relay").resolve() == Sport("cycling+stationary")
+
+    def test_all_modifiers_dropped_when_no_combination(self):
+        assert Sport.parse("cycling.road+race+relay").resolve() == Sport("cycling.road")
 
 
-class TestUnknownModifier:
-    def test_single_unknown_dropped(self):
-        assert Sport.parse("cycling.road+relay").resolve() == Sport("cycling.road")
+class TestNeverAddsModifiers:
+    """resolve() never invents a modifier to manufacture a richer match."""
 
-    def test_unknown_dropped_known_kept(self):
-        assert Sport.parse("cycling.road+race+relay").resolve() == Sport("cycling.road+race")
+    def test_bare_code_does_not_gain_modifiers(self):
+        # running has standard combinations (running+race, …) but plain running
+        # must resolve to bare running, never running+race.
+        assert Sport.parse("running.fell").resolve() == Sport("running")
 
-    def test_known_among_multiple_unknown(self):
-        result = Sport.parse("cycling.road+foo+race+relay").resolve()
-        assert result == Sport("cycling.road+race")
-
-
-class TestBothUnknown:
-    def test_unknown_sport_and_modifier(self):
-        assert Sport.parse("cycling.road.criterium+race+relay").resolve() == Sport(
-            "cycling.road+race"
-        )
-
-    def test_all_unknown(self):
-        assert Sport.parse("parkour.freerunning+foo+bar").resolve() == Sport("generic")
-
-    def test_unknown_sport_all_modifiers_unknown(self):
-        assert Sport.parse("cycling.road.criterium+foo").resolve() == Sport("cycling.road")
-
-
-class TestStandardReturnsSelf:
-    def test_standard_sport_returns_self(self):
-        sport = Sport("cycling.road+race")
-        assert sport.resolve() is sport
+    def test_unknown_code_resolves_up_not_to_a_sibling_combination(self):
+        # xc_skiing+roller is standard, but xc_skiing.unknown climbs to bare
+        # xc_skiing — it does not borrow the +roller modifier it never had.
+        assert Sport.parse("xc_skiing.unknown").resolve() == Sport("xc_skiing")
 
 
 class TestResolveIsStandard:
@@ -65,6 +80,19 @@ class TestResolveIsStandard:
 
     def test_resolved_all_unknown(self):
         assert Sport.parse("parkour.freerunning+foo").resolve().is_standard is True
+
+
+class TestConflictingModifiersDropped:
+    """Group conflicts never raise in resolve(); the subset search just skips them."""
+
+    def test_conflicting_known_modifiers_resolve_without_error(self):
+        # commute and race are both 'purpose'; cycling.road has no combination, so
+        # both are dropped — resolve is total and never raises on a conflict.
+        assert Sport.parse("cycling.road+commute+race").resolve() == Sport("cycling.road")
+
+    def test_conflict_resolved_to_the_standard_subset(self):
+        # Of {leisure, race} only running+race is catalogued, so race wins.
+        assert Sport.parse("running+leisure+race").resolve() == Sport("running+race")
 
 
 class TestStructuralErrors:
@@ -87,19 +115,3 @@ class TestStructuralErrors:
     def test_non_string(self):
         with pytest.raises(TypeError):
             Sport.parse(123).resolve()  # type: ignore[arg-type]
-
-
-class TestModifierConflicts:
-    def test_known_conflicting_modifiers_raises(self):
-        with pytest.raises(ValueError, match="conflict"):
-            Sport.parse("cycling.road+commute+race").resolve()
-
-    def test_conflict_resolved_by_dropping_unknown(self):
-        # "race" is known (purpose group), "relay" is unknown — no conflict
-        result = Sport.parse("cycling.road+race+relay").resolve()
-        assert result == Sport("cycling.road+race")
-
-    def test_one_known_one_unknown_from_same_group(self):
-        # Only "race" survives — no conflict since "futuremod" is dropped
-        result = Sport.parse("cycling.road+futuremod+race").resolve()
-        assert result == Sport("cycling.road+race")

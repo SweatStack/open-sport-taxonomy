@@ -5,24 +5,37 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+from typing import Literal
 
 from open_sport_taxonomy._modifier import Modifier, validate_modifiers
 
 
 # Taxonomy data — generated from schema.yaml.
+# _LABELS is the standard-sports catalogue, keyed by canonical string
+# (bare codes AND recommended combinations).
 _LABELS: dict[str, str] = {
     "alpine_skiing": "alpine skiing",
     "cycling": "cycling",
+    "cycling+assisted": "e-bike ride",
+    "cycling+commute": "bike commute",
+    "cycling+stationary": "indoor cycling",
+    "cycling+stationary+virtual": "virtual indoor cycling",
     "cycling.cyclocross": "cyclocross",
     "cycling.gravel": "gravel cycling",
     "cycling.mountain": "mountain biking",
+    "cycling.mountain+assisted": "e-mountain biking",
     "cycling.road": "road cycling",
     "cycling.time_trial": "time trial cycling",
     "cycling.track": "track cycling",
     "generic": "generic",
     "hand_cycling": "hand cycling",
     "rowing": "rowing",
+    "rowing+stationary": "indoor rowing",
+    "rowing+stationary+virtual": "virtual indoor rowing",
     "running": "running",
+    "running+race": "running race",
+    "running+stationary": "treadmill running",
+    "running+stationary+virtual": "virtual treadmill running",
     "running.road": "road running",
     "running.track": "track running",
     "running.trail": "trail running",
@@ -31,11 +44,120 @@ _LABELS: dict[str, str] = {
     "swimming.open_water": "open water swimming",
     "swimming.pool": "pool swimming",
     "walking": "walking",
+    "walking+stationary": "treadmill walking",
     "walking.hiking": "hiking",
     "xc_skiing": "XC skiing",
+    "xc_skiing+roller": "roller skiing",
     "xc_skiing.classic": "classic XC skiing",
+    "xc_skiing.classic+roller": "classic roller skiing",
     "xc_skiing.double_poling": "double poling XC skiing",
     "xc_skiing.skate": "skate XC skiing",
+    "xc_skiing.skate+roller": "skate roller skiing",
+}
+
+# StandardSport — a Literal of every standard-sport canonical string,
+# generated from the catalogue. Annotate your own variables/fields with it
+# for autocomplete + mypy typo-checking. The Sport constructors take plain
+# `str` (they ingest runtime data); use `is_standard` to test membership.
+StandardSport = Literal[
+    "alpine_skiing",
+    "cycling",
+    "cycling+assisted",
+    "cycling+commute",
+    "cycling+stationary",
+    "cycling+stationary+virtual",
+    "cycling.cyclocross",
+    "cycling.gravel",
+    "cycling.mountain",
+    "cycling.mountain+assisted",
+    "cycling.road",
+    "cycling.time_trial",
+    "cycling.track",
+    "generic",
+    "hand_cycling",
+    "rowing",
+    "rowing+stationary",
+    "rowing+stationary+virtual",
+    "running",
+    "running+race",
+    "running+stationary",
+    "running+stationary+virtual",
+    "running.road",
+    "running.track",
+    "running.trail",
+    "snowboarding",
+    "swimming",
+    "swimming.open_water",
+    "swimming.pool",
+    "walking",
+    "walking+stationary",
+    "walking.hiking",
+    "xc_skiing",
+    "xc_skiing+roller",
+    "xc_skiing.classic",
+    "xc_skiing.classic+roller",
+    "xc_skiing.double_poling",
+    "xc_skiing.skate",
+    "xc_skiing.skate+roller",
+]
+
+# _CODES — the bare (modifier-free) codes: the modality tree.
+_CODES: frozenset[str] = frozenset({
+    "alpine_skiing",
+    "cycling",
+    "cycling.cyclocross",
+    "cycling.gravel",
+    "cycling.mountain",
+    "cycling.road",
+    "cycling.time_trial",
+    "cycling.track",
+    "generic",
+    "hand_cycling",
+    "rowing",
+    "running",
+    "running.road",
+    "running.track",
+    "running.trail",
+    "snowboarding",
+    "swimming",
+    "swimming.open_water",
+    "swimming.pool",
+    "walking",
+    "walking.hiking",
+    "xc_skiing",
+    "xc_skiing.classic",
+    "xc_skiing.double_poling",
+    "xc_skiing.skate",
+})
+
+# _CODE_MODSETS — per code, its catalogue modifier-sets, largest first
+# (ties by canonical string). Drives resolve()'s phase 2.
+_CODE_MODSETS: dict[str, tuple[frozenset[str], ...]] = {
+    "alpine_skiing": (frozenset(),),
+    "cycling": (frozenset({"stationary", "virtual"}), frozenset({"assisted"}), frozenset({"commute"}), frozenset({"stationary"}), frozenset(),),
+    "cycling.cyclocross": (frozenset(),),
+    "cycling.gravel": (frozenset(),),
+    "cycling.mountain": (frozenset({"assisted"}), frozenset(),),
+    "cycling.road": (frozenset(),),
+    "cycling.time_trial": (frozenset(),),
+    "cycling.track": (frozenset(),),
+    "generic": (frozenset(),),
+    "hand_cycling": (frozenset(),),
+    "rowing": (frozenset({"stationary", "virtual"}), frozenset({"stationary"}), frozenset(),),
+    "running": (frozenset({"stationary", "virtual"}), frozenset({"race"}), frozenset({"stationary"}), frozenset(),),
+    "running.road": (frozenset(),),
+    "running.track": (frozenset(),),
+    "running.trail": (frozenset(),),
+    "snowboarding": (frozenset(),),
+    "swimming": (frozenset(),),
+    "swimming.open_water": (frozenset(),),
+    "swimming.pool": (frozenset(),),
+    "walking": (frozenset({"stationary"}), frozenset(),),
+    "walking.hiking": (frozenset(),),
+    "xc_skiing": (frozenset({"roller"}), frozenset(),),
+    "xc_skiing.classic": (frozenset({"roller"}), frozenset(),),
+    "xc_skiing.double_poling": (frozenset(),),
+    "xc_skiing.skate": (frozenset({"roller"}), frozenset(),),
 }
 
 _PARENTS: dict[str, str | None] = {
@@ -94,6 +216,10 @@ _CHILDREN: dict[str, tuple[str, ...]] = {
     "xc_skiing.skate": (),
 }
 
+def _atom_words(token: str) -> str:
+    """Best-effort words from a raw code/modifier token (label fallback only)."""
+    return token.replace(".", " ").replace("_", " ")
+
 
 def _split_encoded(raw: str) -> tuple[str, list[str]]:
     """Split an encoded sport string into code and modifier tokens.
@@ -112,7 +238,7 @@ def _split_encoded(raw: str) -> tuple[str, list[str]]:
 
 def _is_subsport_code(child: str, parent: str) -> bool:
     """True if child == parent or child is below parent in the dot hierarchy."""
-    return child == parent or child.startswith(parent + '.')
+    return child == parent or child.startswith(parent + ".")
 
 
 @dataclass(frozen=True, init=False, slots=True)
@@ -121,13 +247,18 @@ class Sport:
 
     Two ways to create Sport instances:
 
-        Sport(raw)        — strict, enforces the standard vocabulary
+        Sport(raw)        — strict, enforces known atoms (known code + modifiers)
         Sport.parse(raw)  — permissive, for external input
 
-    Or use class constants for known sports::
+    The module exports ``StandardSport`` — a ``Literal`` of every catalogue
+    string. Annotate your own variables/fields with it for autocomplete and
+    static typo-checking; the constructors take plain ``str`` because they ingest
+    runtime data (API/DB values) and validate at runtime.
 
-        Sport.CYCLING_ROAD
-        Sport.RUNNING_TRAIL
+    Three nested levels describe any sport (see docs/taxonomy.md):
+      - well-formed   — `Sport.parse(...)` succeeded;
+      - known-atoms   — `uses_known_atoms`: code and every modifier are declared;
+      - standard sport — `is_standard`: the exact canonical string is catalogued.
     """
 
     code: str
@@ -155,7 +286,7 @@ class Sport:
             )
         if not parsed_code:
             raise ValueError("Sport code cannot be empty")
-        if parsed_code not in _LABELS:
+        if parsed_code not in _CODES:
             raise ValueError(f"Unknown sport code: {parsed_code!r}")
         validate_modifiers(parsed_modifiers)
         object.__setattr__(self, "code", parsed_code)
@@ -181,20 +312,27 @@ class Sport:
         return sport
 
     def resolve(self) -> Sport:
-        """Resolve to the nearest standard sport."""
+        """Resolve to the nearest standard sport.
+
+        Two ordered phases, **drop-only** — never adds a modifier or specificity:
+          1. climb the code tree to the nearest ancestor whose bare form is
+             standard (else ``generic``);
+          2. keep the largest subset of the original modifiers that forms a
+             catalogue entry (bare code if none does).
+        """
         if self.is_standard:
             return self
         code = self.code
-        while code and code not in _LABELS:
+        while code and code not in _CODES:
             dot = code.rfind(".")
             code = code[:dot] if dot != -1 else ""
         if not code:
             code = "generic"
-        known: set[Modifier] = set()
-        for m in self.modifiers:
-            if isinstance(m, Modifier):
-                known.add(m)
-        return Sport(code, modifiers=known)
+        mod_values = {m.value for m in self.modifiers if isinstance(m, Modifier)}
+        # _CODE_MODSETS[code] is largest-first and always contains the empty set
+        # (the bare code), so a subset match is guaranteed.
+        chosen = next(c for c in _CODE_MODSETS[code] if c <= mod_values)
+        return Sport(code, modifiers={Modifier(m) for m in chosen})
 
     def is_subsport_of(self, other: Sport) -> bool:
         """True if this sport is a more specific version of other."""
@@ -206,10 +344,20 @@ class Sport:
 
     @property
     def is_standard(self) -> bool:
-        """True if code and all modifiers are defined in the schema."""
-        if self.code not in _LABELS:
+        """True if this exact sport is in the standard-sports catalogue."""
+        return str(self) in _LABELS
+
+    @property
+    def uses_known_atoms(self) -> bool:
+        """True if the code and every modifier are declared atoms.
+
+        Weaker than `is_standard`: the combination need not be catalogued, but
+        every part must be known (and the modifiers group-valid). `is_standard`
+        implies `uses_known_atoms`.
+        """
+        if self.code not in _CODES:
             return False
-        known = []
+        known: list[Modifier] = []
         for m in self.modifiers:
             if not isinstance(m, Modifier):
                 return False
@@ -221,18 +369,39 @@ class Sport:
         return True
 
     @property
-    def label(self) -> str | None:
-        """Human-readable label, or None for non-standard sports."""
-        return _LABELS.get(self.code)
+    def label(self) -> str:
+        """Human-readable label — always a string.
+
+        Hand-crafted for a standard sport; otherwise composed from the parts as
+        ``code-label (modifier, modifier)``. Unknown atoms fall back to their
+        token with ``.``/``_`` turned to spaces. `is_standard` tells you whether
+        the label is curated or composed.
+        """
+        curated = _LABELS.get(str(self))
+        if curated is not None:
+            return curated
+        code_label = _LABELS.get(self.code)
+        if code_label is None:
+            code_label = _atom_words(self.code)
+        mods = sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)
+        if not mods:
+            return code_label
+        rendered: list[str] = []
+        for m in mods:
+            try:
+                rendered.append(Modifier(m).label)
+            except ValueError:
+                rendered.append(_atom_words(m))
+        return f"{code_label} ({', '.join(rendered)})"
 
     def _with_code(self, code: str) -> Sport:
         """Return a sport with a different code but the same modifiers."""
         if not self.modifiers:
             return Sport.parse(code)
-        mod_str = '+'.join(
+        mod_str = "+".join(
             sorted(m.value if isinstance(m, Modifier) else m for m in self.modifiers)
         )
-        return Sport.parse(code + '+' + mod_str)
+        return Sport.parse(code + "+" + mod_str)
 
     @property
     def parent(self) -> Sport | None:
@@ -254,8 +423,8 @@ class Sport:
 
     @classmethod
     def all(cls) -> list[Sport]:
-        """All standard sports defined in the schema."""
-        return [Sport(code) for code in _LABELS]
+        """All standard sports in the catalogue (codes and combinations)."""
+        return [Sport(s) for s in _LABELS]
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Sport):
@@ -277,31 +446,3 @@ class Sport:
         if self.is_standard:
             return f"Sport({str(self)!r})"
         return f"Sport.parse({str(self)!r})"
-
-
-# Class constants.
-Sport.ALPINE_SKIING = Sport("alpine_skiing")  # type: ignore[attr-defined]
-Sport.CYCLING = Sport("cycling")  # type: ignore[attr-defined]
-Sport.CYCLING_CYCLOCROSS = Sport("cycling.cyclocross")  # type: ignore[attr-defined]
-Sport.CYCLING_GRAVEL = Sport("cycling.gravel")  # type: ignore[attr-defined]
-Sport.CYCLING_MOUNTAIN = Sport("cycling.mountain")  # type: ignore[attr-defined]
-Sport.CYCLING_ROAD = Sport("cycling.road")  # type: ignore[attr-defined]
-Sport.CYCLING_TIME_TRIAL = Sport("cycling.time_trial")  # type: ignore[attr-defined]
-Sport.CYCLING_TRACK = Sport("cycling.track")  # type: ignore[attr-defined]
-Sport.GENERIC = Sport("generic")  # type: ignore[attr-defined]
-Sport.HAND_CYCLING = Sport("hand_cycling")  # type: ignore[attr-defined]
-Sport.ROWING = Sport("rowing")  # type: ignore[attr-defined]
-Sport.RUNNING = Sport("running")  # type: ignore[attr-defined]
-Sport.RUNNING_ROAD = Sport("running.road")  # type: ignore[attr-defined]
-Sport.RUNNING_TRACK = Sport("running.track")  # type: ignore[attr-defined]
-Sport.RUNNING_TRAIL = Sport("running.trail")  # type: ignore[attr-defined]
-Sport.SNOWBOARDING = Sport("snowboarding")  # type: ignore[attr-defined]
-Sport.SWIMMING = Sport("swimming")  # type: ignore[attr-defined]
-Sport.SWIMMING_OPEN_WATER = Sport("swimming.open_water")  # type: ignore[attr-defined]
-Sport.SWIMMING_POOL = Sport("swimming.pool")  # type: ignore[attr-defined]
-Sport.WALKING = Sport("walking")  # type: ignore[attr-defined]
-Sport.WALKING_HIKING = Sport("walking.hiking")  # type: ignore[attr-defined]
-Sport.XC_SKIING = Sport("xc_skiing")  # type: ignore[attr-defined]
-Sport.XC_SKIING_CLASSIC = Sport("xc_skiing.classic")  # type: ignore[attr-defined]
-Sport.XC_SKIING_DOUBLE_POLING = Sport("xc_skiing.double_poling")  # type: ignore[attr-defined]
-Sport.XC_SKIING_SKATE = Sport("xc_skiing.skate")  # type: ignore[attr-defined]
