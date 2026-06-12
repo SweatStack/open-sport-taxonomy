@@ -6,6 +6,8 @@ Every platform has invented its own list of sports. Apple HealthKit calls it `Cy
 
 OpenSportTaxonomy provides a single canonical set of sport codes that any application can reference. It classifies activities by **how the body moves** — see [`docs/taxonomy.md`](docs/taxonomy.md) for the purpose, terminology, and the rule for what counts as a distinct modality, discipline, or modifier.
 
+**Try it live:** explore how each platform's sports translate through OpenSportTaxonomy at **[open-sport-taxonomy.sweatstack.no](https://open-sport-taxonomy.sweatstack.no)**.
+
 > [!WARNING]
 > This taxonomy is young and only covers a few sports at the moment.
 > If yours is missing, [open an issue](https://github.com/sweatstack/open-sport-taxonomy/issues). We'd love to expand it together.
