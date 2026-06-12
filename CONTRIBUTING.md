@@ -84,7 +84,7 @@ entries:
 
 Files are **keyed by platform target** — every legal target in `reference/<platform>/targets.yaml` has exactly one row. Rows with no OST equivalent get `sport: null`. Exactly one row per non-null sport carries `preferred: true`; that row is used for encoding. Other rows decode to the same sport (synonyms). A preferred row may also list `encode_for` — broader (ancestor) sports that *also* encode to its target, letting several sports collapse onto one code on encode while decode stays one-to-one.
 
-The generator (`scripts/generate.py`) enforces 13 validation rules against every mapping file. The rule that mattered most for the 0.4.0 oversight: **every value in `reference/<platform>/targets.yaml` must have a row.** New SDK release → new rows or generation fails.
+The generator (`python/scripts/generate.py`) enforces 13 validation rules against every mapping file. The rule that mattered most for the 0.4.0 oversight: **every value in `reference/<platform>/targets.yaml` must have a row.** New SDK release → new rows or generation fails.
 
 ### Adding mappings to an existing file
 
@@ -114,26 +114,26 @@ When the upstream SDK adds new values:
 
 1. Create `reference/<platform>/` and document the upstream source in a `README.md`.
 2. Write `scripts/build_reference/<platform>.py` that produces `reference/<platform>/targets.yaml` (a flat list of every legal target).
-3. Register the platform in `PLATFORM_REF_DIR` and the defaults in `scripts/scaffold.py` and `scripts/generate.py`.
+3. Register the platform in `PLATFORM_REF_DIR` and the defaults in `scripts/scaffold.py` and `python/scripts/generate.py`.
 4. Run `uv run scripts/scaffold.py <platform>` to generate a skeleton mapping. Annotate where OST equivalents exist.
-5. Add the platform's runtime instance under `src/open_sport_taxonomy/platforms/`.
+5. Add the platform's runtime instance under `python/src/open_sport_taxonomy/platforms/`.
 6. Run `uv run scripts/lint.py` and the test suite.
 
 ## Test discipline
 
-The test suite under `tests/` is organized into four directories:
+The library test suite under `python/tests/` is organized into four directories (it tests the **Python package**; spec-data invariants like reference coverage and `build_reference` idempotency are enforced separately by `make lint`, not duplicated here):
 
-- `tests/domain/` — Sport, Modifier, parsing, resolution, matching, pydantic integration
-- `tests/algorithm/` — encode/decode code paths, the format-v3 loader/validator, GarminFitCode API
-- `tests/integration/` — round-trip safety net, reference-coverage invariants, build_reference idempotency, performance regression bounds
-- `tests/properties/` — property-based tests (Hypothesis) for the Sport class and platform encode/decode
+- `python/tests/domain/` — Sport, Modifier, parsing, resolution, matching, pydantic integration
+- `python/tests/algorithm/` — encode/decode code paths, the loader/validator, GarminFitCode API
+- `python/tests/integration/` — round-trip safety net, performance regression bounds
+- `python/tests/properties/` — property-based tests (Hypothesis) for the Sport class and platform encode/decode
 
 The suite earns its keep, not its size. Plan 017 trimmed it from 643 tests to ~268 example-based tests plus 11 property-based tests by removing redundancies. Future test additions are evaluated against these principles:
 
 1. **One test per claim.** Each test asserts a distinct logical property. If two tests fail together for the same root cause, one is redundant.
-2. **Test the algorithm, not the data.** Mapping YAML files are the canonical specification. Tests that assert specific data values (`assert garmin_fit.encode(Sport.CYCLING_ROAD) == GarminFitCode(2, 7)`) are tautologies. Test the *algorithms* with representative inputs.
-3. **Prefer build-time validation over runtime tests.** Properties enforceable in `scripts/generate.py` belong there. Runtime tests for the same property are defense-in-depth; ration them.
-4. **Properties over examples for pure functions.** For Sport parsing, encode/decode, hierarchy walks: reach for `tests/properties/` first. Hypothesis covers more space than parametrized hand-written cases.
+2. **Test the algorithm, not the data.** Mapping YAML files are the canonical specification. Tests that assert specific data values (`assert garmin_fit.encode(Sport.CYCLING_ROAD) == GarminFitCode(2, 0)`) are tautologies. Test the *algorithms* with representative inputs.
+3. **Prefer build-time validation over runtime tests.** Properties enforceable in `python/scripts/generate.py` belong there. Runtime tests for the same property are defense-in-depth; ration them.
+4. **Properties over examples for pure functions.** For Sport parsing, encode/decode, hierarchy walks: reach for `python/tests/properties/` first. Hypothesis covers more space than parametrized hand-written cases.
 5. **Suite quality is measured, not asserted.** Coverage (`pytest-cov`), mutation score (`mutmut`), and strict typing (`mypy --strict`) are the falsifiable evidence. Use them.
 6. **Failure noise has a cost.** A 100-failure test pass communicates less than a 1-failure pass. Parametrization multiplies *coverage*, not *failure counts*.
 7. **Test names are spec.** `test_modifiers_dominate_discipline_in_encode_walk` reads like a contract clause. `test_cycling_road_virtual` reads like a YAML entry.

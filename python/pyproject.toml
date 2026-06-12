@@ -36,6 +36,9 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Put the project dir on sys.path so property tests can `from tests.properties...`
+# import shared strategies regardless of how pytest is invoked.
+pythonpath = ["."]
 # Coverage runs by default; thresholds enforced in CI.
 # Benchmarks under tests/integration/test_performance.py are excluded from
 # coverage collection (they would otherwise inflate counts) but still run

@@ -29,11 +29,14 @@ from typing import Any
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+# The package lives in python/; the spec (schema, mappings, reference) lives at the
+# repo root. This script bridges them: it reads the spec and generates the package.
+PKG_ROOT = Path(__file__).resolve().parents[1]  # python/
+ROOT = Path(__file__).resolve().parents[2]  # repo root — where the spec lives
 SCHEMA_PATH = ROOT / "schema.yaml"
 MAPPINGS_DIR = ROOT / "mappings"
 REFERENCE_DIR = ROOT / "reference"
-OUT_DIR = ROOT / "src" / "open_sport_taxonomy"
+OUT_DIR = PKG_ROOT / "src" / "open_sport_taxonomy"
 
 HEADER = "# Auto-generated from schema.yaml — do not edit.\n# Run: uv run scripts/generate.py\n"
 

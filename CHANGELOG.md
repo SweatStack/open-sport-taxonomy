@@ -1,6 +1,10 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+This is the **spec** changelog — the OST standard: the sport/modifier vocabulary, the OST
+string format, the mapping format, and the bundled platform mappings (versioned by
+`schema.yaml`). Python **package** release notes are in
+[`python/CHANGELOG.md`](python/CHANGELOG.md). (Entries through `0.9.0` predate the split
+and cover both.)
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

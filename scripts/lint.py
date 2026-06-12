@@ -1,3 +1,7 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml", "jinja2"]
+# ///
 """Lint schema.yaml and mappings/<platform>.yaml.
 
 The mapping lint defers to scripts/generate.py — running generate.py
@@ -132,9 +136,10 @@ def lint_mappings() -> int:
     here.
     """
     result = subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "generate.py"), "--check"],
+        ["uv", "run", "--directory", "python", "scripts/generate.py", "--check"],
         capture_output=True,
         text=True,
+        cwd=str(ROOT),
     )
     sys.stdout.write(result.stdout)
     sys.stderr.write(result.stderr)
@@ -213,16 +218,23 @@ def lint_reference_doc() -> int:
 
 
 def lint_ruff() -> int:
-    """Run ruff lint and ruff format --check against src/, tests/, scripts/."""
-    targets = ["src/", "tests/", "scripts/"]
+    """Run ruff lint + format check over the package (python/) and the root scripts.
+
+    Run from python/ via `uv run --directory python` so ruff uses the package's
+    env and config; `--config pyproject.toml` applies that one config to the root
+    `../scripts` too, keeping a single source of lint rules across the repo.
+    """
+    base = ["uv", "run", "--directory", "python", "ruff"]
+    cfg = ["--config", "pyproject.toml"]
+    targets = ["src", "tests", "scripts", "../scripts"]
     check = subprocess.run(
-        [sys.executable, "-m", "ruff", "check", *targets],
+        [*base, "check", *cfg, *targets],
         capture_output=True,
         text=True,
         cwd=str(ROOT),
     )
     fmt = subprocess.run(
-        [sys.executable, "-m", "ruff", "format", "--check", *targets],
+        [*base, "format", "--check", *cfg, *targets],
         capture_output=True,
         text=True,
         cwd=str(ROOT),
@@ -241,7 +253,7 @@ def lint_ruff() -> int:
 def lint_mypy() -> int:
     """Run mypy --strict against src/open_sport_taxonomy/."""
     result = subprocess.run(
-        [sys.executable, "-m", "mypy"],
+        ["uv", "run", "--directory", "python", "mypy"],
         capture_output=True,
         text=True,
         cwd=str(ROOT),

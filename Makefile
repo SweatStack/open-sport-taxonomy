@@ -7,6 +7,10 @@
 UV ?= uv
 PYTEST_FLAGS ?=
 
+# The Python package lives in python/; spec tooling (PEP 723 scripts) lives at root.
+# Package commands run with python/ as the working directory & project.
+PY = $(UV) run --directory python
+
 .DEFAULT_GOAL := help
 .PHONY: help \
         lint test test-only check format fix mutmut \
@@ -40,29 +44,29 @@ lint: ## Run all static checks (ruff, mypy, schema, reference drift, generator)
 	@$(UV) run scripts/lint.py
 
 test-only: ## Run the test suite (pytest with coverage; skips lint)
-	@$(UV) run python -m pytest tests/ $(PYTEST_FLAGS)
+	@$(PY) python -m pytest $(PYTEST_FLAGS)
 
 test: lint test-only ## Run lint then the test suite (safe default for CI)
 
 check: test ## Alias for `test`; preferred CI entry point
 
-format: ## Apply ruff formatter
-	@$(UV) run ruff format src/ tests/ scripts/
+format: ## Apply ruff formatter (package + root scripts)
+	@$(PY) ruff format --config pyproject.toml src tests scripts ../scripts
 
 fix: ## Auto-fix what ruff can (lint + format)
-	@$(UV) run ruff check --fix src/ tests/ scripts/
-	@$(UV) run ruff format src/ tests/ scripts/
+	@$(PY) ruff check --fix --config pyproject.toml src tests scripts ../scripts
+	@$(PY) ruff format --config pyproject.toml src tests scripts ../scripts
 
 mutmut: ## Run mutation testing on the runtime (slow; periodic health check)
-	@$(UV) run mutmut run --paths-to-mutate=src/open_sport_taxonomy/_platform.py
-	@$(UV) run mutmut results
+	@$(PY) mutmut run --paths-to-mutate=src/open_sport_taxonomy/_platform.py
+	@$(PY) mutmut results
 
 # --------------------------------------------------------------------------
 # Generation — regenerate auto-generated source from schema and mappings.
 # --------------------------------------------------------------------------
 
-generate: ## Regenerate auto-generated Python + docs from schema.yaml + mappings/
-	@$(UV) run scripts/generate.py
+generate: ## Regenerate auto-generated Python (python/) + docs from schema.yaml + mappings/
+	@$(PY) scripts/generate.py
 	@$(UV) run scripts/generate_reference.py
 
 # --------------------------------------------------------------------------
@@ -77,18 +81,20 @@ tool: ## Serve the translation explorer (open /tool/ at the address it prints)
 # Packaging.
 # --------------------------------------------------------------------------
 
-build: ## Build wheel and sdist into dist/
-	@rm -rf dist
-	@uvx --from build pyproject-build --installer uv
+build: ## Build wheel and sdist into python/dist/
+	@rm -rf python/dist
+	@$(UV) build python
 
-publish: build ## Upload dist/* to PyPI (requires credentials)
-	@uvx twine upload dist/*
+publish: build ## Upload python/dist/* to PyPI (requires credentials)
+	@uvx twine upload python/dist/*
 
 # --------------------------------------------------------------------------
 # Housekeeping.
 # --------------------------------------------------------------------------
 
 clean: ## Remove caches and build artifacts
-	@rm -rf dist/ build/ .pytest_cache/ .mypy_cache/ .ruff_cache/ \
-	        .hypothesis/ .mutmut-cache mutants/ htmlcov/ .coverage
+	@rm -rf dist/ build/ python/dist/ .pytest_cache/ python/.pytest_cache/ \
+	        .mypy_cache/ python/.mypy_cache/ .ruff_cache/ python/.ruff_cache/ \
+	        .hypothesis/ python/.hypothesis/ .mutmut-cache python/.mutmut-cache \
+	        mutants/ htmlcov/ python/htmlcov/ .coverage python/.coverage
 	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

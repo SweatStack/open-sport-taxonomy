@@ -1,8 +1,25 @@
 # Plan 025: Spec-first repo layout (`python/` subdir, split changelog, tooling boundaries)
 
-> **Status: proposed.** A structural migration to land **after `0.9.0` ships**, as its own
-> focused PR — never bundled with a behaviour/release change (keeps the diff and `git
-> bisect` clean). Builds on the two-version model in [`plans/024`](024-two-version-model.md).
+> **Status: implemented** (after `0.9.0`). The package now lives in `python/`; the root is
+> the spec. As-built refinements beyond the original plan:
+> - **Tests separated by deletion, not relocation.** The two pure spec-data tests
+>   (`test_build_reference`, `test_reference_coverage`) were *removed* rather than moved to
+>   a root suite — their invariants are already enforced by the root spec-lint
+>   (`lint_reference_drift`) and the generator's validation rules (3–5 via `generate
+>   --check`). `python/tests/` is now library + conformance only; spec validation lives
+>   solely in `make lint`. (A language-agnostic conformance-vector suite remains the future
+>   step when a second implementation lands.)
+> - **lint.py is a PEP 723 root orchestrator** (deps `pyyaml`, `jinja2`): it runs the spec
+>   checks itself and delegates package checks to `uv run --directory python …`.
+> - **One ruff config, repo-wide:** ruff runs from `python/` with `--config pyproject.toml`
+>   applied to both the package and the root `../scripts`, so there's a single lint-rule
+>   source.
+> - **`pythonpath = ["."]`** added to the package's pytest config so `from tests.…` helper
+>   imports work regardless of invocation.
+> - **Acceptance gate met:** the rebuilt wheel's `.py` payload is byte-identical to the
+>   pre-move `0.9.0` build (METADATA differs only by the intended README swap).
+>
+> Builds on the two-version model in [`plans/024`](024-two-version-model.md).
 
 ## Motivation
 
