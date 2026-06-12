@@ -211,7 +211,7 @@ Sport codes are never removed silently. A deprecated code gets a `deprecated: tr
 2. Move the CHANGELOG `[Unreleased]` block under a dated version heading.
 3. `make generate && make lint && make test` — all green.
 4. `make build` to produce the wheel/sdist (carries the package version from `pyproject.toml`).
-5. **Tag the release with the spec version** (`git tag v<spec>`, e.g. `v0.9.0`) and push; cut a GitHub Release. A code-only release where the spec is unchanged is tagged with the **package** version instead, so every release has a unique tag. Git tags do not affect what PyPI publishes — `uv_build` reads the static `version` from `pyproject.toml`.
+5. **Tag with the per-stream namespace** and push; cut a GitHub Release. Each version line has its own prefixed tag: a **package** release is `python/v<package>` (e.g. `python/v0.9.1`, cut every PyPI publish); a **spec** release (when `schema.yaml` changes) is `spec/v<spec>` (e.g. `spec/v0.9.0`). "Latest spec" is the highest `spec/*` tag; "latest package" the highest `python/*`. Git tags do not affect what PyPI publishes — `uv_build` reads the static `version` from `pyproject.toml`.
 6. `make publish` to upload to PyPI.
 
 ## Reporting errors

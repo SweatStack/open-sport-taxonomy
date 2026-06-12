@@ -80,21 +80,32 @@ minor; changing the meaning of an existing one is major.
 > above becomes binding at `1.0`. That is why this release — which re-interprets generic
 > codes as road/classic — ships as `0.9.0`, not `1.0.0`.
 
-## Git tags
+## Git tags — one namespace per version line
 
-Release tags are the **spec version**, prefixed: `v0.9.0`. The repository is the canonical
-home of the *standard*, so tags mark standard releases.
+The two version lines diverge (the package releases more often than the spec), and a single
+`v*` namespace can't represent both unambiguously. So each line has its own **prefixed tag
+namespace** (the standard monorepo convention — cf. Go modules' `subdir/vX`, Lerna's
+`pkg@X`):
 
-- **PyPI is unaffected.** `uv_build` reads a **static** `version` from `pyproject.toml`;
-  the build never inspects git. The tag name has no bearing on what is published. (If the
-  project ever adopts a VCS-derived version backend like `hatch-vcs`/`setuptools-scm`, the
-  tag *would* drive the package version and this must be revisited.)
-- **Divergence handling.** Because the package version can advance without the spec
-  (a code-only release), a release where the spec is unchanged is tagged with the package
-  version instead (`v0.9.1`), so every PyPI release still has a unique tag. In practice:
-  spec releases → `v{spec}`; package-only releases → `v{package}`. The two number lines
-  never collide because the package version only runs *ahead* of the spec between spec
-  releases.
+- **`spec/vX.Y.Z`** — cut **only when `schema.yaml` changes**. Marks a release of the
+  standard. Current: `spec/v0.9.0`.
+- **`python/vX.Y.Z`** — cut for **every** Python package release (each PyPI publish).
+  Current: `python/v0.9.1`.
+- Future implementations get their own: `js/vX.Y.Z`, etc.
+
+Both use the same `vSemVer` format — only the prefix differs (namespaced, not mixed
+formats). "Latest spec" = highest `spec/*`; "latest package" = highest `python/*`.
+
+- **Schema pins reference a spec tag:** `…/raw/spec/v0.9.0/schema.yaml` (slashed refs work
+  in raw URLs).
+- **PyPI is unaffected.** `uv_build` reads a **static** `version` from `pyproject.toml`; the
+  build never inspects git, so the tag name has no bearing on what is published. (If the
+  project ever adopts a VCS-derived version backend like `hatch-vcs`/`setuptools-scm`, this
+  must be revisited.)
+- **Tooling note:** some tooling assumes a bare `vX` at the repo root (`git describe`,
+  release automation); filter with `--match 'python/v*'` / `--match 'spec/v*'` as needed.
+- The pre-split `v0.9.0` tag is retained as a historical alias (it predates the namespaces);
+  it is not deleted in case anything pinned it.
 
 ## Migration performed this release
 

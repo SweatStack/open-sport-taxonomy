@@ -110,8 +110,8 @@ integration — are in [`python/README.md`](python/README.md). The library expos
 
 OST has two [SemVer](https://semver.org) version numbers:
 
-- **Spec version** (`schema.yaml`) — the standard: vocabulary, OST string format, mapping format, and bundled mappings, versioned together. Git **release tags are the spec version** (`v0.9.0`), so a tag pins a snapshot of the whole standard.
-- **Package version** (`pyproject.toml`) — this Python library; what you `pip install`. It *implements* a spec version. The library exposes both as `open_sport_taxonomy.version` (package) and `open_sport_taxonomy.taxonomy_version` (spec).
+- **Spec version** (`schema.yaml`) — the standard: vocabulary, OST string format, mapping format, and bundled mappings, versioned together. Spec releases are tagged **`spec/vX.Y.Z`** (e.g. `spec/v0.9.0`), so a tag pins a snapshot of the whole standard.
+- **Package version** (`pyproject.toml`) — this Python library; what you `pip install`. It *implements* a spec version, and is tagged **`python/vX.Y.Z`** (each line has its own tag namespace). The library exposes both as `open_sport_taxonomy.version` (package) and `open_sport_taxonomy.taxonomy_version` (spec).
 
 Compatibility is by spec major version; sport codes are stable (once published, never removed — only deprecated). See [`CONTRIBUTING.md`](CONTRIBUTING.md#versioning) for the bump rules.
 
@@ -120,7 +120,7 @@ Compatibility is by spec major version; sport codes are stable (once published, 
 https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/main/schema.yaml
 
 # Pinned to a spec version (git tag)
-https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/v0.9.0/schema.yaml
+https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/spec/v0.9.0/schema.yaml
 ```
 
 ## Contributing
