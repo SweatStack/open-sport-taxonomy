@@ -148,6 +148,67 @@ export function parseMapping(text) {
   return { fallbackEncode, fallbackDecode, coarsening, byKey, order, preferred };
 }
 
+/**
+ * @typedef {{ sport: string, label: string, code: string, mods: string[] }} StandardSport
+ * @typedef {{ version: string, sports: StandardSport[] }} Catalogue
+ */
+
+/**
+ * Parse `schema.yaml` text into the standard-sports catalogue. Like
+ * {@link parseMapping}, this reads the regular YAML line-by-line — no library —
+ * and is PURE (no I/O, no DOM). Only `version:` and the `sports:` section are
+ * extracted; modifiers ride along inside each combination's canonical string.
+ * @param {string} text
+ * @returns {Catalogue}
+ */
+export function parseSchema(text) {
+  const lines = text.split(/\r?\n/);
+  let version = '';
+  /** @type {StandardSport[]} */
+  const sports = [];
+  /** @type {'sports' | 'modifiers' | null} */
+  let section = null;
+  /** @type {{ sport: string, label: string } | null} */
+  let current = null;
+  const flush = () => {
+    if (current && current.sport) {
+      const [code, ...mods] = current.sport.split('+');
+      sports.push({ sport: current.sport, label: current.label, code, mods });
+    }
+    current = null;
+  };
+
+  for (const line of lines) {
+    const versionMatch = line.match(/^version:\s*"?([^"]+?)"?\s*$/);
+    if (versionMatch) {
+      version = versionMatch[1];
+      continue;
+    }
+    if (/^sports:\s*$/.test(line)) {
+      section = 'sports';
+      continue;
+    }
+    if (/^modifiers:\s*$/.test(line)) {
+      flush();
+      section = 'modifiers';
+      continue;
+    }
+    if (section !== 'sports') continue;
+
+    const sportMatch = line.match(/^\s*-\s*sport:\s*(.+?)\s*$/);
+    if (sportMatch) {
+      flush();
+      current = { sport: sportMatch[1].trim(), label: '' };
+      continue;
+    }
+    const labelMatch = line.match(/^\s*label:\s*(.+?)\s*$/);
+    if (labelMatch && current) current.label = labelMatch[1].trim();
+  }
+  flush();
+
+  return { version, sports };
+}
+
 // ---------------------------------------------------------------------------
 // Decode  (platform target -> OST sport)
 //

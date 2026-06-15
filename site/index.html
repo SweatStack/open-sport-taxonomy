@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OpenSportTaxonomy — platform translation explorer</title>
+    <title>OpenSportTaxonomy · the sport vocabulary your app was missing</title>
     <style>
       :root {
         color-scheme: light;
@@ -12,8 +12,6 @@
         --line: #e3e3e3;
         --rule: #bdbdbd;
         --zebra: #fafafa;
-        --chip: #f1f1f1;
-        --accent: #0b66c3;
       }
 
       * {
@@ -37,459 +35,248 @@
       }
 
       header {
-        padding-top: 2.5rem;
+        padding-top: 3rem;
       }
+
+      /* ---- Shared header (identical across pages) ---------------------- */
 
       h1 {
-        margin: 0 0 0.15rem;
-        font-size: 1.5rem;
+        margin: 0 0 0.1rem;
+        font-size: 1.6rem;
       }
 
-      .tagline {
-        margin: 0 0 1rem;
+      h1 a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      h1 a:hover {
+        opacity: 0.7;
+      }
+
+      .subtitle {
+        margin: 0 0 1.1rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .nav {
+        display: flex;
+        gap: 1.25rem;
+        margin: 0 0 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .nav a {
         color: var(--muted);
+        text-decoration: none;
+        padding-bottom: 0.15rem;
+        border-bottom: 2px solid transparent;
+      }
+
+      .nav a:hover {
+        color: var(--ink);
+      }
+
+      .nav a[aria-current="page"] {
+        color: var(--ink);
+        font-weight: 700;
+        border-bottom-color: var(--ink);
+      }
+
+      /* ---- Landing content -------------------------------------------- */
+
+      .intro {
+        margin: 0;
         font-size: 1.05rem;
+        max-width: 46rem;
       }
 
-      .lede {
-        margin: 0;
-        max-width: 44rem;
-        color: var(--muted);
-      }
-
-      .lede code {
-        color: inherit;
-      }
-
-      form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        align-items: end;
-        margin: 1.75rem 0 0.75rem;
-      }
-
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-      }
-
-      label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-
-      select,
-      input[type="search"] {
-        font: inherit;
-        padding: 0.4rem 0.5rem;
-        min-width: 15rem;
-        border: 1px solid var(--rule);
-        border-radius: 0.3rem;
-        background: #fff;
-      }
-
-      .status {
-        min-height: 1.5rem;
-        margin: 0.25rem 0 1rem;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      .status.error {
-        color: #b00020;
-      }
-
-      table {
-        width: 100%;
-        margin-bottom: 4rem;
-        border-collapse: collapse;
-      }
-
-      .table-bar {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem 1rem;
-        margin: 2rem 0 0.6rem;
-      }
-
-      .summary {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      .search-field {
-        margin-left: auto;
-      }
-
-      .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        white-space: nowrap;
-        border: 0;
-      }
-
-      th,
-      td {
-        padding: 0.5rem 0.7rem;
-        text-align: left;
-        vertical-align: top;
-        border-bottom: 1px solid var(--line);
-      }
-
-      thead th {
-        border-bottom: 2px solid var(--rule);
-        font-size: 0.82rem;
-      }
-
-      thead .sub {
-        display: block;
-        font-weight: 400;
-        color: var(--muted);
-      }
-
-      tbody tr:nth-child(even) {
-        background: var(--zebra);
-      }
-
-      td:nth-child(2) {
-        width: 30%;
-      }
-
-      code {
+      .intro code,
+      .anatomy {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+
+      .intro code {
         font-size: 0.85em;
-        padding: 0.05rem 0.3rem;
-        background: var(--chip);
-        border-radius: 0.25rem;
+        padding: 0.06rem 0.34rem;
+        background: #f1f1f1;
+        border-radius: 0.3rem;
       }
 
-      .name {
-        color: #444;
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 2.5rem 0;
+        max-width: 46rem;
       }
 
-      .muted,
-      .muted code {
-        color: var(--muted);
+      @media (max-width: 40rem) {
+        .cards {
+          grid-template-columns: 1fr;
+        }
       }
 
-      .muted code {
-        background: transparent;
-      }
-
-      .pill {
-        display: inline-block;
-        margin-left: 0.45rem;
-        padding: 0.02rem 0.4rem;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        color: #fff;
-        background: #c0392b;
-        border-radius: 0.7rem;
-      }
-
-      mark {
-        background: #fff2a8;
+      .card {
+        display: block;
+        border: 1px solid var(--rule);
+        border-radius: 0.6rem;
+        padding: 1.2rem 1.3rem;
+        text-decoration: none;
         color: inherit;
-        padding: 0 0.05rem;
-        border-radius: 0.15rem;
+        transition: border-color 0.12s, box-shadow 0.12s, transform 0.12s;
       }
 
-      .empty {
-        color: var(--muted);
-        font-style: italic;
+      .card:hover {
+        border-color: var(--ink);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+        transform: translateY(-1px);
       }
+
+      .card h2 {
+        margin: 0 0 0.4rem;
+        font-size: 1.2rem;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--ink);
+        font-size: 0.95rem;
+      }
+
+      .card .go {
+        display: inline-block;
+        margin-top: 0.7rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .how {
+        border-top: 1px solid var(--line);
+        padding-top: 1.75rem;
+        max-width: 46rem;
+      }
+
+      .how h2 {
+        font-size: 1.1rem;
+        margin: 0 0 0.6rem;
+      }
+
+      .how p {
+        margin: 0 0 0.75rem;
+        color: var(--ink);
+      }
+
+      .how a {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .anatomy {
+        font-size: 1rem;
+        color: var(--ink);
+        background: var(--zebra);
+        border: 1px solid var(--line);
+        border-radius: 0.4rem;
+        padding: 0.6rem 0.8rem;
+        display: inline-block;
+      }
+
+      .anatomy .sep {
+        font-weight: 700;
+      }
+
+      /* ---- Shared footer (identical across pages) --------------------- */
 
       footer {
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
         padding-bottom: 3rem;
-        color: var(--muted);
-        font-size: 0.85rem;
+        border-top: 1px solid var(--line);
+        color: var(--ink);
+        font-size: 0.9rem;
       }
 
-      a {
-        color: var(--accent);
+      footer p {
+        margin: 0;
+        max-width: 46rem;
+      }
+
+      footer a {
+        color: var(--ink);
+        text-decoration: underline;
       }
     </style>
   </head>
 
   <body>
     <header>
-      <h1>OpenSportTaxonomy</h1>
-      <p class="tagline">Platform translation explorer</p>
-      <p class="lede">
-        Every fitness platform names sports differently; OpenSportTaxonomy is the common language
-        between them. Pick a <strong>source</strong> and a <strong>target</strong> platform — each
-        of the source platform's sports is decoded to its OpenSportTaxonomy equivalent, then
-        encoded into the target:
-        <code>source&nbsp;→&nbsp;decode&nbsp;→&nbsp;OST&nbsp;→&nbsp;encode&nbsp;→&nbsp;target</code>.
-        Greyed values have no equivalent and fall back to <code>generic</code>.
+      <h1><a href="./index.html">OpenSportTaxonomy</a></h1>
+      <p class="subtitle">The sport vocabulary your app was missing.</p>
+      <nav class="nav">
+        <a href="./index.html" aria-current="page">Overview</a>
+        <a href="./sports.html">Standard sports</a>
+        <a href="./translate.html">Translate</a>
+      </nav>
+      <p class="intro">
+        Every fitness platform invented its own list of sports. Strava says <code>Ride</code>,
+        Garmin says <code>ROAD_CYCLING</code>, Apple says <code>Cycling</code>. None of them
+        agree, none are hierarchical, and none are open. OpenSportTaxonomy is one canonical,
+        hierarchical set of sports any app can adopt, with mappings that translate cleanly
+        between every platform.
       </p>
-
-      <form id="controls">
-        <p class="field">
-          <label for="source">Source platform</label>
-          <select id="source"></select>
-        </p>
-        <p class="field">
-          <label for="target">Target platform</label>
-          <select id="target"></select>
-        </p>
-      </form>
+      <p class="intro">
+        With <strong>OpenSportTaxonomy</strong>, cycling on the road is <code>cycling.road</code>,
+        allowing you to filter on <code>cycling.road</code> specifically, or on <code>cycling</code> to also include for example <code>cycling.gravel</code>.
+      </p>
     </header>
 
     <main>
-      <p id="status" class="status" role="status" aria-live="polite">Loading mappings…</p>
-
-      <div class="table-bar">
-        <p class="summary" id="summary"></p>
-        <div class="search-field">
-          <label for="search" class="visually-hidden">Filter sports</label>
-          <input type="search" id="search" placeholder="Filter sports…" autocomplete="off" />
-        </div>
+      <div class="cards">
+        <a class="card" href="./sports.html">
+          <h2>Standard sports</h2>
+          <p>
+            Browse the catalogue: Every standard sport, each with a human label.
+          </p>
+          <span class="go">Browse the sports →</span>
+        </a>
+        <a class="card" href="./translate.html">
+          <h2>Translate</h2>
+          <p>
+            View how sports decode and encode between any two platforms.
+          </p>
+          <span class="go">Start translating →</span>
+        </a>
       </div>
 
-      <table aria-describedby="summary">
-        <thead>
-          <tr>
-            <th scope="col">Source <span class="sub" id="head-source"></span></th>
-            <th scope="col">OpenSportTaxonomy <span class="sub">decode</span></th>
-            <th scope="col">Target <span class="sub" id="head-target"></span></th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+      <section class="how">
+        <h2>How it works</h2>
+        <p>
+          A sport is a single string. Dots separate a sport from its disciplines, and plusses
+          add modifiers that describe the circumstances.
+        </p>
+        <p class="anatomy">
+          cycling<span class="sep">.</span>road<span class="sep">+</span>stationary<span class="sep">+</span>virtual
+        </p>
+        <p>
+          That is the entire spec. We publish a curated set of
+          <a href="./sports.html">standard sports</a> with human labels and platform mappings. But any string that follows this pattern is a valid sport, so a
+          client can mint whatever it needs.
+        </p>
+      </section>
     </main>
 
     <footer>
-      OpenSportTaxonomy is an open standard —
-      <a href="https://github.com/sweatstack/open-sport-taxonomy">view the project on GitHub</a>.
-      Mappings are read live from
-      <a href="https://github.com/sweatstack/open-sport-taxonomy/tree/main/mappings">the repository</a>;
-      the translation logic is a reference implementation of <code>docs/translation.md</code>, in <code>translate.js</code>.
+      <p>
+        OpenSportTaxonomy is maintained by <a href="https://sweatstack.no">SweatStack</a>. We
+        built it because every fitness app ends up rebuilding the same sport plumbing: naming
+        activities, reconciling them across platforms, and keeping a hierarchy straight. It is
+        the vocabulary we wished existed, and we publish it openly because a shared vocabulary
+        only works when it is actually shared. The spec, mappings, and reference implementation
+        are on <a href="https://github.com/sweatstack/open-sport-taxonomy">GitHub</a>.
+      </p>
     </footer>
-
-    <script type="module">
-      import { parseMapping, encode } from "./translate.js";
-
-      // Platforms in a deliberate display order. Ids match mappings/<id>.yaml.
-      const PLATFORMS = [
-        { id: "strava", label: "Strava", target: "SportType" },
-        { id: "garmin_fit", label: "Garmin FIT", target: "sport / sub_sport" },
-        { id: "garmin_training_api", label: "Garmin Training API", target: "sport type" },
-        { id: "apple_healthkit", label: "Apple HealthKit", target: "HKWorkoutActivityType" },
-        { id: "wahoo", label: "Wahoo", target: "workout_type_id" },
-        { id: "polar", label: "Polar", target: "detailed_sport_info" },
-        { id: "suunto", label: "Suunto", target: "activity id" },
-      ];
-      // Mappings are read live from the canonical source on GitHub (main), so this
-      // page is a standalone static file with no bundled data. Pin to a spec tag
-      // (e.g. .../spec/v0.9.0/mappings/) to freeze the tool to a spec release.
-      const MAPPINGS_BASE =
-        "https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/main/mappings/";
-
-      /** @type {Map<string, import("./translate.js").PlatformIndex>} */
-      const indices = new Map();
-
-      const els = {
-        source: document.getElementById("source"),
-        target: document.getElementById("target"),
-        rows: document.getElementById("rows"),
-        status: document.getElementById("status"),
-        summary: document.getElementById("summary"),
-        headSource: document.getElementById("head-source"),
-        headTarget: document.getElementById("head-target"),
-        search: document.getElementById("search"),
-      };
-
-      const platformById = (id) => PLATFORMS.find((p) => p.id === id);
-
-      // Fields searched and highlighted by the filter, in column order.
-      const SEARCH_FIELDS = ["sourceValue", "sourceName", "ost", "targetValue", "targetName"];
-
-      // The current source→target rows, rebuilt once per platform change.
-      let model = [];
-
-      /**
-       * Build the row model for a source→target pair: one descriptor per source
-       * sport, carrying everything render and search need. No DOM.
-       */
-      function buildModel(sourceId, targetId) {
-        const source = indices.get(sourceId);
-        const target = indices.get(targetId);
-        const samePlatform = sourceId === targetId;
-
-        return source.order.map((key) => {
-          const entry = source.byKey.get(key);
-          const ost = entry.sport ?? source.fallbackDecode;
-          const encoded = encode(target, ost);
-          const targetEntry = target.byKey.get(encoded.target);
-
-          const row = {
-            sourceValue: entry.target.value,
-            sourceName: entry.name,
-            ost,
-            noEquivalent: entry.sport === null,
-            targetValue: targetEntry ? targetEntry.target.value : encoded.target,
-            targetName: targetEntry ? targetEntry.name : "",
-            fallback: encoded.via === null,
-            lossy: samePlatform && encoded.target !== key,
-          };
-          row.haystack = SEARCH_FIELDS.map((field) => row[field]).join("\n").toLowerCase();
-          return row;
-        });
-      }
-
-      /** Append `text` to `parent`, wrapping each case-insensitive match of `query` in <mark>. */
-      function appendHighlighted(parent, text, query) {
-        if (!query) {
-          parent.append(text);
-          return;
-        }
-        const haystack = text.toLowerCase();
-        let from = 0;
-        for (let at = haystack.indexOf(query, from); at !== -1; at = haystack.indexOf(query, from)) {
-          if (at > from) parent.append(text.slice(from, at));
-          const mark = document.createElement("mark");
-          mark.textContent = text.slice(at, at + query.length);
-          parent.append(mark);
-          from = at + query.length;
-        }
-        parent.append(text.slice(from));
-      }
-
-      /** Append a `<code>value</code> name` pair to a cell, highlighting `query`. */
-      function nativeCell(td, value, name, query) {
-        const code = document.createElement("code");
-        appendHighlighted(code, value, query);
-        td.append(code);
-        if (name && name !== value) {
-          const span = document.createElement("span");
-          span.className = "name";
-          appendHighlighted(span, " " + name, query);
-          td.append(span);
-        }
-      }
-
-      /** Render one model row as a <tr>, highlighting `query`. */
-      function renderRow(row, query) {
-        const tr = document.createElement("tr");
-
-        const tdSource = document.createElement("td");
-        nativeCell(tdSource, row.sourceValue, row.sourceName, query);
-
-        const tdOst = document.createElement("td");
-        const ostCode = document.createElement("code");
-        appendHighlighted(ostCode, row.ost, query);
-        tdOst.append(ostCode);
-        if (row.noEquivalent) {
-          tdOst.classList.add("muted");
-          tdOst.title = "No OpenSportTaxonomy equivalent — falls back to generic.";
-        }
-
-        const tdTarget = document.createElement("td");
-        nativeCell(tdTarget, row.targetValue, row.targetName, query);
-        if (row.fallback) {
-          tdTarget.classList.add("muted");
-          tdTarget.title = "The target platform has no equivalent — falls back.";
-        }
-        if (row.lossy) {
-          const pill = document.createElement("span");
-          pill.className = "pill";
-          pill.textContent = "lossy";
-          pill.title = "This sport does not round-trip through OpenSportTaxonomy.";
-          tdTarget.append(pill);
-        }
-
-        tr.append(tdSource, tdOst, tdTarget);
-        return tr;
-      }
-
-      /** Filter the model by `rawQuery` and paint the table body, highlighting matches. */
-      function paint(rawQuery) {
-        const query = rawQuery.trim().toLowerCase();
-        const body = document.createDocumentFragment();
-        let shown = 0;
-        for (const row of model) {
-          if (query && !row.haystack.includes(query)) continue;
-          body.append(renderRow(row, query));
-          shown += 1;
-        }
-        if (shown === 0) {
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 3;
-          td.className = "empty";
-          td.textContent = `No sports match “${rawQuery.trim()}”.`;
-          tr.append(td);
-          body.append(tr);
-        }
-        els.rows.replaceChildren(body);
-      }
-
-      /** React to a source/target change: update headings, rebuild the model, repaint. */
-      function select() {
-        const sourceId = els.source.value;
-        const targetId = els.target.value;
-        if (!indices.has(sourceId) || !indices.has(targetId)) return;
-
-        els.headSource.textContent = `${platformById(sourceId).label} · ${platformById(sourceId).target}`;
-        els.headTarget.textContent = `${platformById(targetId).label} · ${platformById(targetId).target}`;
-        els.summary.textContent =
-          `${indices.get(sourceId).order.length} ${platformById(sourceId).label} sports, ` +
-          `decoded to OpenSportTaxonomy and re-encoded for ${platformById(targetId).label}.`;
-
-        model = buildModel(sourceId, targetId);
-        paint(els.search.value);
-      }
-
-      function populateSelect(select, selectedId) {
-        for (const p of PLATFORMS) {
-          const option = document.createElement("option");
-          option.value = p.id;
-          option.textContent = p.label;
-          select.append(option);
-        }
-        select.value = selectedId;
-      }
-
-      async function loadPlatform(p) {
-        const response = await fetch(`${MAPPINGS_BASE}${p.id}.yaml`);
-        if (!response.ok) throw new Error(`${p.id}: HTTP ${response.status}`);
-        indices.set(p.id, parseMapping(await response.text()));
-      }
-
-      async function main() {
-        try {
-          await Promise.all(PLATFORMS.map(loadPlatform));
-        } catch (error) {
-          els.status.textContent = `Could not load mappings from GitHub (${error.message}). Check your connection and retry.`;
-          els.status.classList.add("error");
-          return;
-        }
-
-        populateSelect(els.source, "strava");
-        populateSelect(els.target, "garmin_fit");
-        els.source.addEventListener("change", select);
-        els.target.addEventListener("change", select);
-        els.search.addEventListener("input", () => paint(els.search.value));
-
-        els.status.textContent = "";
-        select();
-      }
-
-      main();
-    </script>
   </body>
 </html>
