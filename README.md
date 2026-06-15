@@ -1,12 +1,12 @@
 # OpenSportTaxonomy
 
-An open taxonomy for classifying sports and physical activities.
+**The sport vocabulary your app was missing.**
 
 Every platform has invented its own list of sports. Apple HealthKit calls it `Cycling`, Strava calls it `Ride`, Garmin calls it `ROAD_CYCLING`. None of them are hierarchical, none map to each other, and none are open standards.
 
 OpenSportTaxonomy provides a single canonical set of sport codes that any application can reference. It classifies activities by **how the body moves** — see [`docs/taxonomy.md`](docs/taxonomy.md) for the purpose, terminology, and the rule for what counts as a distinct modality, discipline, or modifier.
 
-**Try it live** at **[open-sport-taxonomy.sweatstack.no](https://open-sport-taxonomy.sweatstack.no)**: browse the standard sports and see how each one translates, or open the platform-to-platform translation explorer.
+**Try it live** at **[open-sport-taxonomy.sweatstack.no](https://open-sport-taxonomy.sweatstack.no)**: [browse the standard sports](https://open-sport-taxonomy.sweatstack.no/sports.html) and see how each one translates across platforms, or open the [translation explorer](https://open-sport-taxonomy.sweatstack.no/translate.html).
 
 > [!WARNING]
 > This taxonomy is young and only covers a few sports at the moment.
@@ -41,7 +41,7 @@ More examples:
 
 **Modifiers** describe circumstances, not disciplines. Road cycling on a trainer is still road cycling, performed on a stationary machine. Modifiers are appended with `+` and sorted alphabetically. They are independent: a Zwift ride is both `stationary` and `virtual`, set separately.
 
-See the [full reference](docs/reference.md) for all sport codes and modifiers.
+See the [full reference](docs/reference.md) for all sport codes and modifiers, or [browse them live](https://open-sport-taxonomy.sweatstack.no/sports.html).
 
 ### Structured format
 
@@ -81,7 +81,7 @@ Mapping files in [`mappings/`](mappings/) translate OST codes to platform-specif
 
 Mappings are bidirectional: every entry supports both encoding (OST → platform) and decoding (platform → OST). Translations are lossy by design — some platforms are less granular than the taxonomy, so multiple OST codes may encode to the same platform value (e.g. all cycling disciplines map to HealthKit `13`). The decoded result is the most-specific OST code that the platform actually represents.
 
-See [`docs/translation.md`](docs/translation.md) for the language-agnostic encode/decode specification.
+See [`docs/translation.md`](docs/translation.md) for the language-agnostic encode/decode specification, or watch any platform's sports decode and re-encode in the [translation explorer](https://open-sport-taxonomy.sweatstack.no/translate.html).
 
 ## Python library
 
