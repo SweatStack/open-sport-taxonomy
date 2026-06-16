@@ -96,6 +96,34 @@
         padding: 0;
       }
 
+      .callout {
+        max-width: 46rem;
+        padding: 0.6rem 0.85rem;
+        background: var(--zebra);
+        border: 1px solid var(--line);
+        border-radius: 0.4rem;
+        color: var(--ink);
+        font-size: 0.9rem;
+      }
+
+      .callout.top {
+        margin: 1.25rem 0 0;
+      }
+
+      .callout.bottom {
+        margin: 1.5rem 0 0;
+      }
+
+      .callout a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .callout a:hover {
+        text-decoration: underline;
+      }
+
       .status {
         min-height: 1.5rem;
         margin: 1.5rem 0 0;
@@ -350,6 +378,11 @@
         labelled ones it recommends. Use the ⓘ button on any sport to see how it
         translates to every platform.
       </p>
+      <p class="callout top">
+        Missing a sport? The catalogue grows with its users.
+        <a href="https://github.com/sweatstack/open-sport-taxonomy/issues/new">Open an issue</a>
+        and we will consider adding it.
+      </p>
     </header>
 
     <main>
@@ -366,6 +399,12 @@
       </div>
 
       <div class="tree" id="tree"></div>
+
+      <p class="callout bottom">
+        Don’t see a sport you need? OpenSportTaxonomy is open and meant to grow.
+        <a href="https://github.com/sweatstack/open-sport-taxonomy/issues/new">Open an issue</a>
+        to propose adding it.
+      </p>
     </main>
 
     <footer>
