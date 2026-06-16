@@ -150,14 +150,18 @@ export function parseMapping(text) {
 
 /**
  * @typedef {{ sport: string, label: string, code: string, mods: string[] }} StandardSport
- * @typedef {{ version: string, sports: StandardSport[] }} Catalogue
+ * @typedef {{ code: string, label: string, group: string | null }} ModifierAtom
+ * @typedef {{ version: string, sports: StandardSport[], modifiers: ModifierAtom[] }} Catalogue
  */
 
 /**
  * Parse `schema.yaml` text into the standard-sports catalogue. Like
  * {@link parseMapping}, this reads the regular YAML line-by-line — no library —
- * and is PURE (no I/O, no DOM). Only `version:` and the `sports:` section are
- * extracted; modifiers ride along inside each combination's canonical string.
+ * and is PURE (no I/O, no DOM). `version:`, the `sports:` section (each entry's
+ * canonical string + label, with the code/modifiers split out), and the
+ * `modifiers:` section (each atom's code, label, and optional group) are
+ * extracted. The modifier atoms power validity classification (known-atoms);
+ * the modifiers inside a sport's canonical string ride along in its `mods`.
  * @param {string} text
  * @returns {Catalogue}
  */
@@ -166,14 +170,18 @@ export function parseSchema(text) {
   let version = '';
   /** @type {StandardSport[]} */
   const sports = [];
+  /** @type {ModifierAtom[]} */
+  const modifiers = [];
   /** @type {'sports' | 'modifiers' | null} */
   let section = null;
-  /** @type {{ sport: string, label: string } | null} */
+  /** @type {{ sport: string, label: string } | { code: string, label: string, group: string | null } | null} */
   let current = null;
   const flush = () => {
-    if (current && current.sport) {
+    if (current && 'sport' in current && current.sport) {
       const [code, ...mods] = current.sport.split('+');
       sports.push({ sport: current.sport, label: current.label, code, mods });
+    } else if (current && 'code' in current && current.code) {
+      modifiers.push({ code: current.code, label: current.label, group: current.group });
     }
     current = null;
   };
@@ -185,6 +193,7 @@ export function parseSchema(text) {
       continue;
     }
     if (/^sports:\s*$/.test(line)) {
+      flush();
       section = 'sports';
       continue;
     }
@@ -193,20 +202,35 @@ export function parseSchema(text) {
       section = 'modifiers';
       continue;
     }
-    if (section !== 'sports') continue;
+    if (section === null) continue;
 
-    const sportMatch = line.match(/^\s*-\s*sport:\s*(.+?)\s*$/);
-    if (sportMatch) {
-      flush();
-      current = { sport: sportMatch[1].trim(), label: '' };
-      continue;
+    if (section === 'sports') {
+      const sportMatch = line.match(/^\s*-\s*sport:\s*(.+?)\s*$/);
+      if (sportMatch) {
+        flush();
+        current = { sport: sportMatch[1].trim(), label: '' };
+        continue;
+      }
+    } else {
+      const codeMatch = line.match(/^\s*-\s*code:\s*(.+?)\s*$/);
+      if (codeMatch) {
+        flush();
+        current = { code: codeMatch[1].trim(), label: '', group: null };
+        continue;
+      }
+      const groupMatch = line.match(/^\s*group:\s*(.+?)\s*$/);
+      if (groupMatch && current && 'code' in current) {
+        current.group = groupMatch[1].trim();
+        continue;
+      }
     }
+
     const labelMatch = line.match(/^\s*label:\s*(.+?)\s*$/);
     if (labelMatch && current) current.label = labelMatch[1].trim();
   }
   flush();
 
-  return { version, sports };
+  return { version, sports, modifiers };
 }
 
 // ---------------------------------------------------------------------------
@@ -292,11 +316,12 @@ function* candidates(sport) {
 }
 
 /**
- * Split a sport string into its code and its sorted modifiers.
+ * Split a sport string into its code and its sorted modifiers. Exported as a
+ * pure primitive for taxonomy operations (see `taxonomy.js`).
  * @param {string} sport
  * @returns {{ code: string, mods: string[] }}
  */
-function parseSport(sport) {
+export function parseSport(sport) {
   const [code, ...mods] = sport.split('+');
   return { code, mods: mods.slice().sort() };
 }
@@ -304,11 +329,11 @@ function parseSport(sport) {
 /**
  * The dot-notation lineage of a code, nearest first: `cycling.road.crit`
  * yields `["cycling.road.crit", "cycling.road", "cycling"]`. Computed
- * mechanically — no schema lookup needed.
+ * mechanically — no schema lookup needed. Exported as a pure primitive.
  * @param {string} code
  * @returns {string[]}
  */
-function ancestry(code) {
+export function ancestry(code) {
   const lineage = [];
   let current = code;
   for (;;) {

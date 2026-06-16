@@ -107,7 +107,7 @@
 
       .cards {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
         gap: 1rem;
         margin: 2.5rem 0;
         max-width: 46rem;
@@ -219,6 +219,7 @@
         <a href="./index.html" aria-current="page">Overview</a>
         <a href="./sports.html">Standard sports</a>
         <a href="./translate.html">Translate</a>
+        <a href="./filtering.html">Filtering</a>
       </nav>
       <p class="intro">
         Every fitness platform invented its own list of sports. Strava says <code>Ride</code>,
@@ -248,6 +249,14 @@
             View how sports decode and encode between any two platforms.
           </p>
           <span class="go">Start translating →</span>
+        </a>
+        <a class="card" href="./filtering.html">
+          <h2>Filtering</h2>
+          <p>
+            See the hierarchy at work: filter a sample activity log and watch a
+            parent sport pull in all its variants.
+          </p>
+          <span class="go">Try the filter →</span>
         </a>
       </div>
 

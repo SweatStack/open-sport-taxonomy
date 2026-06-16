@@ -114,6 +114,32 @@ Strictly nested: **standard ⊆ known-atoms ⊆ well-formed.** `cycling.road+rac
 well-formed and known-atoms, yet *not* a standard sport — valid and usable, just outside
 the recommended catalogue.
 
+### The well-formed grammar
+
+A **well-formed** string is a dotted code path followed by zero or more `+`
+modifiers. Each segment is lowercase letters with single internal underscores, at
+least one letter per segment; dots live only inside the code (never after a `+`);
+no empty segments. As one canonical regex:
+
+```
+# code path, then zero or more +modifiers; segment = [a-z]+(?:_[a-z]+)*
+WELL_FORMED = /^[a-z]+(?:_[a-z]+)*(?:\.[a-z]+(?:_[a-z]+)*)*(?:\+[a-z]+(?:_[a-z]+)*)*$/
+```
+
+Accepts every catalogue string (`xc_skiing.skate+roller`, `alpine_skiing`,
+`cycling+stationary+virtual`, `generic`); rejects `+stationary` (no code),
+`cycling.` (trailing dot), `cycling..road` (empty segment), `Cycling`
+(uppercase), `cycling__road` (doubled underscore), `cycling+stationary.foo` (dot
+after `+`). Modifier **sortedness and de-duplication** are properties of the
+*canonical* form, not of this lexical grammar — the regex matches an unsorted
+string; canonicalisation sorts and de-duplicates the modifiers.
+
+> **Reference-parser note.** The Python `Sport.parse` is intentionally *more
+> permissive* than `WELL_FORMED` (it splits on `+` and rejects empty parts only,
+> so it currently accepts e.g. uppercase). `WELL_FORMED` is the canonical lexical
+> grammar; tightening `Sport.parse` and any other port to enforce it is a
+> follow-up. The site's filtering demo enforces `WELL_FORMED` directly.
+
 - **The catalogue is the primary artifact** (`schema.yaml`'s `sports:`): a hand-maintained
   list, each entry a canonical string + a hand-crafted label, holding **bare codes and
   recommended combinations** uniformly. A combination is just a standard sport whose

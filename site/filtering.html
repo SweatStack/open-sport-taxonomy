@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenSportTaxonomy · filtering demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1a1a1a;
+        --muted: #8a8a8a;
+        --line: #e3e3e3;
+        --rule: #bdbdbd;
+        --zebra: #fafafa;
+        --chip: #f1f1f1;
+        --accent: #0b66c3;
+        --ok: #1a7f43;
+        --known: #0b66c3;
+        --warn: #b6792a;
+        --bad: #b00020;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #fff;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+      }
+
+      header,
+      main,
+      footer {
+        max-width: 64rem;
+        margin-inline: auto;
+        padding-inline: 1.25rem;
+      }
+
+      header {
+        padding-top: 3rem;
+      }
+
+      h1 {
+        margin: 0 0 0.1rem;
+        font-size: 1.6rem;
+      }
+
+      h1 a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      h1 a:hover {
+        opacity: 0.7;
+      }
+
+      .subtitle {
+        margin: 0 0 1.1rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .nav {
+        display: flex;
+        gap: 1.25rem;
+        margin: 0 0 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .nav a {
+        color: var(--muted);
+        text-decoration: none;
+        padding-bottom: 0.15rem;
+        border-bottom: 2px solid transparent;
+      }
+
+      .nav a:hover {
+        color: var(--ink);
+      }
+
+      .nav a[aria-current="page"] {
+        color: var(--ink);
+        font-weight: 700;
+        border-bottom-color: var(--ink);
+      }
+
+      .lede {
+        margin: 0;
+        max-width: 46rem;
+        color: var(--ink);
+      }
+
+      .lede code {
+        color: inherit;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+
+      .status {
+        min-height: 1.5rem;
+        margin: 1.5rem 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .status.error {
+        color: var(--bad);
+      }
+
+      /* ---- Filter -------------------------------------------------------- */
+
+      .filter {
+        margin: 1.75rem 0 0;
+      }
+
+      .filter label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 0.35rem;
+      }
+
+      .combo {
+        position: relative;
+        max-width: 28rem;
+      }
+
+      /* The wrapper carries the border so it reads as one text box; the input
+         flexes to fill and the validity hint reserves only its own width, so a
+         long value is never clipped. */
+      .input-wrap {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--rule);
+        border-radius: 0.3rem;
+        background: #fff;
+      }
+
+      .input-wrap:focus-within {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+
+      input[type="search"] {
+        font: inherit;
+        flex: 1;
+        min-width: 0;
+        padding: 0.5rem 0.6rem;
+        border: none;
+        background: transparent;
+        border-radius: 0.3rem;
+      }
+
+      input[type="search"]:focus {
+        outline: none;
+      }
+
+      input[type="search"]::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      /* Autocomplete listbox */
+      .suggestions {
+        position: absolute;
+        z-index: 20;
+        left: 0;
+        right: 0;
+        margin: 0.2rem 0 0;
+        padding: 0.25rem;
+        list-style: none;
+        background: #fff;
+        border: 1px solid var(--rule);
+        border-radius: 0.4rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        max-height: 17rem;
+        overflow-y: auto;
+      }
+
+      .suggestions[hidden] {
+        display: none;
+      }
+
+      .suggestions li {
+        display: flex;
+        align-items: baseline;
+        gap: 0.55rem;
+        padding: 0.3rem 0.45rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+      }
+
+      .suggestions li[aria-selected="true"],
+      .suggestions li:hover {
+        background: var(--zebra);
+      }
+
+      .suggestions .s-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.84rem;
+        color: var(--ink);
+        border: 1px solid var(--ink);
+        border-radius: 0.35rem;
+        padding: 0.02rem 0.32rem;
+        white-space: nowrap;
+      }
+
+      .suggestions .s-label {
+        color: var(--muted);
+        font-size: 0.9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Validity hint, right-aligned inside the box (a flex sibling of the input). */
+      .validity {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0 0.6rem 0 0.3rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      .validity:empty {
+        display: none;
+      }
+
+      .validity .dot {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--muted);
+        flex: 0 0 auto;
+      }
+
+      .validity.standard .dot { background: var(--ok); }
+      .validity.standard .tier { color: var(--ok); }
+      .validity.known-atoms .dot { background: var(--known); }
+      .validity.known-atoms .tier { color: var(--known); }
+      .validity.well-formed .dot { background: var(--warn); }
+      .validity.well-formed .tier { color: var(--warn); }
+      .validity.malformed .dot { background: var(--bad); }
+      .validity.malformed .tier { color: var(--bad); }
+
+      /* ---- Summary + table ---------------------------------------------- */
+
+      .summary {
+        margin: 1.75rem 0 0.6rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .summary code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.84em;
+        color: var(--ink);
+        border: 1px solid var(--ink);
+        border-radius: 0.35rem;
+        padding: 0.02rem 0.3rem;
+      }
+
+      table {
+        width: 100%;
+        margin-bottom: 4rem;
+        border-collapse: collapse;
+      }
+
+      caption {
+        caption-side: top;
+        text-align: left;
+        margin-bottom: 0.5rem;
+        padding: 0.35rem 0.5rem;
+        background: var(--zebra);
+        border: 1px dashed var(--rule);
+        border-radius: 0.3rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-style: italic;
+      }
+
+      th,
+      td {
+        padding: 0.5rem 0.7rem;
+        text-align: left;
+        vertical-align: baseline;
+        border-bottom: 1px solid var(--line);
+      }
+
+      thead th {
+        border-bottom: 2px solid var(--rule);
+        font-size: 0.82rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      tbody tr:nth-child(even) {
+        background: var(--zebra);
+      }
+
+      td.num,
+      th.num {
+        text-align: right;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      td.date {
+        white-space: nowrap;
+        color: var(--muted);
+      }
+
+      .title {
+        font-weight: 500;
+      }
+
+      .sub {
+        display: block;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .sport-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .sport-cell .sport-label {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      /* Canonical sport string: a strong outlined pill (matches sports.html). */
+      .sport-cell code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.84em;
+        padding: 0.05rem 0.34rem;
+        color: var(--ink);
+        background: transparent;
+        border: 1px solid var(--ink);
+        border-radius: 0.35rem;
+        white-space: nowrap;
+      }
+
+      .empty {
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      footer {
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+        border-top: 1px solid var(--line);
+        color: var(--ink);
+        font-size: 0.9rem;
+      }
+
+      footer p {
+        margin: 0;
+        max-width: 46rem;
+      }
+
+      footer a {
+        color: var(--ink);
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1><a href="./index.html">OpenSportTaxonomy</a></h1>
+      <p class="subtitle">The sport vocabulary your app was missing.</p>
+      <nav class="nav">
+        <a href="./index.html">Overview</a>
+        <a href="./sports.html">Standard sports</a>
+        <a href="./translate.html">Translate</a>
+        <a href="./filtering.html" aria-current="page">Filtering</a>
+      </nav>
+      <p class="lede">
+        This is OST inside an app: tag each activity with its canonical sport string, and
+        hierarchical filtering comes for free. A filter matches a sport and every sport beneath it
+        in the dot hierarchy, so <code>cycling</code> selects <code>cycling.road</code>,
+        <code>cycling.gravel</code>, <code>cycling+stationary</code>, and the rest;
+        <code>cycling.road</code> narrows to road rides, and <code>cycling+stationary</code> to the
+        indoor variants. The log below filters this way; a flat list of sport names cannot.
+      </p>
+    </header>
+
+    <main>
+      <p id="status" class="status" role="status" aria-live="polite">Loading the demo…</p>
+
+      <div class="filter">
+        <label for="filter">Filter by sport</label>
+        <div class="combo">
+          <div class="input-wrap">
+            <input
+              type="search"
+              id="filter"
+              placeholder="Try cycling, cycling.road, or running+stationary…"
+              autocomplete="off"
+              role="combobox"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              aria-controls="suggestions"
+            />
+            <span class="validity" id="validity" aria-live="polite"></span>
+          </div>
+          <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
+        </div>
+      </div>
+
+      <p class="summary" id="summary"></p>
+
+      <table aria-describedby="summary">
+        <caption>Artificial sample data, generated for this demo. Not a real activity log.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Sport</th>
+            <th scope="col" class="num">Duration</th>
+            <th scope="col" class="num">Distance</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </main>
+
+    <footer>
+      <p>
+        OpenSportTaxonomy is maintained by <a href="https://sweatstack.no">SweatStack</a>. We
+        built it because every fitness app ends up rebuilding the same sport plumbing: naming
+        activities, reconciling them across platforms, and keeping a hierarchy straight. It is
+        the vocabulary we wished existed, and we publish it openly because a shared vocabulary
+        only works when it is actually shared. The spec, mappings, and reference implementation
+        are on <a href="https://github.com/sweatstack/open-sport-taxonomy">GitHub</a>.
+      </p>
+    </footer>
+
+    <script type="module">
+      import { parseSchema, parseMapping } from "./translate.js";
+      import { classifyTier, isSubsport, buildAtoms } from "./taxonomy.js";
+      import { generateActivities } from "./activities.js";
+      import { createXlateButton, closeXlatePopover } from "./xlate-popover.js";
+
+      // Read live from the canonical source on GitHub (main), so this page is a
+      // standalone static file with no bundled data. Pin to a spec tag
+      // (.../spec/v0.10.0/) to freeze it to a spec release.
+      const RAW_BASE = "https://raw.githubusercontent.com/sweatstack/open-sport-taxonomy/main/";
+      const SCHEMA_URL = `${RAW_BASE}schema.yaml`;
+      const MAPPINGS_BASE = `${RAW_BASE}mappings/`;
+
+      // Platforms in a deliberate display order; ids match mappings/<id>.yaml.
+      const PLATFORMS = [
+        { id: "strava", label: "Strava" },
+        { id: "garmin_fit", label: "Garmin FIT" },
+        { id: "garmin_training_api", label: "Garmin Training API" },
+        { id: "apple_healthkit", label: "Apple HealthKit" },
+        { id: "wahoo", label: "Wahoo" },
+        { id: "polar", label: "Polar" },
+        { id: "suunto", label: "Suunto" },
+      ];
+
+      const TIER_TEXT = {
+        standard: "standard",
+        "known-atoms": "known atoms",
+        "well-formed": "well-formed",
+        malformed: "not valid",
+      };
+
+      const els = {
+        status: document.getElementById("status"),
+        filter: document.getElementById("filter"),
+        suggestions: document.getElementById("suggestions"),
+        validity: document.getElementById("validity"),
+        summary: document.getElementById("summary"),
+        rows: document.getElementById("rows"),
+      };
+
+      const dateFmt = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
+      let activities = [];
+      let atoms = null;
+      let catalogueSports = []; // {sport, label} for autocomplete
+      const indices = new Map();
+      const labels = new Map();
+      const ctx = { platforms: PLATFORMS, indices, labels };
+
+      let activeIndex = -1; // highlighted suggestion
+
+      // ---- Formatting ---------------------------------------------------
+
+      const pad = (n) => String(n).padStart(2, "0");
+
+      function fmtDuration(sec) {
+        const h = Math.floor(sec / 3600);
+        const m = Math.round((sec % 3600) / 60);
+        return h > 0 ? `${h}:${pad(m)} h` : `${m} min`;
+      }
+
+      function fmtDistance(m) {
+        return m == null ? "—" : `${(m / 1000).toFixed(1)} km`;
+      }
+
+      // ---- Rows ---------------------------------------------------------
+
+      function renderRow(a) {
+        const tr = document.createElement("tr");
+
+        const date = document.createElement("td");
+        date.className = "date";
+        date.textContent = dateFmt.format(a.date);
+
+        const sport = document.createElement("td");
+        const cell = document.createElement("div");
+        cell.className = "sport-cell";
+        const code = document.createElement("code");
+        code.textContent = a.sport;
+        const label = document.createElement("span");
+        label.className = "sport-label";
+        label.textContent = a.label;
+        cell.append(code, label, createXlateButton(a.sport, ctx));
+        sport.append(cell);
+
+        const duration = document.createElement("td");
+        duration.className = "num";
+        duration.textContent = fmtDuration(a.durationSec);
+
+        const distance = document.createElement("td");
+        distance.className = "num";
+        distance.textContent = fmtDistance(a.distanceM);
+
+        tr.append(date, sport, duration, distance);
+        return tr;
+      }
+
+      function paintRows(list) {
+        const frag = document.createDocumentFragment();
+        if (list.length === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 4;
+          td.className = "empty";
+          td.textContent = "No activities match this filter.";
+          tr.append(td);
+          frag.append(tr);
+        } else {
+          for (const a of list) frag.append(renderRow(a));
+        }
+        els.rows.replaceChildren(frag);
+      }
+
+      // ---- Summary (with an inline canonical pill) ----------------------
+
+      /** Build the summary from a mix of plain strings and {code} pills. */
+      function setSummary(parts) {
+        const frag = document.createDocumentFragment();
+        for (const part of parts) {
+          if (typeof part === "string") {
+            frag.append(part);
+          } else {
+            const code = document.createElement("code");
+            code.textContent = part.code;
+            frag.append(code);
+          }
+        }
+        els.summary.replaceChildren(frag);
+      }
+
+      // ---- Validity badge -----------------------------------------------
+
+      function setValidity(tier) {
+        els.validity.className = "validity" + (tier ? " " + tier : "");
+        if (!tier) {
+          els.validity.replaceChildren();
+          return;
+        }
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        const name = document.createElement("span");
+        name.className = "tier";
+        name.textContent = TIER_TEXT[tier];
+        els.validity.replaceChildren(dot, name);
+      }
+
+      // ---- Filtering ----------------------------------------------------
+
+      function applyFilter() {
+        closeXlatePopover();
+        const query = els.filter.value.trim();
+        const total = activities.length;
+
+        if (!query) {
+          setValidity(null);
+          setSummary([`${total} activities.`]);
+          paintRows(activities);
+          return;
+        }
+
+        const tier = classifyTier(query, atoms);
+        setValidity(tier);
+
+        if (tier === "malformed") {
+          // Don't filter on a broken string; keep the log visible while typing.
+          setSummary([{ code: query }, " isn’t a well-formed OST string. Showing all ", String(total), "."]);
+          paintRows(activities);
+          return;
+        }
+
+        const matched = activities.filter((a) => isSubsport(a.sport, query));
+        const distinct = new Set(matched.map((a) => a.sport)).size;
+        if (matched.length === 0) {
+          setSummary([{ code: query }, ` is ${tier}, but no activity sits under it. 0 of ${total}.`]);
+        } else {
+          setSummary([
+            `Showing ${matched.length} of ${total} · `,
+            { code: query },
+            ` covers ${distinct} distinct sport${distinct === 1 ? "" : "s"} here (sub-sport containment).`,
+          ]);
+        }
+        paintRows(matched);
+      }
+
+      // ---- Autocomplete -------------------------------------------------
+
+      /** Rank catalogue sports for `query`: code-prefix, then code-substring, then label. */
+      function suggestionsFor(query) {
+        const q = query.toLowerCase();
+        const scored = [];
+        for (const s of catalogueSports) {
+          const code = s.sport.toLowerCase();
+          const label = s.label.toLowerCase();
+          let rank;
+          if (code.startsWith(q)) rank = 0;
+          else if (code.includes(q)) rank = 1;
+          else if (label.includes(q)) rank = 2;
+          else continue;
+          scored.push({ ...s, rank });
+        }
+        scored.sort((a, b) => a.rank - b.rank || a.sport.localeCompare(b.sport));
+        return scored.slice(0, 8);
+      }
+
+      function closeSuggestions() {
+        els.suggestions.hidden = true;
+        els.suggestions.replaceChildren();
+        els.filter.setAttribute("aria-expanded", "false");
+        activeIndex = -1;
+      }
+
+      function renderSuggestions() {
+        const query = els.filter.value.trim();
+        // Nothing to suggest for an empty box, or when the box already equals the one hit.
+        if (!query) return closeSuggestions();
+        const list = suggestionsFor(query);
+        if (list.length === 0 || (list.length === 1 && list[0].sport === query)) {
+          return closeSuggestions();
+        }
+
+        const frag = document.createDocumentFragment();
+        list.forEach((s, i) => {
+          const li = document.createElement("li");
+          li.role = "option";
+          li.id = "sug-" + i;
+          li.dataset.sport = s.sport;
+          li.setAttribute("aria-selected", String(i === activeIndex));
+          const code = document.createElement("span");
+          code.className = "s-code";
+          code.textContent = s.sport;
+          const label = document.createElement("span");
+          label.className = "s-label";
+          label.textContent = s.label;
+          li.append(code, label);
+          frag.append(li);
+        });
+        els.suggestions.replaceChildren(frag);
+        els.suggestions.hidden = false;
+        els.filter.setAttribute("aria-expanded", "true");
+      }
+
+      function moveActive(delta) {
+        const items = [...els.suggestions.children];
+        if (items.length === 0) return;
+        activeIndex = (activeIndex + delta + items.length) % items.length;
+        items.forEach((li, i) => li.setAttribute("aria-selected", String(i === activeIndex)));
+        els.filter.setAttribute("aria-activedescendant", "sug-" + activeIndex);
+      }
+
+      function acceptSuggestion(sport) {
+        els.filter.value = sport;
+        closeSuggestions();
+        applyFilter();
+      }
+
+      // ---- Boot ---------------------------------------------------------
+
+      async function main() {
+        let catalogue;
+        try {
+          const response = await fetch(SCHEMA_URL);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          catalogue = parseSchema(await response.text());
+        } catch (error) {
+          els.status.textContent = `Could not load the catalogue from GitHub (${error.message}). Check your connection and retry.`;
+          els.status.classList.add("error");
+          return;
+        }
+
+        atoms = buildAtoms(catalogue);
+        for (const s of catalogue.sports) labels.set(s.sport, s.label);
+        // Autocomplete over the standard catalogue, minus the generic placeholder.
+        catalogueSports = catalogue.sports
+          .filter((s) => s.sport !== "generic")
+          .map((s) => ({ sport: s.sport, label: s.label }));
+        activities = generateActivities(catalogue);
+
+        // Mappings power the per-row translations popover; best-effort, so the
+        // log still works if a mapping is briefly unavailable.
+        await Promise.all(
+          PLATFORMS.map(async (p) => {
+            try {
+              const response = await fetch(`${MAPPINGS_BASE}${p.id}.yaml`);
+              if (response.ok) indices.set(p.id, parseMapping(await response.text()));
+            } catch {
+              /* leave this platform out of the popover */
+            }
+          }),
+        );
+
+        els.status.textContent = "";
+        applyFilter();
+
+        els.filter.addEventListener("input", () => {
+          activeIndex = -1;
+          renderSuggestions();
+          applyFilter();
+        });
+        els.filter.addEventListener("focus", renderSuggestions);
+
+        els.filter.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            if (els.suggestions.hidden) renderSuggestions();
+            else moveActive(1);
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            moveActive(-1);
+          } else if (event.key === "Enter") {
+            if (!els.suggestions.hidden && activeIndex >= 0) {
+              event.preventDefault();
+              acceptSuggestion(els.suggestions.children[activeIndex].dataset.sport);
+            }
+          } else if (event.key === "Escape") {
+            closeSuggestions();
+          }
+        });
+
+        els.suggestions.addEventListener("mousedown", (event) => {
+          // mousedown (not click) so it fires before the input's blur.
+          const li = event.target.closest("li[data-sport]");
+          if (li) {
+            event.preventDefault();
+            acceptSuggestion(li.dataset.sport);
+          }
+        });
+
+        // Close the suggestions when focus leaves the combo.
+        document.addEventListener("click", (event) => {
+          if (!event.target.closest(".combo")) closeSuggestions();
+        });
+
+        // The popover is fixed-positioned; close it on scroll/resize (native
+        // handles outside-click + Escape).
+        window.addEventListener("scroll", closeXlatePopover, true);
+        window.addEventListener("resize", closeXlatePopover);
+      }
+
+      main();
+    </script>
+  </body>
+</html>
