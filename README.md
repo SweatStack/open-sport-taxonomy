@@ -1,3 +1,5 @@
+<img src="site/favicon.png" alt="OpenSportTaxonomy logo" width="88" align="right" />
+
 # OpenSportTaxonomy
 
 **The sport vocabulary your app was missing.**
